@@ -3,14 +3,14 @@ import { Outlet, Link, NavLink } from "react-router";
 function App() {
   const navLinks = [
     { name: "แดชบอร์ด", path: "/dashboard", icon:"home.svg" },
-    { name: "นักเรียน", path: "/students", icon:"student.svg" },
-    { name: "ครู", path: "/teachers", icon:"teacher.svg" },
+    // { name: "นักเรียน", path: "/students", icon:"student.svg" },
+    // { name: "ครู", path: "/teachers", icon:"teacher.svg" },
     { name: "ห้องเรียน", path: "/classroom", icon:"classroom.svg" },
-    { name: "วิชาเรียน", path: "/subjects", icon:"subject.svg" },
+    { name: "วิชาที่สอน", path: "/subjects", icon:"subject.svg" },
     { name: "กิจกรรม", path: "/activities", icon:"activity.svg" },
-    { name: "การเข้าเรียน", path: "/attendances", icon:"attendance.svg" },
+    // { name: "การเข้าเรียน", path: "/attendances", icon:"attendance.svg" },
     { name: "คำร้อง", path: "/leavereq", icon: "leave.svg" },
-    { name: "ตั้งค่า", path: "/settings", icon: "settings.svg" },
+    // { name: "ตั้งค่า", path: "/settings", icon: "settings.svg" },
   ];
 
   function openMenu() {
