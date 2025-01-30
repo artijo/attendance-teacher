@@ -1,12 +1,41 @@
+import axios from "axios";
+import { HOSTNAME } from "../config";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+
 function Login() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const onSubmit = (e) => {
+    const data = {
+      email: email,
+      password: password,
+    };
+
+    axios
+      .post(`${HOSTNAME}/auth/t/login`, data)
+      .then((res) => {
+        localStorage.setItem("refreshToken", res.data.refreshToken);
+        navigate("/dashboard");
+      })
+      .catch((err) => {
+        console.log(err);
+        setError("เข้าสู่ระบบไม่สำเร็จ");
+      });
+
+  }
   return (
     <div className="w-full h-[96dvh] flex flex-col gap-2 justify-center items-center">
       <div className="shadow-lg p-10 md:p-20 rounded-md">
 
-      <h1 className="text-center text-2xl md:text-3xl">เข้าสู่ระบบ • สำหรับผู้ดูแล</h1>
+      <h1 className="text-center text-2xl md:text-3xl">เข้าสู่ระบบ • สำหรับคุณครู</h1>
       <div className="mt-5 space-y-4">
+        {error && <p className="text-red-500">{error}</p>}
         <label
-          htmlFor="username"
+          htmlFor="email"
           className="block text-sm font-medium text-gray-700"
         >
           {" "}
@@ -14,9 +43,10 @@ function Login() {
         </label>
         <input
           type="text"
-          id="username"
+          id="email"
           placeholder="username@mail.com"
           className="mt-1 w-full h-10 rounded-md border-gray-200 shadow-sm sm:text-sm"
+          onChange={(e) => setEmail(e.target.value)}
         />
         <label
           htmlFor="password"
@@ -29,8 +59,9 @@ function Login() {
           type="password"
           id="password"
           className="mt-1 w-full h-10 rounded-md border-gray-200 shadow-sm sm:text-sm"
+          onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="button" className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">เข้าสู่ระบบ</button>
+        <button type="button" className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" onClick={onSubmit}>เข้าสู่ระบบ</button>
       </div>
       </div>
     </div>

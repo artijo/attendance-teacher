@@ -5,6 +5,45 @@ import axios from "axios";
 import { HOSTNAME } from "./config";
 import Logo from "./assets/nps-logo.webp";
 
+// config axios
+axios.defaults.withCredentials = true;
+
+let isRefreshing = false;
+
+// Add axios interceptor for handling responses
+axios.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401 && !error.config._retry) {
+      error.config._retry = true;
+      
+      if (!isRefreshing) {
+        isRefreshing = true;
+        try {
+          const refreshToken = localStorage.getItem("refreshToken");
+          await axios.post(
+            `${HOSTNAME}/auth/a/refresh`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${refreshToken}`,
+              },
+            }
+          );
+          isRefreshing = false;
+          window.location.reload();
+          return;
+        } catch (refreshError) {
+          isRefreshing = false;
+          window.location.href = "/login";
+          return Promise.reject(refreshError);
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navLinks = [
@@ -23,6 +62,55 @@ function App() {
     setIsMenuOpen(!isMenuOpen);
     document.querySelector("header").classList.toggle("active");
   }
+
+  async function refreshTokens() {
+    const refreshToken = localStorage.getItem("refreshToken");
+    try {
+      // refresh token headers['Authorization'] = 'Bearer ' + token;
+      const response = await axios.post(
+        `${HOSTNAME}/auth/t/refresh`,
+        {},  // ข้อมูลที่ต้องการส่งไปใน request body (ถ้ามี)
+        {
+          headers: {
+            Authorization: `Bearer ${refreshToken}`,
+          },
+          withCredentials: true
+        }
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Cannot refresh token");
+      }
+
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      window.location.reload();
+    }
+    window.location.href = "/login";
+  }
+  }
+
+
+  const checkAuth = async () => {
+    try {
+      const res = await axios.get(HOSTNAME+"/auth/t/check", { withCredentials: true });
+      if (res.status !== 200) {
+        refreshTokens();
+      }
+    } catch (error) {
+      refreshTokens();
+    }
+};
+
+
+
+    if (!localStorage.getItem("refreshToken")) {
+      return <Navigate to="/login" />;
+    }
+    useEffect(() => {
+     checkAuth();
+
+    }, []);
 
   return (
     <>
