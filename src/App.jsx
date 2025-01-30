@@ -1,6 +1,12 @@
 import { Outlet, Link, NavLink } from "react-router";
+import { Navigate } from "react-router";
+import { useEffect, useState } from "react";  // Add this import at the top with other imports
+import axios from "axios";
+import { HOSTNAME } from "./config";
+import Logo from "./assets/nps-logo.webp";
 
 function App() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navLinks = [
     { name: "แดชบอร์ด", path: "/dashboard", icon:"home.svg" },
     // { name: "นักเรียน", path: "/students", icon:"student.svg" },
@@ -14,46 +20,60 @@ function App() {
   ];
 
   function openMenu() {
+    setIsMenuOpen(!isMenuOpen);
     document.querySelector("header").classList.toggle("active");
   }
 
   return (
     <>
-      <header className="bg-background-alt text-white sticky left-0 top-0 md:bottom-0 md:fixed md:w-56 h-14 md:h-full">
+      <header className="font-heading bg-background-alt text-white sticky left-0 top-0 md:bottom-0 md:fixed md:w-56 h-[4.5rem] md:h-screen flex flex-col">
         <div className="p-2 md:p-3 text-white flex sm:block justify-between items-center h-auto">
           <div
             id="toggle"
-            className="sm:hidden flex items-center gap-1 border-2 my-2 p-2"
+            className="sm:hidden flex items-center rounded-md border-2 my-2 p-2"
             onClick={openMenu}
           >
-            <svg
-              width={25}
-              viewBox="-2.4 -2.4 28.80 28.80"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-              <g
-                id="SVGRepo_tracerCarrier"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                stroke="#CCCCCC"
-                strokeWidth="0.624"
-              ></g>
-              <g id="SVGRepo_iconCarrier">
-                {" "}
+            {!isMenuOpen ? (
+              <svg
+                width={25}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   d="M4 6H20M4 12H20M4 18H20"
                   stroke="#ffffff"
-                  strokeWidth="1.2"
+                  strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                ></path>{" "}
-              </g>
-            </svg>
-            <span className="text-sm">MENU</span>
+                />
+              </svg>
+            ) : (
+              <svg
+                width={25}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 6L18 18M6 18L18 6"
+                  stroke="#ffffff"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
           </div>
-          <h1 className="text-center text-xl md:text-left">
+          {/* Logo */}
+          <div className="hidden md:block">
+            <img
+              src={Logo}
+              alt="Logo"
+              className="w-10 h-10 md:w-12 md:h-12 mx-auto"
+            />
+          </div>
+          <h1 className="md:hidden text-center text-xl md:text-left">
             ระบบบันทึกการเข้าเรียนและกิจกรรม
           </h1>
           <div className="sm:hidden">
@@ -76,7 +96,14 @@ function App() {
             </svg>
           </div>
         </div>
-        <nav>
+        <nav className="overflow-y-auto flex-1 md:max-h-[calc(100vh-180px)]
+  [&::-webkit-scrollbar]:w-2
+  [&::-webkit-scrollbar-track]:rounded-full
+  [&::-webkit-scrollbar-track]:bg-gray-100
+  [&::-webkit-scrollbar-thumb]:rounded-full
+  [&::-webkit-scrollbar-thumb]:bg-gray-300
+  dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+  dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
           <ul className="grid grid-cols-5 md:block">
             {navLinks.map((link, index) => (
               <li key={index}>
@@ -110,8 +137,13 @@ function App() {
           <button className="p-2 md:p-3">ออกจากระบบ</button>
         </div>
       </header>
-      <main className="md:ml-56 p-4 min-h-dvh">
-        <Outlet />
+      <main className="md:ml-56 min-h-dvh">
+            <div className="hidden md:block sticky top-0 z-10 mt-0 ml-0 mr-0 mb-4 bg-background-alt p-4 shadow-sm">
+              <h1 className="text-2xl font-bold text-white">ระบบบันทึกการเข้าเรียนและกิจกรรม</h1>
+            </div>
+            <div className="p-4">
+              <Outlet />
+            </div>
       </main>
     </>
   );
