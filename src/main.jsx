@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard.jsx'
 // Subject Page
 import Subject from './pages/subject/Subject.jsx';
 import SubjectDetail from './pages/subject/SubjectDetail.jsx';
+import SubjectAttendance from './pages/subject/SubjectAttendance.jsx';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='dashboard' element={<Dashboard />} />
           <Route path='subjects' element={<Subject />} />
           <Route path='subjects/:id' element={<SubjectDetail />} />
+          <Route path='subjects/:id/attendance' element={<SubjectAttendance />} />
         </Route>
       </Routes>
   </BrowserRouter>,

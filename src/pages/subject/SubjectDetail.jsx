@@ -52,7 +52,7 @@ function SubjectDetail() {
                     </div>
 
                     <div className="bg-white rounded-lg shadow-lg p-6">
-                        <h2 className="text-2xl font-bold mb-4">ตารางเรียน</h2>
+                        <h2 className="text-2xl font-bold mb-4">ตารางสอน</h2>
                         {subject.timetable.map((time) => (
                             <div key={time.timetableId} className="mb-6 border-b pb-4">
                                 <div 

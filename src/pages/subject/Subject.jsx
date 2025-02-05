@@ -27,7 +27,7 @@ function Subject() {
     }, []);
     
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto">
             <h1 className="text-3xl font-bold text-center mb-8">วิชาที่สอน</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {subjects && subjects.map((subject) => (
@@ -46,7 +46,7 @@ function Subject() {
                                 ดูรายละเอียด
                             </Link>
                             <Link 
-                                to={''}
+                                to={`/subjects/${subject.subId}/attendance`}
                                 className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-center"
                             >
                                 บันทึกการเข้าเรียน
