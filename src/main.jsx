@@ -8,6 +8,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import Login from './pages/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 
+// Subject Page
+import Subject from './pages/subject/Subject.jsx';
+
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
   <BrowserRouter>
@@ -16,6 +19,8 @@ createRoot(document.getElementById('root')).render(
       <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/" element={<App />} >
           <Route path='dashboard' element={<Dashboard />} />
+          <Route path='subjects' element={<Subject />} />
+
         </Route>
       </Routes>
   </BrowserRouter>,
