@@ -11,6 +11,7 @@ function Attendance() {
     const [attendanceStatus, setAttendanceStatus] = useState({});
     const [notes, setNotes] = useState({}); // Add notes state
     const [isSaving, setIsSaving] = useState(false);
+    const [changes, setChanges] = useState({}); // Track changes
 
     useEffect(() => {
         axios.get(`${HOSTNAME}/t/studyTime/${studingid}`)
@@ -23,7 +24,8 @@ function Attendance() {
                     initialStatus[att.stdId] = {
                         status: att.attStatus,
                         method: att.attMethod.attMethodName,
-                        timestamp: att.attTimestamp
+                        timestamp: att.attTimestamp,
+                        attId: att.attId // Store existing attendance ID
                     };
                     initialNotes[att.stdId] = att.note || ''; // Set initial notes
                 });
@@ -40,7 +42,11 @@ function Attendance() {
             ...prev,
             [stdId]: { ...prev[stdId], status }
         }));
-        // TODO: Add API call to update attendance
+        // Track change
+        setChanges(prev => ({
+            ...prev,
+            [stdId]: true
+        }));
     };
 
     const handleNoteChange = (stdId, note) => {
@@ -48,20 +54,40 @@ function Attendance() {
             ...prev,
             [stdId]: note
         }));
+        // Track change
+        setChanges(prev => ({
+            ...prev,
+            [stdId]: true
+        }));
     };
 
     const handleSaveAttendance = async () => {
         try {
             setIsSaving(true);
-            const attendanceData = Object.entries(attendanceStatus).map(([stdId, data]) => ({
+            // Filter only changed records
+            const changedRecords = Object.keys(changes).map(stdId => ({
+                attId: attendanceStatus[stdId]?.attId, // Include if updating existing record
                 stdId,
                 studingTimeId: studingid,
-                attStatus: data.status,
-                note: notes[stdId] || '', // Include notes in save data
+                attStatus: attendanceStatus[stdId]?.status || 'ABSENT', // Default to ABSENT if not set
+                note: notes[stdId] || ''
             }));
-            // console.log(attendanceData);
 
-            await axios.post(`${HOSTNAME}/t/attendance/bulk`, attendanceData);
+            if (changedRecords.length === 0) {
+                alert('ไม่มีการเปลี่ยนแปลงข้อมูล');
+                return;
+            }
+
+            // Separate new and existing records
+            const newRecords = changedRecords.filter(record => !record.attId);
+            const updatedRecords = changedRecords.filter(record => record.attId);
+
+            // Send updates in parallel if needed
+            await Promise.all([
+                newRecords.length > 0 && axios.post(`${HOSTNAME}/t/attendance/bulk`, newRecords),
+                updatedRecords.length > 0 && axios.post(`${HOSTNAME}/t/attendance/bulk`, updatedRecords)
+            ]);
+
             alert('บันทึกการเข้าเรียนเรียบร้อย');
             navigate(-1);
         } catch (error) {
@@ -69,6 +95,31 @@ function Attendance() {
             alert('เกิดข้อผิดพลาดในการบันทึก');
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    // Add reset changes function
+    const handleReset = (stdId) => {
+        const attendance = studyTime.attendance.find(att => att.stdId === stdId);
+        if (attendance) {
+            setAttendanceStatus(prev => ({
+                ...prev,
+                [stdId]: {
+                    status: attendance.attStatus,
+                    method: attendance.attMethod.attMethodName,
+                    timestamp: attendance.attTimestamp,
+                    attId: attendance.attId
+                }
+            }));
+            setNotes(prev => ({
+                ...prev,
+                [stdId]: attendance.note || ''
+            }));
+            setChanges(prev => {
+                const newChanges = { ...prev };
+                delete newChanges[stdId];
+                return newChanges;
+            });
         }
     };
 
@@ -118,7 +169,7 @@ function Attendance() {
                                         .map((member) => {
                                             const attendance = studyTime.attendance.find(att => att.stdId === member.stdId);
                                             return (
-                                                <tr key={member.stdId} className="border-b hover:bg-gray-50">
+                                                <tr key={member.stdId} className={`border-b hover:bg-gray-50 ${changes[member.stdId] ? 'bg-yellow-50' : ''}`}>
                                                     <td className="px-2 py-2">{member.stdNo}</td>
                                                     <td className="px-2 py-2">{member.stdId}</td>
                                                     <td className="px-2 py-2">
@@ -171,6 +222,14 @@ function Attendance() {
                                                         />
                                                     </td>
                                                     <td className="px-2 py-2 text-center text-sm text-gray-600">
+                                                        {changes[member.stdId] && attendanceStatus[member.stdId]?.attId && (
+                                                            <button
+                                                                onClick={() => handleReset(member.stdId)}
+                                                                className="text-blue-500 hover:text-blue-700 underline mb-2 block"
+                                                            >
+                                                                ยกเลิกการแก้ไข
+                                                            </button>
+                                                        )}
                                                         {attendanceStatus[member.stdId]?.method && (
                                                             <>
                                                                 {attendanceStatus[member.stdId].method}
