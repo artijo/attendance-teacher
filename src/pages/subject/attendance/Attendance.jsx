@@ -15,7 +15,6 @@ function Attendance() {
     useEffect(() => {
         axios.get(`${HOSTNAME}/t/studyTime/${studingid}`)
             .then((response) => {
-                console.log(response.data);
                 setStudyTime(response.data);
                 // Initialize attendance status from existing data
                 const initialStatus = {};
@@ -60,7 +59,7 @@ function Attendance() {
                 attStatus: data.status,
                 note: notes[stdId] || '', // Include notes in save data
             }));
-            console.log(attendanceData);
+            // console.log(attendanceData);
 
             await axios.post(`${HOSTNAME}/t/attendance/bulk`, attendanceData);
             alert('บันทึกการเข้าเรียนเรียบร้อย');
@@ -74,11 +73,11 @@ function Attendance() {
     };
 
     const statusOptions = [
-        { value: 'PRESENT', label: 'มาเรียน', color: 'bg-green-100' },
-        { value: 'ABSENT', label: 'ขาดเรียน', color: 'bg-red-100' },
-        { value: 'LATE', label: 'มาสาย', color: 'bg-yellow-100' },
-        { value: 'ACTIVITY', label: 'กิจกรรม', color: 'bg-blue-100' },
-        { value: 'LEAVE', label: 'ลา', color: 'bg-purple-100' }
+        { value: 'PRESENT', label: 'มาเรียน', color: 'bg-green-100', hoverColor: 'hover:bg-green-200', borderColor: 'border-green-300' },
+        { value: 'ABSENT', label: 'ขาดเรียน', color: 'bg-red-100', hoverColor: 'hover:bg-red-200', borderColor: 'border-red-300' },
+        { value: 'LATE', label: 'มาสาย', color: 'bg-yellow-100', hoverColor: 'hover:bg-yellow-200', borderColor: 'border-yellow-300' },
+        { value: 'ACTIVITY', label: 'กิจกรรม', color: 'bg-blue-100', hoverColor: 'hover:bg-blue-200', borderColor: 'border-blue-300' },
+        { value: 'LEAVE', label: 'ลา', color: 'bg-purple-100', hoverColor: 'hover:bg-purple-200', borderColor: 'border-purple-300' }
     ];
 
     return (
@@ -102,15 +101,15 @@ function Attendance() {
 
                     <div className="bg-white rounded-lg shadow-lg p-6">
                         <div className="overflow-x-auto">
-                            <table className="min-w-full">
+                            <table className="min-w-full whitespace-nowrap">
                                 <thead>
                                     <tr className="bg-gray-100">
-                                        <th className="px-4 py-2 text-left">เลขที่</th>
-                                        <th className="px-4 py-2 text-left">รหัสนักศึกษา</th>
-                                        <th className="px-4 py-2 text-left">ชื่อ-สกุล</th>
-                                        <th className="px-4 py-2">สถานะ</th>
-                                        <th className="px-4 py-2">หมายเหตุ</th>
-                                        <th className="px-4 py-2">การบันทึก</th>
+                                        <th className="px-2 py-2 text-left w-16">เลขที่</th>
+                                        <th className="px-2 py-2 text-left w-32">รหัสนักเรียน</th>
+                                        <th className="px-2 py-2 text-left w-48">ชื่อ-สกุล</th>
+                                        <th className="px-2 py-2" style={{ minWidth: '400px' }}>สถานะ</th>
+                                        <th className="px-2 py-2 w-48">หมายเหตุ</th>
+                                        <th className="px-2 py-2 w-32">การบันทึก</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -120,18 +119,24 @@ function Attendance() {
                                             const attendance = studyTime.attendance.find(att => att.stdId === member.stdId);
                                             return (
                                                 <tr key={member.stdId} className="border-b hover:bg-gray-50">
-                                                    <td className="px-4 py-2">{member.stdNo}</td>
-                                                    <td className="px-4 py-2">{member.stdId}</td>
-                                                    <td className="px-4 py-2">
+                                                    <td className="px-2 py-2">{member.stdNo}</td>
+                                                    <td className="px-2 py-2">{member.stdId}</td>
+                                                    <td className="px-2 py-2">
                                                         {formatTitle(member.student.title)} {member.student.fName} {member.student.lName}
                                                     </td>
-                                                    <td className="px-4 py-2">
-                                                        <div className="flex gap-3 justify-center">
+                                                    <td className="px-2 py-2">
+                                                        <div className="flex gap-2 items-center">
                                                             {statusOptions.map(option => (
                                                                 <label 
                                                                     key={option.value}
-                                                                    className={`flex items-center space-x-2 p-2 rounded cursor-pointer
-                                                                        ${attendanceStatus[member.stdId]?.status === option.value ? option.color : ''}`}
+                                                                    className={`
+                                                                        relative flex items-center px-3 py-1.5 rounded-full border-2 
+                                                                        transition-all duration-200 cursor-pointer select-none
+                                                                        ${attendanceStatus[member.stdId]?.status === option.value 
+                                                                            ? `${option.color} ${option.borderColor} shadow-sm` 
+                                                                            : 'bg-white border-gray-300 hover:border-gray-400'}
+                                                                        ${option.hoverColor}
+                                                                    `}
                                                                 >
                                                                     <input
                                                                         type="radio"
@@ -139,31 +144,39 @@ function Attendance() {
                                                                         value={option.value}
                                                                         checked={attendanceStatus[member.stdId]?.status === option.value}
                                                                         onChange={() => handleStatusChange(member.stdId, option.value)}
-                                                                        className="hidden"
+                                                                        className="absolute opacity-0"
                                                                     />
-                                                                    <span className="text-sm whitespace-nowrap">
-                                                                        {option.label}
-                                                                    </span>
+                                                                    <div className="flex items-center whitespace-nowrap">
+                                                                        <div className={`
+                                                                            w-2.5 h-2.5 rounded-full mr-1.5 border
+                                                                            ${attendanceStatus[member.stdId]?.status === option.value 
+                                                                                ? 'bg-white border-gray-600' 
+                                                                                : 'bg-gray-200 border-gray-400'}
+                                                                        `}></div>
+                                                                        <span className="text-sm">
+                                                                            {option.label}
+                                                                        </span>
+                                                                    </div>
                                                                 </label>
                                                             ))}
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-2">
+                                                    <td className="px-2 py-2">
                                                         <input
                                                             type="text"
                                                             value={notes[member.stdId] || ''}
                                                             onChange={(e) => handleNoteChange(member.stdId, e.target.value)}
                                                             placeholder="เพิ่มหมายเหตุ..."
-                                                            className="w-full p-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                                                            className="w-full p-1.5 border rounded-lg focus:outline-none focus:border-blue-500"
                                                         />
                                                     </td>
-                                                    <td className="px-4 py-2 text-center">
+                                                    <td className="px-2 py-2 text-center text-sm text-gray-600">
                                                         {attendanceStatus[member.stdId]?.method && (
-                                                            <div className="text-sm text-gray-600">
+                                                            <>
                                                                 {attendanceStatus[member.stdId].method}
                                                                 <br />
                                                                 {new Date(attendanceStatus[member.stdId].timestamp).toLocaleTimeString('th-TH')}
-                                                            </div>
+                                                            </>
                                                         )}
                                                     </td>
                                                 </tr>
