@@ -50,7 +50,7 @@ function App() {
     { name: "แดชบอร์ด", path: "/dashboard", icon:"home.svg" },
     // { name: "นักเรียน", path: "/students", icon:"student.svg" },
     // { name: "ครู", path: "/teachers", icon:"teacher.svg" },
-    { name: "ห้องเรียน", path: "/classroom", icon:"classroom.svg" },
+    { name: "ห้องเรียน", path: "/classrooms", icon:"classroom.svg" },
     { name: "วิชาที่สอน", path: "/subjects", icon:"subject.svg" },
     { name: "กิจกรรม", path: "/activities", icon:"activity.svg" },
     // { name: "การเข้าเรียน", path: "/attendances", icon:"attendance.svg" },
