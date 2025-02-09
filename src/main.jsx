@@ -15,6 +15,7 @@ import SubjectAttendance from './pages/subject/SubjectAttendance.jsx';
 import Attendance from './pages/subject/attendance/Attendance.jsx';
 import Classroom from './pages/classroom/Classroom.jsx';
 import ClassroomDetail from './pages/classroom/ClassroomDetail.jsx';
+import StudentAttendance from './pages/classroom/attendance/StudentAttendance.jsx';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='subjects/:id/attendance/:studingid' element={<Attendance />} />
           {/* Classroom */}
           <Route path='classrooms' element={<Classroom/>}/>
+          <Route path='classroom/attendance/student' element={<StudentAttendance/>}/>
           <Route path='classroom/detail' element={<ClassroomDetail/>}/>
           
           

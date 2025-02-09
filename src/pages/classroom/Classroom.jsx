@@ -10,7 +10,7 @@ function Classroom() {
             const response = await axios.get(`${HOSTNAME}/t/classrooms`);
             if(response.status === 200) {
                 setClassrooms(response.data);
-                // console.log(response.data)
+                console.log(response.data)
             }else{
                 throw new Error(response.data.message);
             }
@@ -20,8 +20,6 @@ function Classroom() {
         }
     }
     
-
-
     useEffect(() => {
         fecthTeacherAdvisorClassroom();
     },[])
