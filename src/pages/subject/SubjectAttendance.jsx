@@ -19,6 +19,10 @@ function SubjectAttendance() {
             });
     }, [id]);
 
+    const hasAttendance = (study) => {
+        return study.attendance && study.attendance.length > 0;
+    };
+
     return (
         <div className="container mx-auto">
             {subject && (
@@ -76,13 +80,28 @@ function SubjectAttendance() {
                                                     <Link
                                                         key={study.studyTimeId}
                                                         to={`/subjects/${id}/attendance/${study.studyTimeId}`}
-                                                        className="block p-4 rounded-lg border hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                                                        className={`block p-4 rounded-lg border transition-colors ${
+                                                            hasAttendance(study) 
+                                                            ? 'bg-green-50 border-green-200 hover:bg-green-100' 
+                                                            : 'hover:bg-blue-50 hover:border-blue-200'
+                                                        }`}
                                                     >
-                                                        <div className="font-semibold mb-2">
-                                                            {formatDate(study.studingTimeDate)}
-                                                        </div>
-                                                        <div className="text-sm text-gray-600">
-                                                            {time.timeStart.substring(0, 5)} - {time.timeEnd.substring(0, 5)} น.
+                                                        <div className="flex justify-between items-center">
+                                                            <div>
+                                                                <div className="font-semibold mb-2">
+                                                                    {formatDate(study.studingTimeDate)}
+                                                                </div>
+                                                                <div className="text-sm text-gray-600">
+                                                                    {time.timeStart.substring(0, 5)} - {time.timeEnd.substring(0, 5)} น.
+                                                                </div>
+                                                            </div>
+                                                            <span className={`px-2 py-1 text-sm rounded-full ${
+                                                                hasAttendance(study) 
+                                                                ? 'bg-green-100 text-green-800' 
+                                                                : 'bg-yellow-100 text-yellow-800'
+                                                            }`}>
+                                                                {hasAttendance(study) ? 'บันทึกแล้ว' : 'ยังไม่บันทึก'}
+                                                            </span>
                                                         </div>
                                                     </Link>
                                                 ))}
