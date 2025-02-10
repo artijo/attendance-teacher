@@ -26,3 +26,24 @@ export const formatTitle = (title) => {
             return title;
     }
 }
+
+export function calculatedTimeToSeconde(hour, miniute) { // สำหรับ .
+    return (parseInt(hour)*3600)+(parseInt(miniute)*60);
+}
+
+export function formatDayOfWeeks(dayOfWeek) {
+    const dayOfWeeksThai = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"];
+    for (let i = 0; i <= dayOfWeeksThai.length; i++) {
+      if ((dayOfWeek-1) === i) {
+        return dayOfWeeksThai[i];
+      }
+    }
+}
+
+export function calculatedTimeToSecondeDouleDot(time) { // สำหรับ :
+    const timeSplit = time.split(':');
+    return (parseInt(timeSplit[0])*3600)+(parseInt(timeSplit[1])*60);
+    // return (parseInt(hour)*3600)+(parseInt(miniute)*60);
+}
+
+  

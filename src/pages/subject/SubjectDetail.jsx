@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { HOSTNAME } from '../../config';
 import { getDayName, formatDate } from '../../helper';
+import TeacherTimetableBySubject from '../../components/teacherTimetableBySubject';
 
 function SubjectDetail() {
     const { id } = useParams();
@@ -24,6 +25,15 @@ function SubjectDetail() {
             {subject && (
                 <>
                     <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+                        <h1 className="text-3xl font-bold mb-6">ตารางสอนเทอมปัจจุบันของอาจารย์</h1>
+                        <div className='flex justify-center'>
+                            <div className='overflow-x-auto'>
+                                <TeacherTimetableBySubject subjectId={id}/>
+                            </div>
+                        </div>
+                    
+                    </div>
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
                         <h1 className="text-3xl font-bold mb-6">รายละเอียดวิชา</h1>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-3">
@@ -40,6 +50,7 @@ function SubjectDetail() {
                                     <span className="font-bold">หน่วยกิต:</span> {subject.subCredit}
                                 </p>
                             </div>
+                            
                             <div className="space-y-3">
                                 <p className="text-base leading-relaxed">
                                     <span className="font-bold">อาจารย์ผู้สอน:</span> {subject.teacher.fName} {subject.teacher.lName}
