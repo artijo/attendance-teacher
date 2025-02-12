@@ -142,7 +142,7 @@ function TeacherTimetableBySubject({subject}) {
     return (
         <>
             <div>
-                <table className="border-collapse border">
+                <table className="mx-auto bg-white border-collapse border ">
                     <TableHead/>
                     <TableBody/>
                 </table>
