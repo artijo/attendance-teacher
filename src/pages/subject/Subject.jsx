@@ -2,6 +2,7 @@ import { HOSTNAME } from "../../config";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import TeacherTimetableBySubject from "../../components/teacherTimetableBySubject";
 
 function Subject() {
     const [subjects, setSubjects] = useState([]);
@@ -28,6 +29,15 @@ function Subject() {
     
     return (
         <div className="container mx-auto">
+            {
+                subjects.length > 0  && 
+                <>
+                    <div className="overflow-x-auto">
+                        <TeacherTimetableBySubject subject={subjects}/>
+                    </div>    
+                
+                </>
+            }
             <h1 className="text-3xl font-bold text-center mb-8">วิชาที่สอน</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {subjects && subjects.map((subject) => (

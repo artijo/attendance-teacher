@@ -3,6 +3,9 @@ export const getDayName = (day) => {
     return days[day];
 };
 
+
+
+
 export const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('th-TH', {
@@ -26,6 +29,12 @@ export const formatTitle = (title) => {
             return title;
     }
 }
+
+
+export function formatTime(time) {
+    const timeSplit = time.split(':');
+    return `${timeSplit[0]}:${timeSplit[1]}`;
+  }
 
 export function calculatedTimeToSeconde(hour, miniute) { // สำหรับ .
     return (parseInt(hour)*3600)+(parseInt(miniute)*60);
