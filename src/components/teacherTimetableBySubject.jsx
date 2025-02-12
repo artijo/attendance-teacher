@@ -41,7 +41,7 @@ function TeacherTimetableBySubject({subject}) {
     const TableHead = () => {
         return (
             <thead className="ltr:text-left rtl:text-right bg-background-alt">
-            <tr className="h-11 text-white">
+            <tr className="h-16 text-white">
                 <th className="whitespace-nowrap border px-4 py-2 font-medium text-white">
                 <span>คาบที่</span>
                 </th>
@@ -70,7 +70,7 @@ function TeacherTimetableBySubject({subject}) {
                 <span>7</span>
                 </th>
             </tr>
-            <tr className="h-11 shadow-md">
+            <tr className="h-16 shadow-md">
                 <th className="whitespace-nowrap border px-4 py-2 font-medium text-white">
                 <span>เวลา</span>
                 </th>
@@ -87,7 +87,7 @@ function TeacherTimetableBySubject({subject}) {
     const TableBodyRow = ({row,day}) => {
         return (
             <tr>
-                <td className="border text-center">
+                <td className="border text-center h-16">
                    <span>{formatDayOfWeeks(day)}</span> 
                 </td>
                 {

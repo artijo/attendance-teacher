@@ -32,7 +32,7 @@ function Subject() {
             {
                 subjects.length > 0  && 
                 <>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto flex justify-center mb-8">
                         <TeacherTimetableBySubject subject={subjects}/>
                     </div>    
                 
