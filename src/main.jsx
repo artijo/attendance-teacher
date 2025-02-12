@@ -19,6 +19,7 @@ import ClassroomDetail from './pages/classroom/ClassroomDetail.jsx';
 import StudentAttendance from './pages/classroom/attendance/StudentAttendance.jsx';
 // Activity Page
 import Activities from './pages/activities/Activities.jsx';
+import ActivityDetail from './pages/activities/ActivityDetail.jsx';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
@@ -38,6 +39,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='classroom/detail' element={<ClassroomDetail/>}/>
           {/* Activities */}
           <Route path='activities' element={<Activities/>}/>
+          <Route path='activities/:id' element={<ActivityDetail/>}/>
         </Route>
       </Routes>
   </BrowserRouter>,
