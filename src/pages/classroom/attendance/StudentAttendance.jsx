@@ -1,13 +1,17 @@
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 import { HOSTNAME } from "../../../config";
-import { useEffect, useState } from "react";
+import { useEffect,useState } from "react";
 
 function StudentAttendance(){
     const location = useLocation();
     const classroomId = location.state.classroomsId;
     const stdId = location.state.stdId;
     const [studentInfo, setStudentInfo] = useState(null);
+
+    
+
+    
 
     async function getSubjectName(subId) {
         try{
@@ -61,8 +65,8 @@ function StudentAttendance(){
 
     return(
         <div className="mx-auto container">
-            <div>
-                <h1 className="text-3xl font-bold text-start mb-8">
+            <div className="grid grid-cols-1 gap-8">
+                <h1 className="text-3xl font-bold text-start">
                     รายละเอียดการเข้าเรียนตามรายวิชาของ <span>{
                         studentInfo != null &&
                         `${studentInfo.studentInfo.student.fName} ${studentInfo.studentInfo.student.lName}` 
@@ -90,7 +94,7 @@ function StudentAttendance(){
                                         Object.keys(studentInfo).map( (key, index) =>{
                                             if(index === 0) return;
                                             return (
-                                                <>
+                                                
                                                     <tr className="even:bg-slate-100/70 text-center" key={`${key} ${index}`}>
                                                         <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                                                             {key}
@@ -118,54 +122,13 @@ function StudentAttendance(){
                                                         </td>
                                                     </tr>
                                                     
-                                                </>
+                                              
                                                 
                                                 
                                             )
                                         })
                                         
                                     }
-                                    {/* {
-                                        sliceStudentList.map((std, index) => (
-                                            <tr 
-                                                key={`student ${index}`}
-                                                className="even:bg-slate-100/70 text-center"
-                                            >
-                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                                                    {parseInt(std.stdNo)}
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                                                    {std.student.stdId}
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                                                    {std.student.fName}
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                                                    {std.student.lName}
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                                                    {std.behaviourScore} คะแนน
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-2">
-                                                    <Link 
-                                                        to={`/classroom/attendance/student`} 
-                                                        state={
-                                                            {
-                                                                stdId:std.stdId,
-                                                                classroomsId: classrooms.classId
-                                                            }
-                                                        }
-                                                    >
-                                                        <button className="cursor-pointer bg-blue-300/60 text-blue-500 px-5 py-[2px] rounded-sm hover:bg-blue-300/100 hover:text-blue-700">
-                                                            การเข้าเรียนตามรายวิชา
-                                                        </button>
-                                                    </Link>
-                                                </td>
-                                                
-                                            </tr>
-                                        ))
-                                        
-                                    } */}
                                 </tbody>
                             </table>
                         </div>
