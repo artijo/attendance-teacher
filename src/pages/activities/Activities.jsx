@@ -2,6 +2,7 @@ import axios from "axios";
 import { HOSTNAME } from "../../config";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { formatDate } from "../../helper";
 
 function Activities() {
     const [groupedActivities, setGroupedActivities] = useState({});
@@ -22,15 +23,6 @@ function Activities() {
             ...prev,
             [sectionId]: !prev[sectionId]
         }));
-    };
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('th-TH', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
     };
 
     const groupActivities = (activities) => {
