@@ -13,9 +13,13 @@ import Subject from './pages/subject/Subject.jsx';
 import SubjectDetail from './pages/subject/SubjectDetail.jsx';
 import SubjectAttendance from './pages/subject/SubjectAttendance.jsx';
 import Attendance from './pages/subject/attendance/Attendance.jsx';
+// Classroom Page
 import Classroom from './pages/classroom/Classroom.jsx';
 import ClassroomDetail from './pages/classroom/ClassroomDetail.jsx';
 import StudentAttendance from './pages/classroom/attendance/StudentAttendance.jsx';
+// Activity Page
+import Activities from './pages/activities/Activities.jsx';
+import ActivityDetail from './pages/activities/ActivityDetail.jsx';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
@@ -33,8 +37,9 @@ createRoot(document.getElementById('root')).render(
           <Route path='classrooms' element={<Classroom/>}/>
           <Route path='classroom/attendance/student' element={<StudentAttendance/>}/>
           <Route path='classroom/detail' element={<ClassroomDetail/>}/>
-          
-          
+          {/* Activities */}
+          <Route path='activities' element={<Activities/>}/>
+          <Route path='activities/:id' element={<ActivityDetail/>}/>
         </Route>
       </Routes>
   </BrowserRouter>,
