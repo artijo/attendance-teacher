@@ -20,6 +20,7 @@ import StudentAttendance from './pages/classroom/attendance/StudentAttendance.js
 // Activity Page
 import Activities from './pages/activities/Activities.jsx';
 import ActivityDetail from './pages/activities/ActivityDetail.jsx';
+import CheckIn from './pages/activities/CheckIn.jsx';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
@@ -40,6 +41,7 @@ createRoot(document.getElementById('root')).render(
           {/* Activities */}
           <Route path='activities' element={<Activities/>}/>
           <Route path='activities/:id' element={<ActivityDetail/>}/>
+          <Route path='activities/:id/check-in' element={<CheckIn/>}/>
         </Route>
       </Routes>
   </BrowserRouter>,

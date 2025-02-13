@@ -1,0 +1,194 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { HOSTNAME } from "../../config";
+import { formatDate } from "../../helper";
+
+function CheckIn() {
+    const { id } = useParams();
+    const [activity, setActivity] = useState(null);
+    const [classrooms, setClassrooms] = useState([]);
+    const [students, setStudents] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [selectedClassroom, setSelectedClassroom] = useState(null);
+    const [filteredStudents, setFilteredStudents] = useState([]);
+    const [selectedClassroomId, setSelectedClassroomId] = useState('all');
+    const [availableClassrooms, setAvailableClassrooms] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const [activityResponse, classroomsResponse] = await Promise.all([
+                    axios.get(`${HOSTNAME}/t/activity/${id}`),
+                    axios.get(`${HOSTNAME}/t/classrooms/all`)
+                ]);
+
+                setActivity(activityResponse.data);
+                setClassrooms(classroomsResponse.data);
+
+                // Modified classroom filtering logic
+                if (activityResponse.data.joinLimit) {
+                    if (activityResponse.data.joinLimitNumber) {
+                        // If there's a number limit, show all classrooms
+                        setAvailableClassrooms(classroomsResponse.data);
+                        const allStudents = classroomsResponse.data.flatMap(c => c.classroomMembers);
+                        setStudents(allStudents);
+                    } else if (activityResponse.data.classroom) {
+                        // If there's classroom restriction, filter by allowed classrooms
+                        const allowedClassIds = activityResponse.data.classroom.map(c => c.classId);
+                        const filteredClassrooms = classroomsResponse.data.filter(c => 
+                            allowedClassIds.includes(c.classId)
+                        );
+                        setAvailableClassrooms(filteredClassrooms);
+                        const filteredStudents = classroomsResponse.data
+                            .filter(c => allowedClassIds.includes(c.classId))
+                            .flatMap(c => c.classroomMembers);
+                        setStudents(filteredStudents);
+                    }
+                } else {
+                    // No limits, show all
+                    setAvailableClassrooms(classroomsResponse.data);
+                    const allStudents = classroomsResponse.data.flatMap(c => c.classroomMembers);
+                    setStudents(allStudents);
+                }
+            } catch (err) {
+                setError(err.response?.data?.message || 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [id]);
+
+    useEffect(() => {
+        let result = [...students];
+        
+        // Apply classroom filter
+        if (selectedClassroomId !== 'all') {
+            result = result.filter(student => 
+                student.classId === selectedClassroomId
+            );
+        }
+
+        // Sort by student number
+        result.sort((a, b) => parseInt(a.stdNo) - parseInt(b.stdNo));
+        
+        setFilteredStudents(result);
+    }, [students, selectedClassroomId]);
+
+    const handleAttendanceChange = async (studentId, status) => {
+        try {
+            await axios.post(`${HOSTNAME}/t/activity/${id}/participate`, {
+                stdId: studentId,
+                status: status
+            });
+            // Refresh activity data after recording attendance
+            const response = await axios.get(`${HOSTNAME}/t/activity/${id}`);
+            setActivity(response.data);
+        } catch (err) {
+            setError(err.response?.data?.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        }
+    };
+
+    const handleClassroomFilter = (classroomId) => {
+        setSelectedClassroomId(classroomId);
+    };
+
+    if (loading) return <div className="text-center p-4">กำลังโหลด...</div>;
+    if (error) return <div className="text-center text-red-500 p-4">{error}</div>;
+
+    return (
+        <div className="container mx-auto">
+            {activity && (
+                <>
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+                        <h1 className="text-3xl font-bold mb-6">บันทึกการเข้าร่วมกิจกรรม</h1>
+                        <div className="space-y-3">
+                            <p className="text-xl">
+                                <span className="font-bold">กิจกรรม:</span> {activity.actName}
+                            </p>
+                            <p className="text-lg">
+                                <span className="font-bold">วันที่:</span> {formatDate(activity.actDate)}
+                            </p>
+                            <p className="text-lg">
+                                <span className="font-bold">เวลา:</span> {activity.actStartTime} - {activity.actEndTime} น.
+                            </p>
+                            <p className="text-lg">
+                                <span className="font-bold">สถานที่:</span> {activity.actLocation}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                        <div className="mb-4">
+                            <h2 className="text-2xl font-bold mb-4">รายชื่อนักเรียน</h2>
+                            
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    กรองตามห้องเรียน:
+                                </label>
+                                <select
+                                    className="border rounded-md px-3 py-2 w-full max-w-xs"
+                                    value={selectedClassroomId}
+                                    onChange={(e) => handleClassroomFilter(e.target.value)}
+                                >
+                                    <option value="all">ทุกห้องเรียน</option>
+                                    {availableClassrooms.map((classroom) => (
+                                        <option key={classroom.classId} value={classroom.classId}>
+                                            ม.{classroom.classLevel}/{classroom.classRoom}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {activity.joinLimit && (
+                                <p className="text-gray-600 mb-4">
+                                    จำกัดการเข้าร่วมเฉพาะห้องที่กำหนด
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full">
+                                <thead>
+                                    <tr className="bg-gray-100">
+                                        <th className="px-6 py-3 text-left">เลขที่</th>
+                                        <th className="px-6 py-3 text-left">รหัสนักเรียน</th>
+                                        <th className="px-6 py-3 text-left">ชื่อ-นามสกุล</th>
+                                        <th className="px-6 py-3 text-center">สถานะ</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200">
+                                    {filteredStudents.map((student) => (
+                                        <tr key={student.stdId} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4">{student.stdNo}</td>
+                                            <td className="px-6 py-4">{student.stdId}</td>
+                                            <td className="px-6 py-4">
+                                                {student.student.title === 'BOY' ? 'เด็กชาย' : 'เด็กหญิง'} {student.student.fName} {student.student.lName}
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <select
+                                                    className="border rounded px-3 py-1"
+                                                    onChange={(e) => handleAttendanceChange(student.stdId, e.target.value)}
+                                                    defaultValue="ABSENT"
+                                                >
+                                                    <option value="ABSENT">ไม่เข้าร่วม</option>
+                                                    <option value="PRESENT">เข้าร่วม</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
+
+export default CheckIn;

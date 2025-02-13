@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { HOSTNAME } from "../../config";
 import { formatDate } from "../../helper";
 
 function ActivityDetail() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -29,6 +30,10 @@ function ActivityDetail() {
 
         fetchActivityDetail();
     }, [id]);
+
+    const handleCheckIn = () => {
+        navigate(`/activities/${id}/check-in`);
+    };
 
     if (loading) {
         return (
@@ -139,6 +144,15 @@ function ActivityDetail() {
                                 </div>
                             </div>
                         )}
+
+                        <div className="mt-8 flex justify-end">
+                            <button
+                                onClick={handleCheckIn}
+                                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                            >
+                                เช็คชื่อนักเรียน
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
