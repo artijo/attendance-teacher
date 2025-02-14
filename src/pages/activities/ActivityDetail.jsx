@@ -61,7 +61,7 @@ function ActivityDetail() {
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-4xl mx-auto px-4">
+            <div className="mx-auto px-4">
                 <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
                     <h1 className="text-3xl font-bold text-gray-800 border-b pb-4">
                         {activity.actName}
@@ -144,6 +144,62 @@ function ActivityDetail() {
                                 </div>
                             </div>
                         )}
+
+                        <div className="mt-8">
+                            <h2 className="text-xl font-semibold text-gray-700 mb-4">ประวัติการบันทึก</h2>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full table-fixed">
+                                    <thead>
+                                        <tr className="bg-gray-100">
+                                            <th className="px-6 py-3 text-left w-32">รหัสนักเรียน</th>
+                                            <th className="px-6 py-3 text-left">ชื่อ-นามสกุล</th>
+                                            <th className="px-6 py-3 text-center w-32">สถานะ</th>
+                                            <th className="px-6 py-3 text-left w-64">หมายเหตุ</th>
+                                            <th className="px-6 py-3 text-left w-48">บันทึกโดย</th>
+                                            <th className="px-6 py-3 text-left w-48">วันเวลาที่บันทึก</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200">
+                                        {activity.actParticipate.map((record) => (
+                                            <tr key={record.actParticipateId} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 whitespace-nowrap">{record.stdId}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {record.student.title === 'BOY' ? 'เด็กชาย' : 'เด็กหญิง'} {record.student.fName} {record.student.lName}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        เข้าร่วม
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {record.note || '-'}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {record.operateBy === 'TEACHER' && record.teacher ? (
+                                                        `${record.teacher.tchCode} ${record.teacher.fName}`
+                                                    ) : record.operateBy}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {new Date(record.joinTimestamp).toLocaleString('th-TH', {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        hour12: false
+                                                    })}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                                {activity.actParticipate.length === 0 && (
+                                    <div className="text-center py-8 text-gray-500">
+                                        ยังไม่มีประวัติการบันทึก
+                                    </div>
+                                )}
+                            </div>
+                        </div>
 
                         <div className="mt-8 flex justify-end">
                             <button
