@@ -15,6 +15,7 @@ function CheckIn() {
     const [filteredStudents, setFilteredStudents] = useState([]);
     const [selectedClassroomId, setSelectedClassroomId] = useState('all');
     const [availableClassrooms, setAvailableClassrooms] = useState([]);
+    const [notes, setNotes] = useState({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -79,11 +80,12 @@ function CheckIn() {
         setFilteredStudents(result);
     }, [students, selectedClassroomId]);
 
-    const handleAttendanceChange = async (studentId, status) => {
+    const handleAttendanceChange = async (studentId, status, note = notes[studentId] || '') => {
         try {
             await axios.post(`${HOSTNAME}/t/activity/${id}/participate`, {
                 stdId: studentId,
-                status: status
+                status: status,
+                note: note
             });
             // Refresh activity data after recording attendance
             const response = await axios.get(`${HOSTNAME}/t/activity/${id}`);
@@ -91,6 +93,13 @@ function CheckIn() {
         } catch (err) {
             setError(err.response?.data?.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
         }
+    };
+
+    const handleNoteChange = (studentId, note) => {
+        setNotes(prev => ({
+            ...prev,
+            [studentId]: note
+        }));
     };
 
     const handleClassroomFilter = (classroomId) => {
@@ -159,6 +168,7 @@ function CheckIn() {
                                         <th className="px-6 py-3 text-left w-32">รหัสนักเรียน</th>
                                         <th className="px-6 py-3 text-left">ชื่อ-นามสกุล</th>
                                         <th className="px-6 py-3 text-center w-64">สถานะ</th>
+                                        <th className="px-6 py-3 text-left w-64">หมายเหตุ</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
@@ -195,6 +205,18 @@ function CheckIn() {
                                                         <span className="peer-checked:text-red-500">ไม่เข้าร่วม</span>
                                                     </label>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <input
+                                                    type="text"
+                                                    className="w-full border rounded px-2 py-1"
+                                                    placeholder="หมายเหตุ..."
+                                                    value={notes[student.stdId] || ''}
+                                                    onChange={(e) => {
+                                                        handleNoteChange(student.stdId, e.target.value);
+                                                        handleAttendanceChange(student.stdId, document.querySelector(`input[name="status-${student.stdId}"]:checked`)?.value || 'ABSENT', e.target.value);
+                                                    }}
+                                                />
                                             </td>
                                         </tr>
                                     ))}
