@@ -62,7 +62,8 @@ function Subject() {
                                 บันทึกการเข้าเรียน
                             </Link>
                             <Link 
-                                to={''}
+                                to={`/subjects/${subject.subId}/attendance/check`}
+                                state={{subject: subject}}
                                 className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 text-center"
                             >
                                 ตรวจสอบการเข้าเรียน
