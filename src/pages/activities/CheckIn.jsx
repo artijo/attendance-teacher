@@ -151,33 +151,50 @@ function CheckIn() {
                             )}
                         </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full">
+                        <div className="overflow-x-auto w-full">
+                            <table className="min-w-full table-fixed">
                                 <thead>
                                     <tr className="bg-gray-100">
-                                        <th className="px-6 py-3 text-left">เลขที่</th>
-                                        <th className="px-6 py-3 text-left">รหัสนักเรียน</th>
+                                        <th className="px-6 py-3 text-left w-20">เลขที่</th>
+                                        <th className="px-6 py-3 text-left w-32">รหัสนักเรียน</th>
                                         <th className="px-6 py-3 text-left">ชื่อ-นามสกุล</th>
-                                        <th className="px-6 py-3 text-center">สถานะ</th>
+                                        <th className="px-6 py-3 text-center w-64">สถานะ</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
                                     {filteredStudents.map((student) => (
                                         <tr key={student.stdId} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4">{student.stdNo}</td>
-                                            <td className="px-6 py-4">{student.stdId}</td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-4 whitespace-nowrap">{student.stdNo}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">{student.stdId}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
                                                 {student.student.title === 'BOY' ? 'เด็กชาย' : 'เด็กหญิง'} {student.student.fName} {student.student.lName}
                                             </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <select
-                                                    className="border rounded px-3 py-1"
-                                                    onChange={(e) => handleAttendanceChange(student.stdId, e.target.value)}
-                                                    defaultValue="ABSENT"
-                                                >
-                                                    <option value="ABSENT">ไม่เข้าร่วม</option>
-                                                    <option value="PRESENT">เข้าร่วม</option>
-                                                </select>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex justify-center gap-3">
+                                                    <label className="relative flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name={`status-${student.stdId}`}
+                                                            value="PRESENT"
+                                                            onChange={(e) => handleAttendanceChange(student.stdId, e.target.value)}
+                                                            className="sr-only peer"
+                                                        />
+                                                        <div className="w-4 h-4 border-2 border-gray-300 rounded-full peer-checked:border-green-500 peer-checked:bg-green-500"></div>
+                                                        <span className="peer-checked:text-green-500">เข้าร่วม</span>
+                                                    </label>
+                                                    <label className="relative flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name={`status-${student.stdId}`}
+                                                            value="ABSENT"
+                                                            defaultChecked
+                                                            onChange={(e) => handleAttendanceChange(student.stdId, e.target.value)}
+                                                            className="sr-only peer"
+                                                        />
+                                                        <div className="w-4 h-4 border-2 border-gray-300 rounded-full peer-checked:border-red-500 peer-checked:bg-red-500"></div>
+                                                        <span className="peer-checked:text-red-500">ไม่เข้าร่วม</span>
+                                                    </label>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
