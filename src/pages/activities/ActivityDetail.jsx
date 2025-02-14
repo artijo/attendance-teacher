@@ -63,9 +63,19 @@ function ActivityDetail() {
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="mx-auto px-4">
                 <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+                    <div className="flex justify-between items-center">
                     <h1 className="text-3xl font-bold text-gray-800 border-b pb-4">
                         {activity.actName}
                     </h1>
+                    <div className="mt-8 flex justify-end pb-4">
+                            <button
+                                onClick={handleCheckIn}
+                                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                            >
+                                เช็คชื่อนักเรียน
+                            </button>
+                        </div>
+                    </div>
 
                     <div className="space-y-4">
                         <div>
@@ -199,15 +209,6 @@ function ActivityDetail() {
                                     </div>
                                 )}
                             </div>
-                        </div>
-
-                        <div className="mt-8 flex justify-end">
-                            <button
-                                onClick={handleCheckIn}
-                                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-                            >
-                                เช็คชื่อนักเรียน
-                            </button>
                         </div>
                     </div>
                 </div>
