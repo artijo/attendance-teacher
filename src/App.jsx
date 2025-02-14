@@ -22,7 +22,7 @@ axios.interceptors.response.use(
         try {
           const refreshToken = localStorage.getItem("refreshToken");
           await axios.post(
-            `${HOSTNAME}/auth/a/refresh`,
+            `${HOSTNAME}/auth/t/refresh`,
             {},
             {
               headers: {
