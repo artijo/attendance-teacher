@@ -105,6 +105,11 @@ function SubjectCheckAttendenceDetail() {
                                             </tr>
                                         ))
                                     }
+                                    {
+                                        <tr>
+                                            <td colSpan={10} className="text-center">ไม่มีข้อมูล</td>
+                                        </tr>
+                                    }
                                          
                                 </tbody>
                             </table>
