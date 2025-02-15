@@ -72,20 +72,20 @@ function StudentAttendance(){
                         `${studentInfo.studentInfo.student.fName} ${studentInfo.studentInfo.student.lName}` 
                     }</span>
                 </h1>
-                <div className="grid gap-2 md:grid-cols-1">
-                    <div className=" border border-gray-200 shadow-md">
+                <div className="grid gap-2 md:grid-cols-1 overflow-x-auto">
+                    <div className=" border border-gray-200 shadow-md overflow-x-auto">
                         <div className="overflow-x-auto">   
                             <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
                                 <thead className="ltr:text-left rtl:text-right">
-                                    <tr className="text-center h-12 shadow-md">
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">วิชา</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">ขาดเรียน(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">เข้าสาย(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">ลา(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">กิจกรรม(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">เข้าเรียน(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">ร้อยละการเข้าเรียนทั้งหมดรวมลา(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">สถานะไม่มีสิทธ์สอบ</th>
+                                    <tr className="text-center h-12 shadow-md bg-blue-400">
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">วิชา</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">ขาดเรียน(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">เข้าสาย(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">ลา(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">กิจกรรม(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">เข้าเรียน(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">ร้อยละการเข้าเรียนทั้งหมดรวมลา(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">สถานะไม่มีสิทธ์สอบ</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">

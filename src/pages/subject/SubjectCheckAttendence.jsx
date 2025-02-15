@@ -87,7 +87,7 @@ function SubjectCheckAttendence() {
                             {classrooms.map((item, index) => (
                                 <div
                                     key={`box-number-${index}`}
-                                    className="border border-gray-200 p-6 rounded-xl shadow-lg bg-white hover:shadow-xl transition-shadow duration-300"
+                                    className="border border-t-8 border-t-blue-300 p-6 rounded-xl shadow-lg bg-white hover:shadow-xl transition-shadow duration-300"
                                 >
                                     <div id={`box-number-${index}`} className="w-full">
                                         <div className="flex flex-col">

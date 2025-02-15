@@ -14,12 +14,13 @@ function ClassroomDetailTable({classrooms}) {
                     <div className="overflow-x-auto">   
                         <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
                             <thead className="ltr:text-left rtl:text-right">
-                                <tr className="text-center h-12 shadow-md">
-                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">เลขที่</th>
-                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">รหัสนักเรียน</th>
-                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">ชื่อ</th>
-                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">นามสกุล</th>
-                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">คะแนนจิตวิสัย</th>
+                                <tr className="text-center h-12 shadow-md bg-blue-400">
+                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">เลขที่</th>
+                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">รหัสนักเรียน</th>
+                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">ชื่อ</th>
+                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">นามสกุล</th>
+                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">คะแนนจิตวิสัย</th>
+                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
