@@ -16,6 +16,7 @@ function CheckIn() {
     const [selectedClassroomId, setSelectedClassroomId] = useState('all');
     const [availableClassrooms, setAvailableClassrooms] = useState([]);
     const [notes, setNotes] = useState({});
+    const [studentStatuses, setStudentStatuses] = useState({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -28,6 +29,20 @@ function CheckIn() {
 
                 setActivity(activityResponse.data);
                 setClassrooms(classroomsResponse.data);
+
+                // Initialize notes from existing participation data
+                const participationNotes = {};
+                activityResponse.data.actParticipate.forEach(participation => {
+                    participationNotes[participation.stdId] = participation.note || '';
+                });
+                setNotes(participationNotes);
+
+                // Initialize statuses from participation data
+                const initialStatuses = {};
+                activityResponse.data.actParticipate.forEach(participation => {
+                    initialStatuses[participation.stdId] = 'PRESENT';
+                });
+                setStudentStatuses(initialStatuses);
 
                 // Modified classroom filtering logic
                 if (activityResponse.data.joinLimit) {
@@ -85,9 +100,21 @@ function CheckIn() {
             await axios.post(`${HOSTNAME}/t/activity/${id}/participate`, {
                 stdId: studentId,
                 status: status,
-                note: note
+                note: status === 'ABSENT' ? '' : note
             });
-            // Refresh activity data after recording attendance
+            
+            // Update local status state
+            setStudentStatuses(prev => ({
+                ...prev,
+                [studentId]: status
+            }));
+
+            // Clear note if status is ABSENT
+            if (status === 'ABSENT') {
+                handleNoteChange(studentId, '');
+            }
+
+            // Refresh activity data
             const response = await axios.get(`${HOSTNAME}/t/activity/${id}`);
             setActivity(response.data);
         } catch (err) {
@@ -172,54 +199,70 @@ function CheckIn() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
-                                    {filteredStudents.map((student) => (
-                                        <tr key={student.stdId} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 whitespace-nowrap">{student.stdNo}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap">{student.stdId}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                {student.student.title === 'BOY' ? 'เด็กชาย' : 'เด็กหญิง'} {student.student.fName} {student.student.lName}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex justify-center gap-3">
-                                                    <label className="relative flex items-center gap-2 cursor-pointer">
-                                                        <input
-                                                            type="radio"
-                                                            name={`status-${student.stdId}`}
-                                                            value="PRESENT"
-                                                            onChange={(e) => handleAttendanceChange(student.stdId, e.target.value)}
-                                                            className="sr-only peer"
-                                                        />
-                                                        <div className="w-4 h-4 border-2 border-gray-300 rounded-full peer-checked:border-green-500 peer-checked:bg-green-500"></div>
-                                                        <span className="peer-checked:text-green-500">เข้าร่วม</span>
-                                                    </label>
-                                                    <label className="relative flex items-center gap-2 cursor-pointer">
-                                                        <input
-                                                            type="radio"
-                                                            name={`status-${student.stdId}`}
-                                                            value="ABSENT"
-                                                            defaultChecked
-                                                            onChange={(e) => handleAttendanceChange(student.stdId, e.target.value)}
-                                                            className="sr-only peer"
-                                                        />
-                                                        <div className="w-4 h-4 border-2 border-gray-300 rounded-full peer-checked:border-red-500 peer-checked:bg-red-500"></div>
-                                                        <span className="peer-checked:text-red-500">ไม่เข้าร่วม</span>
-                                                    </label>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <input
-                                                    type="text"
-                                                    className="w-full border rounded px-2 py-1"
-                                                    placeholder="หมายเหตุ..."
-                                                    value={notes[student.stdId] || ''}
-                                                    onChange={(e) => {
-                                                        handleNoteChange(student.stdId, e.target.value);
-                                                        handleAttendanceChange(student.stdId, document.querySelector(`input[name="status-${student.stdId}"]:checked`)?.value || 'ABSENT', e.target.value);
-                                                    }}
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {filteredStudents.map((student) => {
+                                        const participation = activity.actParticipate.find(p => p.stdId === student.stdId);
+                                        const isAbsent = studentStatuses[student.stdId] === 'ABSENT';
+                                        const canAddNote = participation && !isAbsent;
+                                        
+                                        return (
+                                            <tr key={student.stdId} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 whitespace-nowrap">{student.stdNo}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">{student.stdId}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {student.student.title === 'BOY' ? 'เด็กชาย' : 'เด็กหญิง'} {student.student.fName} {student.student.lName}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex justify-center gap-3">
+                                                        <label className="relative flex items-center gap-2 cursor-pointer">
+                                                            <input
+                                                                type="radio"
+                                                                name={`status-${student.stdId}`}
+                                                                value="PRESENT"
+                                                                defaultChecked={participation !== undefined}
+                                                                onChange={(e) => handleAttendanceChange(student.stdId, e.target.value)}
+                                                                className="sr-only peer"
+                                                            />
+                                                            <div className="w-4 h-4 border-2 border-gray-300 rounded-full peer-checked:border-green-500 peer-checked:bg-green-500"></div>
+                                                            <span className="peer-checked:text-green-500">เข้าร่วม</span>
+                                                        </label>
+                                                        <label className="relative flex items-center gap-2 cursor-pointer">
+                                                            <input
+                                                                type="radio"
+                                                                name={`status-${student.stdId}`}
+                                                                value="ABSENT"
+                                                                defaultChecked={participation === undefined}
+                                                                onChange={(e) => handleAttendanceChange(student.stdId, e.target.value)}
+                                                                className="sr-only peer"
+                                                            />
+                                                            <div className="w-4 h-4 border-2 border-gray-300 rounded-full peer-checked:border-red-500 peer-checked:bg-red-500"></div>
+                                                            <span className="peer-checked:text-red-500">ไม่เข้าร่วม</span>
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <input
+                                                        type="text"
+                                                        className={`w-full border rounded px-2 py-1 ${
+                                                            !canAddNote ? 'bg-gray-100 cursor-not-allowed' : ''
+                                                        }`}
+                                                        placeholder="หมายเหตุ..."
+                                                        value={!canAddNote ? '' : (notes[student.stdId] || '')}
+                                                        onChange={(e) => {
+                                                            if (canAddNote) {
+                                                                handleNoteChange(student.stdId, e.target.value);
+                                                                handleAttendanceChange(
+                                                                    student.stdId,
+                                                                    'PRESENT',
+                                                                    e.target.value
+                                                                );
+                                                            }
+                                                        }}
+                                                        disabled={!canAddNote}
+                                                    />
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
