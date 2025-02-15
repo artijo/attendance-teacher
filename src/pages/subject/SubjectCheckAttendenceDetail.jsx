@@ -1,0 +1,119 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { Await, useLocation } from "react-router-dom";
+import { HOSTNAME } from "../../config";
+import { formatTitle } from "../../helper";
+
+function SubjectCheckAttendenceDetail() {
+    const location = useLocation();
+    const classroom = location.state.classroooms;
+    const subject = location.state.subject;
+    const [abStact, setAbStact] = useState([]);
+    // console.log(`Classroom is \n` + classroom);
+    // console.log(`Subject is \n` + subject)
+    // console.log(classroom);
+
+    const fetchDataAbstact =  async (subjectId, classroomId) => {
+        try{
+            const response = await axios.get(`${HOSTNAME}/t/classrooms/classrooms/checkdetail/${subjectId}/${classroomId}`);
+            if(response.status === 200) {
+                console.log(response.data);
+                setAbStact(response.data);
+            }else{
+                throw new Error(response.data.message);
+            }
+        }catch(error){
+            console.error(error);
+        };
+    };
+
+    useEffect(() => {
+        if(!classroom || classroom === undefined) return;
+        if(!subject || subject==="") return;
+        fetchDataAbstact(subject.subId,classroom.classId);
+
+    },[classroom, subject])
+
+
+
+
+
+
+    return(
+        <div className="mx-auto container">
+                <h1 className="text-3xl font-bold text-center mb-8">รายละเอียดการเข้าเรียน</h1>
+                <p className="text-2xl font-medium mb-8">
+                    {
+                        subject != null && (
+                            <span>วิชา {subject.subNameThai}({subject.subNameEng}) - {subject.subCode}</span> 
+                        )
+                    }
+                </p>
+                <div className="grid gap-2 md:grid-cols-1">
+                    <div className=" border border-gray-200 shadow-md">
+                        <div className="overflow-x-auto">   
+                            <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
+                                <thead className="ltr:text-left rtl:text-right">
+                                    <tr className="text-center h-12 shadow-md">
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">เลขที่</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">ชื่อ</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">นามสกุล</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">ขาดเรียน(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">เข้าสาย(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">ลา(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">กิจกรรม(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">เข้าเรียน(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">ร้อยละการเข้าเรียนทั้งหมดรวมลา(ครั้ง)</th>
+                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-gray-900">สถานะไม่มีสิทธ์สอบ</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200">
+                                    {
+                                        abStact.length > 0 && 
+                                        abStact.map((item,index) => (
+                                            <tr className="even:bg-slate-100/70 text-center" key={`${item.stdNo} ${index}`}>
+                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    {parseInt(item.stdNo)}
+                                                </td>
+                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    {formatTitle(item.title)}{item.fName}
+                                                </td>
+                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    {item.lName}
+                                                </td>
+                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    {item.attendenceAbsentCount}
+                                                </td>
+                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    {item.attendenceLateCount}
+                                                </td>
+                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    {item.attendenceLeaveCount}
+                                                </td>
+                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    {item.attendenceActivity}
+                                                </td>
+                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    {item.attendenceCount}
+                                                </td>
+                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    {item.attendencePercent}%
+                                                </td>
+                                                <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    {item.canExam}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    }
+                                         
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+        
+        </div>
+    );
+};
+
+export default SubjectCheckAttendenceDetail;

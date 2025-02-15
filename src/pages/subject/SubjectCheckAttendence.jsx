@@ -7,7 +7,7 @@ function SubjectCheckAttendence() {
     const params = useParams();
     const location = useLocation();
     const subjectInfo = location.state.subject;
-    console.log(location.state);
+    // console.log(location.state);
     // console.log(params.id);
     const subjectid = params.id === undefined || params.id === null || params.id === "" ? "no id" : params.id
     // console.log(subjectid)
@@ -70,7 +70,7 @@ function SubjectCheckAttendence() {
                 <div>
                     <label>ปีการศึกษา: </label>
                     { termList.length > 0 && 
-                        <select name="term" value={selectValue}  className="px-2 py-3 border border-slate-700  rounded-lg" onChange={(e) => handleSelectOption(e.target.value)}>
+                        <select name="term" value={selectValue}  className="px-2 border border-slate-700  rounded-lg" onChange={(e) => handleSelectOption(e.target.value)}>
                             {
                                 termList.map((term, index) => (
                                     <option value={term.termId} key={`option for term ${index}`}>
@@ -107,8 +107,8 @@ function SubjectCheckAttendence() {
                                         </div>
                                         <div className="mt-6">
                                             <Link
-                                                to={'/classroom/detail'}
-                                                state={{ classroooms: item }}
+                                                to={'/subjects/attendance/checkdetail'}
+                                                state={{ classroooms: item , subject:subjectInfo}}
                                             >
                                                 <button className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
                                                     รายละเอียด
