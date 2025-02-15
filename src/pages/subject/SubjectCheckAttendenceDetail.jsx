@@ -106,6 +106,7 @@ function SubjectCheckAttendenceDetail() {
                                         ))
                                     }
                                     {
+                                        !abStact.length &&
                                         <tr>
                                             <td colSpan={10} className="text-center">ไม่มีข้อมูล</td>
                                         </tr>
