@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { HOSTNAME } from "../../config";
 import { formatDate } from "../../helper";
+import { DateTime } from "luxon";
+import { convertNumberToThaiMonth } from "../../helper";
 
 function ActivityDetail() {
     const { id } = useParams();
@@ -10,6 +12,7 @@ function ActivityDetail() {
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedDate, setSelectedDate] = useState('');
 
     useEffect(() => {
         const fetchActivityDetail = async () => {
@@ -31,8 +34,57 @@ function ActivityDetail() {
         fetchActivityDetail();
     }, [id]);
 
+    useEffect(() => {
+        if (activity) {
+            const startDate = DateTime.fromISO(activity.actDate)
+                .setZone('Asia/Bangkok')
+                .toISODate();
+            setSelectedDate(startDate);
+        }
+    }, [activity]);
+
     const handleCheckIn = () => {
         navigate(`/activities/${id}/check-in`);
+    };
+
+    const isActivityEnded = (activity) => {
+        const endDate = DateTime.fromISO(activity.actDateEnd)
+            .setZone('Asia/Bangkok')
+            .set({
+                hour: parseInt(activity.actEndTime.split(':')[0]),
+                minute: parseInt(activity.actEndTime.split(':')[1])
+            });
+        return DateTime.now().setZone('Asia/Bangkok') > endDate;
+    };
+
+    const getDatesBetween = (startDate, endDate) => {
+        const dates = [];
+        let current = DateTime.fromISO(startDate).setZone('Asia/Bangkok').startOf('day');
+        const end = DateTime.fromISO(endDate).setZone('Asia/Bangkok').startOf('day');
+        
+        while (current <= end) {
+            dates.push(current.toISODate());
+            current = current.plus({ days: 1 });
+        }
+        return dates;
+    };
+
+    const isRecordMatchingDate = (record) => {
+        if (!selectedDate) return true;
+        const recordDate = DateTime.fromISO(record.joinTimestamp).setZone('Asia/Bangkok');
+        const filterDate = DateTime.fromISO(selectedDate).setZone('Asia/Bangkok');
+        return recordDate.hasSame(filterDate, 'day');
+    };
+
+    const filteredParticipations = activity?.actParticipate.filter(isRecordMatchingDate) || [];
+
+    const formatThaiDateTime = (dateTime) => {
+        const dt = DateTime.fromISO(dateTime).setZone('Asia/Bangkok');
+        const day = dt.toFormat('d');
+        const month = convertNumberToThaiMonth(dt.month);
+        const year = dt.year + 543;
+        const time = dt.toFormat("HH:mm 'น.'");
+        return `${day} ${month} ${year} ${time}`;
     };
 
     if (loading) {
@@ -64,16 +116,27 @@ function ActivityDetail() {
             <div className="mx-auto px-4">
                 <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
                     <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-800 border-b pb-4">
-                        {activity.actName}
-                    </h1>
-                    <div className="mt-8 flex justify-end pb-4">
-                            <button
-                                onClick={handleCheckIn}
-                                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-                            >
-                                เช็คชื่อนักเรียน
-                            </button>
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-800">
+                                {activity.actName}
+                            </h1>
+                            <div className="mt-2">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    isActivityEnded(activity) ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                                }`}>
+                                    {isActivityEnded(activity) ? 'สิ้นสุดกิจกรรม' : 'กิจกรรมกำลังดำเนินการ'}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="mt-8 flex justify-end pb-4">
+                            {!isActivityEnded(activity) && (
+                                <button
+                                    onClick={handleCheckIn}
+                                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                                >
+                                    เช็คชื่อนักเรียน
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -157,6 +220,39 @@ function ActivityDetail() {
 
                         <div className="mt-8">
                             <h2 className="text-xl font-semibold text-gray-700 mb-4">ประวัติการบันทึก</h2>
+                            <div className="relative mb-6">
+                                <div className="overflow-x-auto pb-2 hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                                    <div className="flex gap-2 px-1">
+                                        {activity && getDatesBetween(activity.actDate, activity.actDateEnd).map((date) => {
+                                            const dateTime = DateTime.fromISO(date).setZone('Asia/Bangkok');
+                                            const isToday = DateTime.now().setZone('Asia/Bangkok').hasSame(dateTime, 'day');
+                                            const thaiMonth = convertNumberToThaiMonth(dateTime.month);
+                                            
+                                            return (
+                                                <button
+                                                    key={date}
+                                                    onClick={() => setSelectedDate(date)}
+                                                    className={`flex-shrink-0 flex flex-col items-center w-24 py-2 rounded-lg transition-all ${
+                                                        selectedDate === date
+                                                            ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                                                            : 'bg-white border hover:bg-gray-50'
+                                                    } ${isToday ? 'ring-2 ring-blue-400' : ''}`}
+                                                >
+                                                    <span className="text-xs mb-1">
+                                                        {dateTime.toFormat('ccc')}
+                                                    </span>
+                                                    <span className="text-lg font-semibold">
+                                                        {dateTime.day}
+                                                    </span>
+                                                    <span className="text-xs">
+                                                        {thaiMonth}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
                             <div className="overflow-x-auto">
                                 <table className="min-w-full table-fixed">
                                     <thead>
@@ -170,7 +266,7 @@ function ActivityDetail() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-200">
-                                        {activity.actParticipate.map((record) => (
+                                        {filteredParticipations.map((record) => (
                                             <tr key={record.actParticipateId} className="hover:bg-gray-50">
                                                 <td className="px-6 py-4 whitespace-nowrap">{record.stdId}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
@@ -190,22 +286,15 @@ function ActivityDetail() {
                                                     ) : record.operateBy}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    {new Date(record.joinTimestamp).toLocaleString('th-TH', {
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit',
-                                                        hour12: false
-                                                    })}
+                                                    {formatThaiDateTime(record.joinTimestamp)}
                                                 </td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
-                                {activity.actParticipate.length === 0 && (
+                                {filteredParticipations.length === 0 && (
                                     <div className="text-center py-8 text-gray-500">
-                                        ยังไม่มีประวัติการบันทึก
+                                        {selectedDate ? 'ไม่พบข้อมูลการบันทึกในวันที่เลือก' : 'ยังไม่มีประวัติการบันทึก'}
                                     </div>
                                 )}
                             </div>
