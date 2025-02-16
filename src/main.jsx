@@ -23,6 +23,7 @@ import ActivityDetail from './pages/activities/ActivityDetail.jsx';
 import CheckIn from './pages/activities/CheckIn.jsx';
 import SubjectCheckAttendence from './pages/subject/SubjectCheckAttendence.jsx';
 import SubjectCheckAttendenceDetail from './pages/subject/SubjectCheckAttendenceDetail.jsx';
+import SubjectCheckAttendenceByPeriod from './pages/subject/SubjectCheckAttendenceByPeriod.jsx';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
@@ -38,6 +39,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='subjects/:id/attendance/:studingid' element={<Attendance />} />
           <Route path='subjects/:id/attendance/check' element={<SubjectCheckAttendence />} />
           <Route path='subjects/attendance/checkdetail' element={<SubjectCheckAttendenceDetail />} />
+          <Route path='subjects/attendance/byperiod' element={<SubjectCheckAttendenceByPeriod />} />
           {/* Classroom */}
           <Route path='classrooms' element={<Classroom/>}/>
           <Route path='classroom/attendance/student' element={<StudentAttendance/>}/>

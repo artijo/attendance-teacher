@@ -94,7 +94,7 @@ function SubjectCheckAttendence() {
                                             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
                                                 ห้อง {item.classLevel}/{item.classRoom} <span className="text-base font-normal">(หลักสูตร {item.classroomType.classTypeNameThai})</span>
                                             </h2>
-                                            อาจารย์ที่ปรึกษา:
+                                            <span className="font-medium text-sm text-gray-800">อาจารย์ที่ปรึกษา</span>
                                             <p className="text-lg text-gray-600 grid">
                                                 {
                                                     item.teacher.length > 0 && (
@@ -110,8 +110,18 @@ function SubjectCheckAttendence() {
                                                 to={'/subjects/attendance/checkdetail'}
                                                 state={{ classroooms: item , subject:subjectInfo}}
                                             >
-                                                <button className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
-                                                    รายละเอียด
+                                                <button className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors duration-200 font-medium">
+                                                    รายละเอียดการมีสิทธิ์สอบ
+                                                </button>
+                                            </Link>
+                                        </div>
+                                        <div className="mt-2">
+                                            <Link
+                                                to={'/subjects/attendance/byperiod'}
+                                                state={{ classroooms: item , subject:subjectInfo}}
+                                            >
+                                                <button className="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600  transition-colors duration-200 font-medium">
+                                                    รายละเอียดการเข้าเรียนตามคาบ
                                                 </button>
                                             </Link>
                                         </div>
