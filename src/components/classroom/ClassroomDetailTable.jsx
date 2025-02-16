@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import ExportExcelButton from "../exportExcelButton";
+import { ClassroomsAbstacTable } from "../../excel";
 
 function ClassroomDetailTable({classrooms}) {
     console.log(classrooms);
@@ -7,8 +9,16 @@ function ClassroomDetailTable({classrooms}) {
     const totalPages = Math.ceil(classrooms.classroomMembers.length / 20);
     const currentPage = selectedPage;
     const sliceStudentList = classrooms.classroomMembers.slice((selectedPage - 1) * 20, selectedPage * 20).sort((a,b) => parseInt(a.stdNo) - parseInt(b.stdNo));
+    
+    // const handleExportExcelButton = () => {
+    //     if(classrooms.length > 0){
+    //         ClassroomsAbstacTable(classrooms);
+    //     };
+    // };
+
     return (
         <>
+            {/* <ExportExcelButton handelOnClickFunction={handleExportExcelButton}/> */}
             <div className="grid gap-2 md:grid-cols-1">
                 <div className=" border border-gray-200 shadow-md">
                     <div className="overflow-x-auto">   

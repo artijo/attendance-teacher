@@ -1,13 +1,16 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Await, useLocation } from "react-router-dom";
 import { HOSTNAME } from "../../config";
 import { formatTitle } from "../../helper";
+import ExportExcelButton from "../../components/exportExcelButton";
+import { Table_to_Excel } from "../../excel";
 
 function SubjectCheckAttendenceDetail() {
     const location = useLocation();
     const classroom = location.state.classroooms;
     const subject = location.state.subject;
+    const ref = useRef();
     const [abStact, setAbStact] = useState([]);
     const fetchDataAbstact =  async (subjectId, classroomId) => {
         try{
@@ -23,6 +26,13 @@ function SubjectCheckAttendenceDetail() {
         };
     };
 
+    const handleExportExcelButton = () => {
+        if(ref.current){
+            const table = ref.current;
+            Table_to_Excel(table);
+        }
+    }
+
     useEffect(() => {
         if(!classroom || classroom === undefined) return;
         if(!subject || subject==="") return;
@@ -32,6 +42,7 @@ function SubjectCheckAttendenceDetail() {
 
     return(
         <div className="mx-auto container">
+                
                 <h1 className="text-3xl font-bold text-center mb-8">รายละเอียดการเข้าเรียน</h1>
                 <p className="text-2xl font-medium mb-8">
                     {
@@ -40,11 +51,12 @@ function SubjectCheckAttendenceDetail() {
                         )
                     }
                 </p>
+                <ExportExcelButton handelOnClickFunction={handleExportExcelButton}/>
                 <div>
                     <div className="grid gap-2 md:grid-cols-1 overflow-x-auto">
                         <div className=" border border-gray-200 shadow-md overflow-x-auto">
                             <div className="overflow-x-auto">   
-                                <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
+                                <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm" ref={ref}>
                                     <thead className="ltr:text-left rtl:text-right">
                                         <tr className="text-center h-12 shadow-md bg-blue-400">
                                             <th className="whitespace-nowrap px-4 py-2 font-bold text-white">เลขที่</th>

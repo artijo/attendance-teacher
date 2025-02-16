@@ -4,6 +4,7 @@ import ExportExcelButton from "../exportExcelButton";
 import { TapAttendenceSummaryOpen } from "../tapAttendenceSummaryOpen";
 import { useEffect, useRef, useState } from "react";
 import { convertNumberToThaiMonth } from "../../helper";
+import { Table_to_Excel } from "../../excel";
 
 export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, subject}) => {
     // const subject = subject;
@@ -121,7 +122,7 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
 
     const handelExportExcel = (index) => {
         if(ref.current[index]){
-            AttendanceSummaryByDay(ref.current[index]);
+            Table_to_Excel(ref.current[index]);
         }
     }
     // const [jsonElement, setJsonElement] = useState([]);
