@@ -36,10 +36,21 @@ function ActivityDetail() {
 
     useEffect(() => {
         if (activity) {
-            const startDate = DateTime.fromISO(activity.actDate)
-                .setZone('Asia/Bangkok')
-                .toISODate();
-            setSelectedDate(startDate);
+            // const startDate = DateTime.fromISO(activity.actDate)
+            //     .setZone('Asia/Bangkok')
+            //     .toISODate();
+            // setSelectedDate(startDate);
+            const now = DateTime.now().setZone('Asia/Bangkok');
+            const startDate = DateTime.fromISO(activity.actDate).setZone('Asia/Bangkok');
+            const endDate = DateTime.fromISO(activity.actDateEnd).setZone('Asia/Bangkok');
+            
+            // Check if current date is within activity period
+            if (now >= startDate && now <= endDate) {
+                setSelectedDate(now.toISODate());
+            } else {
+                // If not in period, set to activity end date
+                setSelectedDate(endDate.toISODate());
+            }
         }
     }, [activity]);
 
