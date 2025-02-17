@@ -162,7 +162,7 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
                                     <Table 
                                         month={month} 
                                         index={index} 
-                                        exportPdf={<ExportPdfButtonKK index={index} month={month}/>}
+                                        exportPdf={null}//<ExportPdfButtonKK index={index} month={month}/>}
                                         exportExcel={ <ExportExcelButton handelOnClickFunction={() => handelExportExcel(index)}/>}
                                     />
                                 </TapAttendenceSummaryOpen>
