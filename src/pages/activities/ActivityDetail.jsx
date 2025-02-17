@@ -13,6 +13,7 @@ function ActivityDetail() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedDate, setSelectedDate] = useState('');
+    const [selectedClassroom, setSelectedClassroom] = useState('all');
 
     useEffect(() => {
         const fetchActivityDetail = async () => {
@@ -36,10 +37,6 @@ function ActivityDetail() {
 
     useEffect(() => {
         if (activity) {
-            // const startDate = DateTime.fromISO(activity.actDate)
-            //     .setZone('Asia/Bangkok')
-            //     .toISODate();
-            // setSelectedDate(startDate);
             const now = DateTime.now().setZone('Asia/Bangkok');
             const startDate = DateTime.fromISO(activity.actDate).setZone('Asia/Bangkok');
             const endDate = DateTime.fromISO(activity.actDateEnd).setZone('Asia/Bangkok');
@@ -87,7 +84,34 @@ function ActivityDetail() {
         return recordDate.hasSame(filterDate, 'day');
     };
 
-    const filteredParticipations = activity?.actParticipate.filter(isRecordMatchingDate) || [];
+    const getUniqueClassrooms = (participations) => {
+        const classrooms = participations
+            .filter(p => p.student.classroomMembers && p.student.classroomMembers[0])
+            .map(p => ({
+                classId: p.student.classroomMembers[0].classroom.classId,
+                classLevel: p.student.classroomMembers[0].classroom.classLevel,
+                classRoom: p.student.classroomMembers[0].classroom.classRoom
+            }));
+
+        // Remove duplicates
+        return Array.from(new Map(classrooms.map(item => 
+            [item.classId, item]
+        )).values()).sort((a, b) => {
+            if (a.classLevel === b.classLevel) {
+                return a.classRoom - b.classRoom;
+            }
+            return a.classLevel - b.classLevel;
+        });
+    };
+
+    const filteredParticipations = activity?.actParticipate
+        .filter(record => {
+            const matchesDate = isRecordMatchingDate(record);
+            const matchesClassroom = selectedClassroom === 'all' || 
+                (record.student.classroomMembers && 
+                 record.student.classroomMembers[0]?.classroom.classId === selectedClassroom);
+            return matchesDate && matchesClassroom;
+        }) || [];
 
     const formatThaiDateTime = (dateTime) => {
         const dt = DateTime.fromISO(dateTime).setZone('Asia/Bangkok');
@@ -231,6 +255,27 @@ function ActivityDetail() {
 
                         <div className="mt-8">
                             <h2 className="text-xl font-semibold text-gray-700 mb-4">ประวัติการบันทึก</h2>
+                            
+                            {/* Add classroom filter */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    กรองตามห้องเรียน:
+                                </label>
+                                <select
+                                    className="border rounded-md px-3 py-2 w-full max-w-xs"
+                                    value={selectedClassroom}
+                                    onChange={(e) => setSelectedClassroom(e.target.value)}
+                                >
+                                    <option value="all">ทุกห้องเรียน</option>
+                                    {activity && getUniqueClassrooms(activity.actParticipate).map((classroom) => (
+                                        <option key={classroom.classId} value={classroom.classId}>
+                                            ม.{classroom.classLevel}/{classroom.classRoom}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Date selector */}
                             <div className="relative mb-6">
                                 <div className="overflow-x-auto pb-2 hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
                                     <div className="flex gap-2 px-1">
@@ -264,6 +309,8 @@ function ActivityDetail() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Participation table */}
                             <div className="overflow-x-auto">
                                 <table className="min-w-full table-fixed">
                                     <thead>
