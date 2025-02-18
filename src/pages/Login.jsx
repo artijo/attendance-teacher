@@ -18,6 +18,7 @@ function Login() {
     axios
       .post(`${HOSTNAME}/auth/t/login`, data)
       .then((res) => {
+        localStorage.setItem("accessToken", res.data.token);
         localStorage.setItem("refreshToken", res.data.refreshToken);
         navigate("/dashboard");
       })
