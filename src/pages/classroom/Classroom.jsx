@@ -45,13 +45,18 @@ function Classroom() {
                         {classroooms.map((item, index) => (
                             <div
                                 key={`box-number-${index}`}
-                                className="border border-t-8 border-t-blue-300 border-gray-200 p-6 rounded-xl shadow-lg bg-white hover:shadow-xl transition-shadow duration-300"
+                                className="relative grid grid-cols-1 gap-2 border border-gray-200 rounded-xl shadow-lg bg-white hover:shadow-xl transition-shadow duration-300"
                             >
-                                <div id={`box-number-${index}`} className="w-full">
-                                    <div className="flex flex-col space-y-3">
-                                        <h2 className="text-2xl font-semibold text-gray-800">
+                                <div 
+                                    className=" w-full h-20 flex items-center justify-center bg-gradient-to-r rounded-t-lg from-indigo-300 via-blue-300 to-sky-300 text-white"
+                                >
+                                    
+                                </div>
+                                <div id={`box-number-${index}`} className="w-full p-6 pt-2 relative">
+                                    <div className="grid grid-cols-1 gap-1">
+                                        <p className="text-xl font-semibold text-gray-800">
                                             ปีการศึกษา {item.term.academicYear + 543}
-                                        </h2>
+                                        </p>
                                         <p className="text-lg text-gray-600">
                                             เทอม {item.term.semester}
                                         </p>
@@ -62,14 +67,29 @@ function Classroom() {
                                             หลักสูตร {item.classroomType.classTypeNameThai}
                                         </p>
                                     </div>
-                                    <div className="mt-6">
+                                    <div className="menu-section mt-2">
                                         <Link
                                             to={'/classroom/detail'}
                                             state={{ classroooms: item }}
                                         >
-                                            <button className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
-                                                รายละเอียด
-                                            </button>
+                                            <div className="group/item flex items-center">
+                                                <span
+                                                    className="text-sky-400 border border-sky-400 rounded-full p-1 group-hover/item:rounded-e-none group-hover/item:border-e-0"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                                                    </svg>
+                                                </span>
+                                                <span 
+                                                    className="
+                                                        font-medium text-black
+                                                      border-sky-400  align-middle w-0 py-1 pe-2 truncate invisible group-hover/item:visible group-hover/item:w-fit group-hover/item:text-clip text-xs
+                                                        group-hover/item:border group-hover/item:rounded-e-full  group-hover/item:border-s-0 
+                                                    "
+                                                >
+                                                    รายละเอียดการเข้าเรียน
+                                                </span>
+                                            </div>
                                         </Link>
                                     </div>
                                 </div>

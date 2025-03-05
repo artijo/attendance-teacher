@@ -141,8 +141,8 @@ function TeacherTimetableBySubject({subject}) {
 
     return (
         <>
-            <div>
-                <table className="mx-auto bg-white border-collapse border ">
+            <div className="w-full">
+                <table className="w-full mx-auto bg-white border-collapse border ">
                     <TableHead/>
                     <TableBody/>
                 </table>

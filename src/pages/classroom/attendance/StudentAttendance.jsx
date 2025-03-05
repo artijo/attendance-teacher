@@ -8,10 +8,7 @@ function StudentAttendance(){
     const classroomId = location.state.classroomsId;
     const stdId = location.state.stdId;
     const [studentInfo, setStudentInfo] = useState(null);
-
-    
-
-    
+    const studentInfoMation = studentInfo != null && studentInfo.studentInfo.student;
 
     async function getSubjectName(subId) {
         try{
@@ -66,58 +63,60 @@ function StudentAttendance(){
     return(
         <div className="mx-auto container">
             <div className="grid grid-cols-1 gap-8">
-                <h1 className="text-3xl font-bold text-start">
-                    รายละเอียดการเข้าเรียนตามรายวิชาของ <span>{
-                        studentInfo != null &&
-                        `${studentInfo.studentInfo.student.fName} ${studentInfo.studentInfo.student.lName}` 
-                    }</span>
-                </h1>
-                <div className="grid gap-2 md:grid-cols-1 overflow-x-auto">
-                    <div className=" border border-gray-200 shadow-md overflow-x-auto">
-                        <div className="overflow-x-auto">   
-                            <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
-                                <thead className="ltr:text-left rtl:text-right">
-                                    <tr className="text-center h-12 shadow-md bg-blue-400">
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">วิชา</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">ขาดเรียน(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">เข้าสาย(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">ลา(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">กิจกรรม(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">เข้าเรียน(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">ร้อยละการเข้าเรียนทั้งหมดรวมลา(ครั้ง)</th>
-                                        <th className="whitespace-nowrap px-4 py-2 font-bold text-white">สถานะไม่มีสิทธ์สอบ</th>
+                <div>
+                    <h1 className="text-lg font-bold text-start">
+                        รายละเอียดการเข้าเรียนตามรายวิชาของ <span>{
+                            `${studentInfoMation.title} ${studentInfoMation.fName} ${studentInfoMation.lName}` 
+                        }</span>
+                    </h1>
+
+                </div>
+                <div>
+                    <div>
+                        <div className="relative overflow-x-auto shadow-md sm:rounded-2xl">   
+                            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                <thead className="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                    <tr>
+                                        <th className="px-6 py-3">วิชา</th>
+                                        <th className="px-6 py-3">ขาดเรียน(ครั้ง)</th>
+                                        <th className="px-6 py-3">เข้าสาย(ครั้ง)</th>
+                                        <th className="px-6 py-3">ลา(ครั้ง)</th>
+                                        <th className="px-6 py-3">กิจกรรม(ครั้ง)</th>
+                                        <th className="px-6 py-3">เข้าเรียน(ครั้ง)</th>
+                                        <th className="px-6 py-3">ร้อยละการเข้าเรียนทั้งหมดรวมลา(ครั้ง)</th>
+                                        <th className="px-6 py-3">สถานะไม่มีสิทธ์สอบ</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
+                                <tbody >
                                     {
                                         studentInfo != null &&
                                         Object.keys(studentInfo).map( (key, index) =>{
                                             if(index === 0) return;
                                             return (
                                                 
-                                                    <tr className="even:bg-slate-100/70 text-center" key={`${key} ${index}`}>
-                                                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200" key={`${key} ${index}`}>
+                                                        <th  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                             {key}
-                                                        </td>
-                                                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                        </th>
+                                                        <td  className="px-6 py-4">
                                                             {studentInfo[key].attendenceAbsentCount}
                                                         </td>
-                                                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                        <td  className="px-6 py-4">
                                                             {studentInfo[key].attendenceLateCount}
                                                         </td>
-                                                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                        <td  className="px-6 py-4">
                                                             {studentInfo[key].attendenceLeaveCount}
                                                         </td>
-                                                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                        <td  className="px-6 py-4">
                                                             {studentInfo[key].attendenceActivity}
                                                         </td>
-                                                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                        <td  className="px-6 py-4">
                                                             {studentInfo[key].attendenceCount}
                                                         </td>
-                                                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                        <td  className="px-6 py-4">
                                                             {studentInfo[key].attendencePercent}%
                                                         </td>
-                                                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                                        <td  className="px-6 py-4">
                                                             {studentInfo[key].canExam}
                                                         </td>
                                                     </tr>       

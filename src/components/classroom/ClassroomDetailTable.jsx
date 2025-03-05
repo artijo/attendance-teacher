@@ -9,66 +9,68 @@ function ClassroomDetailTable({classrooms}) {
     const totalPages = Math.ceil(classrooms.classroomMembers.length / 20);
     const currentPage = selectedPage;
     const sliceStudentList = classrooms.classroomMembers.slice((selectedPage - 1) * 20, selectedPage * 20).sort((a,b) => parseInt(a.stdNo) - parseInt(b.stdNo));
-    
-    // const handleExportExcelButton = () => {
-    //     if(classrooms.length > 0){
-    //         ClassroomsAbstacTable(classrooms);
-    //     };
-    // };
-
     return (
         <>
             {/* <ExportExcelButton handelOnClickFunction={handleExportExcelButton}/> */}
-            <div className="grid gap-2 md:grid-cols-1">
-                <div className=" border border-gray-200 shadow-md">
-                    <div className="overflow-x-auto">   
-                        <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
-                            <thead className="ltr:text-left rtl:text-right">
-                                <tr className="text-center h-12 shadow-md bg-blue-400">
-                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">เลขที่</th>
-                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">รหัสนักเรียน</th>
-                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">ชื่อ</th>
-                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">นามสกุล</th>
-                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">คะแนนจิตวิสัย</th>
-                                    <th className="whitespace-nowrap px-4 py-2 font-bold text-white">จัดการ</th>
+            <div>
+                <div>
+                    <div className="relative overflow-x-auto shadow-md sm:rounded-2xl">   
+                        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                            <thead className="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                    <th className="px-6 py-3">เลขที่</th>
+                                    <th className="px-6 py-3">รหัสนักเรียน</th>
+                                    <th className="px-6 py-3">ชื่อ</th>
+                                    <th className="px-6 py-3">นามสกุล</th>
+                                    <th className="px-6 py-3">คะแนนจิตวิสัย</th>
+                                    <th className="px-6 py-3">จัดการ</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
+                            <tbody>
                                 {
                                     sliceStudentList.map((std, index) => (
                                         <tr 
                                             key={`student ${index}`}
-                                            className="even:bg-slate-100/70 text-center"
+                                            className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
                                         >
-                                            <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                            <td className="px-6 py-4">
                                                 {parseInt(std.stdNo)}
                                             </td>
-                                            <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                            <td className="px-6 py-4">
                                                 {std.student.stdId}
                                             </td>
-                                            <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                            <td className="px-6 py-4">
                                                 {std.student.fName}
                                             </td>
-                                            <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                            <td className="px-6 py-4">
                                                 {std.student.lName}
                                             </td>
-                                            <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                                            <td className="px-6 py-4">
                                                 {std.behaviourScore} คะแนน
                                             </td>
-                                            <td className="whitespace-nowrap px-4 py-2">
-                                                <Link 
-                                                    to={`/classroom/attendance/student`} 
-                                                    state={
-                                                        {
-                                                            stdId:std.stdId,
-                                                            classroomsId: classrooms.classId
+                                            <td className="px-6 py-4">
+                                                <span className='inline-flex overflow-hidden rounded-md border bg-white shadow-sm'>
+                                                    <Link 
+                                                        to={`/classroom/attendance/student`} 
+                                                        state={
+                                                            {
+                                                                stdId:std.stdId,
+                                                                classroomsId: classrooms.classId
+                                                            }
                                                         }
-                                                    }
-                                                >
-                                                    <button className="cursor-pointer bg-blue-300/60 text-blue-500 px-5 py-[2px] rounded-sm hover:bg-blue-300/100 hover:text-blue-700">
-                                                        การเข้าเรียนตามรายวิชา
-                                                    </button>
-                                                </Link>
+                                                    >
+                                                        <button 
+                                                            className="text-xs inline-flex items-center gap-2 p-3 text-blue-600 hover:bg-gray-50 focus:relative"
+
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                            </svg>
+                                                            การเข้าเรียนตามรายวิชา
+                                                        </button>
+                                                    </Link>
+                                                </span>
+                                                
                                             </td>
                                             
                                         </tr>
