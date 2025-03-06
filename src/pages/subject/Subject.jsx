@@ -6,7 +6,7 @@ import TeacherTimetableBySubject from "../../components/teacherTimetableBySubjec
 
 function Subject() {
     const [subjects, setSubjects] = useState([]);
-
+    const [isShowTable, setIsShowTable] = useState(false);
     function fetchSubjects() {
         axios.get(`${HOSTNAME}/subjects`)
             .then((response) => {
@@ -26,20 +26,29 @@ function Subject() {
                 console.error(error);
             });
     }, []);
+    const handleShow = () => {
+        setIsShowTable(!isShowTable);
+    }
     
     return (
         <div className="container mx-auto">
+            <h1 className="text-3xl font-bold text-center mb-8">วิชาที่สอน</h1>
+            <button className={`inline-flex border rounded-lg p-2 align-middle font-medium ${isShowTable ? 'bg-blue-400 text-white' : 'bg-gray-50 text-black'}`} onClick={() => handleShow()}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 1.5v-1.5m0 0c0-.621.504-1.125 1.125-1.125m0 0h7.5" />
+                </svg>
+                ตารางเรียน
+            </button>
             {
                 subjects.length > 0  && 
-                <>
+                <div className={`mt-4 ${isShowTable ? 'block' : 'hidden'}`}>
                     <div className="overflow-auto">
                         <TeacherTimetableBySubject subject={subjects}/>
                     </div>    
                 
-                </>
+                </div>
             }
-            <h1 className="text-3xl font-bold text-center mb-8">วิชาที่สอน</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
                 {subjects && subjects.map((subject) => (
                     <div key={subject.subId} className="rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                         <div 
