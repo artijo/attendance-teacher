@@ -5,6 +5,9 @@ import { HOSTNAME } from "../../config";
 import { formatDate } from "../../helper";
 import { DateTime } from "luxon";
 import { convertNumberToThaiMonth } from "../../helper";
+import DropdownExportDocument from "../../components/DropdownExportDocument";
+import TextDropdownDocument from "../../components/TextDropdownDocument";
+import { abstactActivity, abstactActivityFilterByClassroom } from "../../excel";
 
 function ActivityDetail() {
     const { id } = useParams();
@@ -121,6 +124,7 @@ function ActivityDetail() {
         const time = dt.toFormat("HH:mm 'น.'");
         return `${day} ${month} ${year} ${time}`;
     };
+
 
     if (loading) {
         return (
@@ -257,23 +261,45 @@ function ActivityDetail() {
                             <h2 className="text-xl font-semibold text-gray-700 mb-4">ประวัติการบันทึก</h2>
                             
                             {/* Add classroom filter */}
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    กรองตามห้องเรียน:
-                                </label>
-                                <select
-                                    className="border rounded-md px-3 py-2 w-full max-w-xs"
-                                    value={selectedClassroom}
-                                    onChange={(e) => setSelectedClassroom(e.target.value)}
-                                >
-                                    <option value="all">ทุกห้องเรียน</option>
-                                    {activity && getUniqueClassrooms(activity.actParticipate).map((classroom) => (
-                                        <option key={classroom.classId} value={classroom.classId}>
-                                            ม.{classroom.classLevel}/{classroom.classRoom}
-                                        </option>
-                                    ))}
-                                </select>
+                            <div className="flex flex-col  md:flex-row  justify-start gap-4 mb-4 ">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        ดาวน์โหลดเอกสาร:
+                                    </label>
+                                    <DropdownExportDocument>
+                                        {
+                                            selectedClassroom != 'all' &&
+                                            <TextDropdownDocument 
+                                                title={`สรุปการเข้ากิจกรรมของห้องเรียนที่เลือก (EXCEL)`}
+                                                actionFunction={() => abstactActivity(activity.actId,selectedClassroom)}
+                                            />
+                                        }
+                                        <TextDropdownDocument
+                                            title={`สรุปการเข้ากิจกรรมโดยแบ่งตามห้องเรียนที่ความเข้าร่วม (EXCEL)`}
+                                            actionFunction={() => abstactActivityFilterByClassroom(activity.actId)}
+                                        />
+                                    </DropdownExportDocument>
+                                </div>
+                               
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        กรองตามห้องเรียน:
+                                    </label>
+                                    <select
+                                        className="border rounded-md px-3 py-2 w-full max-w-xs"
+                                        value={selectedClassroom}
+                                        onChange={(e) => setSelectedClassroom(e.target.value)}
+                                    >
+                                        <option value="all">ทุกห้องเรียน</option>
+                                        {activity && getUniqueClassrooms(activity.actParticipate).map((classroom) => (
+                                            <option key={classroom.classId} value={classroom.classId}>
+                                                ม.{classroom.classLevel}/{classroom.classRoom}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
+                            
 
                             {/* Date selector */}
                             <div className="relative mb-6">

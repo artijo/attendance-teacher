@@ -2,9 +2,28 @@ export const getDayName = (day) => {
     const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
     return days[day];
 };
+export function convertNumberToThaiMonth(monthNumber) {
+  const thaiMonths = [
+    "มกราคม",   // เดือนที่ 1
+    "กุมภาพันธ์", // เดือนที่ 2
+    "มีนาคม",     // เดือนที่ 3
+    "เมษายน",     // เดือนที่ 4
+    "พฤษภาคม",   // เดือนที่ 5
+    "มิถุนายน",   // เดือนที่ 6
+    "กรกฎาคม",   // เดือนที่ 7
+    "สิงหาคม",    // เดือนที่ 8
+    "กันยายน",    // เดือนที่ 9
+    "ตุลาคม",     // เดือนที่ 10
+    "พฤศจิกายน", // เดือนที่ 11
+    "ธันวาคม"     // เดือนที่ 12
+  ];
 
-
-
+  if (monthNumber >= 1 && monthNumber <= 12) {
+    return thaiMonths[monthNumber-1];
+  } else {
+    return "เลขเดือนไม่ถูกต้อง";
+  }
+}
 
 export const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -56,26 +75,4 @@ export function calculatedTimeToSecondeDouleDot(time) { // สำหรับ :
 }
 
 
-export function convertNumberToThaiMonth(monthNumber) {
-    const thaiMonths = [
-      "มกราคม",   // เดือนที่ 1
-      "กุมภาพันธ์", // เดือนที่ 2
-      "มีนาคม",     // เดือนที่ 3
-      "เมษายน",     // เดือนที่ 4
-      "พฤษภาคม",   // เดือนที่ 5
-      "มิถุนายน",   // เดือนที่ 6
-      "กรกฎาคม",   // เดือนที่ 7
-      "สิงหาคม",    // เดือนที่ 8
-      "กันยายน",    // เดือนที่ 9
-      "ตุลาคม",     // เดือนที่ 10
-      "พฤศจิกายน", // เดือนที่ 11
-      "ธันวาคม"     // เดือนที่ 12
-    ];
-  
-    if (monthNumber >= 1 && monthNumber <= 12) {
-      return thaiMonths[monthNumber-1];
-    } else {
-      return "เลขเดือนไม่ถูกต้อง";
-    }
-  }
   
