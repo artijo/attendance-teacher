@@ -115,7 +115,7 @@ function Activities() {
                                                         <p className="text-gray-700">
                                                             {formatDate(item.activity.actDate)} - {formatDate(item.activity.actDateEnd)}
                                                         </p>
-                                                        <Link to={`/activities/${item.activity.actId}`} className="text-blue-500 hover:underline">
+                                                        <Link to={`/activities/${item.activity.actId}`} className="inline-flex w-fit text-sm px-4 py-1 rounded-full font-bold text-white bg-blue-700 hover:text-gray-50 hover:bg-blue-600 hover:shadow-md">
                                                             รายละเอียด
                                                         </Link>
                                                     </div>
@@ -152,7 +152,7 @@ function Activities() {
                                                         <p className="text-gray-700">
                                                             {formatDate(item.activity.actDate)} - {formatDate(item.activity.actDateEnd)}
                                                         </p>
-                                                        <Link to={`/activities/${item.activity.actId}`} className="text-blue-500 hover:underline">
+                                                        <Link to={`/activities/${item.activity.actId}`} className="inline-flex w-fit text-sm px-4 py-1 rounded-full font-bold text-white bg-blue-700 hover:text-gray-50 hover:bg-blue-600 hover:shadow-md">
                                                             รายละเอียด
                                                         </Link>
                                                     </div>

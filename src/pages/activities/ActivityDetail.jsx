@@ -8,12 +8,16 @@ import { convertNumberToThaiMonth } from "../../helper";
 import DropdownExportDocument from "../../components/DropdownExportDocument";
 import TextDropdownDocument from "../../components/TextDropdownDocument";
 import { abstactActivity, abstactActivityFilterByClassroom } from "../../excel";
+import FilterByClassroom from "../../components/activities/pdf/FilterByClassroom";
+import FilterByRoomJoin from "../../components/activities/pdf/FilterByRoomJoin";
 
 function ActivityDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isPopUpPDF, setIsPopUpPDF] = useState(false);
+    const [isPopUpPDFRoomJoin, setIsPopUpPDFRoomJoin] = useState(false);
     const [error, setError] = useState(null);
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedClassroom, setSelectedClassroom] = useState('all');
@@ -124,7 +128,13 @@ function ActivityDetail() {
         const time = dt.toFormat("HH:mm 'น.'");
         return `${day} ${month} ${year} ${time}`;
     };
+    const handlePopUpPDF = () => {
+        setIsPopUpPDF((prevState) => !prevState);
+    }
 
+    const handlePopUpPDFRoomJoin = () => {
+        setIsPopUpPDFRoomJoin((prevState) => !prevState);
+    }
 
     if (loading) {
         return (
@@ -151,242 +161,388 @@ function ActivityDetail() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="mx-auto px-4">
-                <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-800">
-                                {activity.actName}
-                            </h1>
-                            <div className="mt-2">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                    isActivityEnded(activity) ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                                }`}>
-                                    {isActivityEnded(activity) ? 'สิ้นสุดกิจกรรม' : 'กิจกรรมกำลังดำเนินการ'}
+        <div>
+            {isPopUpPDF && (
+                <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    {getUniqueClassrooms(activity.actParticipate).length === 0 && (
+                        <div className="relative inline-flex justify-center items-center bg-white md:w-[300px] md:h-[150px] rounded-2xl">
+                            <button
+                                className="absolute top-2 right-2 text-gray-600 hover:text-red-500 p-2"
+                                onClick={() => handlePopUpPDF()}
+                                aria-label="Close"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="w-6 h-6"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <div className="py-5 px-5">
+                                <span className="flex flex-col items-center justify-center text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z" />
+                                    </svg>
+                                    ไม่มีห้องเรียนที่เข้าร่วมกิจกรรม
                                 </span>
                             </div>
                         </div>
-                        <div className="mt-8 flex justify-end pb-4">
-                            {!isActivityEnded(activity) && (
-                                <button
-                                    onClick={handleCheckIn}
-                                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                    )}
+                    {getUniqueClassrooms(activity.actParticipate).length > 0 && (
+                        <div className="relative inline-flex justify-start bg-white rounded-2xl w-[400px] h-[500px] md:w-[600px] md:h-[800px]">
+                             <button
+                                className="absolute top-2 right-2 text-gray-600 hover:text-red-500 p-2"
+                                onClick={() => handlePopUpPDF()}
+                                aria-label="Close"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="w-6 h-6"
                                 >
-                                    เช็คชื่อนักเรียน
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-700">รายละเอียด</h2>
-                            <p className="text-gray-600 mt-2">{activity.actDesc}</p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-700">วันที่จัดกิจกรรม</h2>
-                                <p className="text-gray-600">
-                                    {formatDate(activity.actDate)} - {formatDate(activity.actDateEnd)}
-                                </p>
-                            </div>
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-700">เวลา</h2>
-                                <p className="text-gray-600">
-                                    {activity.actStartTime} - {activity.actEndTime} น.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-700">สถานที่</h2>
-                            <p className="text-gray-600">{activity.actLocation}</p>
-                        </div>
-
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-700">ประเภทกิจกรรม</h2>
-                            <p className="text-gray-600">{activity.activityType.actTypeName}</p>
-                        </div>
-
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-700">การจำกัดจำนวน</h2>
-                            <p className="text-gray-600">
-                                {activity.joinLimit ? 
-                                    (activity.joinLimitNumber ? 
-                                        `จำกัด ${activity.joinLimitNumber} คน` : 
-                                        'จำกัดจำนวน (ไม่ระบุจำนวน)') : 
-                                    'ไม่จำกัดจำนวน'}
-                            </p>
-                        </div>
-
-                        {activity.classroom && activity.classroom.length > 0 && (
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-700">ห้องเรียนที่เข้าร่วมได้</h2>
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                    {activity.classroom
-                                        .sort((a, b) => {
-                                            if (a.classroom.classLevel === b.classroom.classLevel) {
-                                                return a.classroom.classRoom - b.classroom.classRoom;
-                                            }
-                                            return a.classroom.classLevel - b.classroom.classLevel;
-                                        })
-                                        .map((c) => (
-                                            <span
-                                                key={c.classCanjoinId}
-                                                className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                                            >
-                                                ม.{c.classroom.classLevel}/{c.classroom.classRoom}
-                                            </span>
-                                        ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {activity.teacher && activity.teacher.length > 0 && (
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-700">ครูผู้ดูแล</h2>
-                                <div className="mt-2">
-                                    {activity.teacher.map((t) => (
-                                        <div key={t.actTeacherId} className="text-gray-600">
-                                            {t.teacher.fName} {t.teacher.lName}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="mt-8">
-                            <h2 className="text-xl font-semibold text-gray-700 mb-4">ประวัติการบันทึก</h2>
-                            
-                            {/* Add classroom filter */}
-                            <div className="flex flex-col  md:flex-row  justify-start gap-4 mb-4 ">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        ดาวน์โหลดเอกสาร:
-                                    </label>
-                                    <DropdownExportDocument>
-                                        {
-                                            selectedClassroom != 'all' &&
-                                            <TextDropdownDocument 
-                                                title={`สรุปการเข้ากิจกรรมของห้องเรียนที่เลือก (EXCEL)`}
-                                                actionFunction={() => abstactActivity(activity.actId,selectedClassroom)}
-                                            />
-                                        }
-                                        <TextDropdownDocument
-                                            title={`สรุปการเข้ากิจกรรมโดยแบ่งตามห้องเรียนที่ความเข้าร่วม (EXCEL)`}
-                                            actionFunction={() => abstactActivityFilterByClassroom(activity.actId)}
-                                        />
-                                    </DropdownExportDocument>
-                                </div>
-                               
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        กรองตามห้องเรียน:
-                                    </label>
-                                    <select
-                                        className="border rounded-md px-3 py-2 w-full max-w-xs"
-                                        value={selectedClassroom}
-                                        onChange={(e) => setSelectedClassroom(e.target.value)}
-                                    >
-                                        <option value="all">ทุกห้องเรียน</option>
-                                        {activity && getUniqueClassrooms(activity.actParticipate).map((classroom) => (
-                                            <option key={classroom.classId} value={classroom.classId}>
-                                                ม.{classroom.classLevel}/{classroom.classRoom}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                            
-
-                            {/* Date selector */}
-                            <div className="relative mb-6">
-                                <div className="overflow-x-auto pb-2 hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
-                                    <div className="flex gap-2 px-1">
-                                        {activity && getDatesBetween(activity.actDate, activity.actDateEnd).map((date) => {
-                                            const dateTime = DateTime.fromISO(date).setZone('Asia/Bangkok');
-                                            const isToday = DateTime.now().setZone('Asia/Bangkok').hasSame(dateTime, 'day');
-                                            const thaiMonth = convertNumberToThaiMonth(dateTime.month);
-                                            
-                                            return (
-                                                <button
-                                                    key={date}
-                                                    onClick={() => setSelectedDate(date)}
-                                                    className={`flex-shrink-0 flex flex-col items-center w-24 py-2 rounded-lg transition-all ${
-                                                        selectedDate === date
-                                                            ? 'bg-blue-600 text-white shadow-lg transform scale-105'
-                                                            : 'bg-white border hover:bg-gray-50'
-                                                    } ${isToday ? 'ring-2 ring-blue-400' : ''}`}
-                                                >
-                                                    <span className="text-xs mb-1">
-                                                        {dateTime.toFormat('ccc')}
-                                                    </span>
-                                                    <span className="text-lg font-semibold">
-                                                        {dateTime.day}
-                                                    </span>
-                                                    <span className="text-xs">
-                                                        {thaiMonth}
-                                                    </span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Participation table */}
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full table-fixed">
-                                    <thead>
-                                        <tr className="bg-gray-100">
-                                            <th className="px-6 py-3 text-left w-32">รหัสนักเรียน</th>
-                                            <th className="px-6 py-3 text-left">ชื่อ-นามสกุล</th>
-                                            <th className="px-6 py-3 text-center w-32">สถานะ</th>
-                                            <th className="px-6 py-3 text-left w-64">หมายเหตุ</th>
-                                            <th className="px-6 py-3 text-left w-48">บันทึกโดย</th>
-                                            <th className="px-6 py-3 text-left w-48">วันเวลาที่บันทึก</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200">
-                                        {filteredParticipations.map((record) => (
-                                            <tr key={record.actParticipateId} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">{record.stdId}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {record.student.title === 'BOY' ? 'เด็กชาย' : 'เด็กหญิง'} {record.student.fName} {record.student.lName}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        เข้าร่วม
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {record.note || '-'}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {record.operateBy === 'TEACHER' && record.teacher ? (
-                                                        `${record.teacher.tchCode} ${record.teacher.fName}`
-                                                    ) : record.operateBy}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {formatThaiDateTime(record.joinTimestamp)}
-                                                </td>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <div className="py-10 w-full overflow-x-auto overflow-y-auto">
+                                <h4 className="text-xl font-bold text-gray-800 px-5 pb-2">การเข้าดาวน์โหลดเอกสารการเข้าร่วมกิจกรรมตามห้องเรียน</h4>
+                                <h4 className="text-sm font-bold text-gray-800 px-5 pb-2">รายการห้องเรียน</h4>
+                                <div className="relative overflow-x-auto sm:rounded-lg">
+                                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border">
+                                            <tr>
+                                                <th scope="col" className="px-6 py-3">
+                                                    ห้องที่เข้าร่วม
+                                                </th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                {filteredParticipations.length === 0 && (
-                                    <div className="text-center py-8 text-gray-500">
-                                        {selectedDate ? 'ไม่พบข้อมูลการบันทึกในวันที่เลือก' : 'ยังไม่มีประวัติการบันทึก'}
-                                    </div>
+                                        </thead>
+                                        <tbody>
+                                            {getUniqueClassrooms(activity.actParticipate).map((classroom, index) => (
+                                                // console.log(classroom)
+                                                <FilterByClassroom
+                                                    activityId={activity.actId} classId={classroom.classId}
+                                                    className={`${classroom.classLevel}/${classroom.classRoom}`} key={classroom.classId + "key: " + index}
+                                                />
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+            {isPopUpPDFRoomJoin && (
+                <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    {getUniqueClassrooms(activity.actParticipate).length === 0 && (
+                        <div className="relative inline-flex justify-center items-center bg-white md:w-[300px] md:h-[150px] rounded-2xl">
+                            <button
+                                className="absolute top-2 right-2 text-gray-600 hover:text-red-500 p-2"
+                                onClick={() => handlePopUpPDFRoomJoin()}
+                                aria-label="Close"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="w-6 h-6"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <div className="py-5 px-5">
+                                <span className="flex flex-col items-center justify-center text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z" />
+                                    </svg>
+                                    ไม่มีห้องเรียนที่เข้าร่วมกิจกรรม
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                    {getUniqueClassrooms(activity.actParticipate).length > 0 && (
+                        <div className="relative flex justify-start bg-white rounded-2xl w-[400px] h-fit">
+                             <button
+                                className="absolute top-2 right-2 text-gray-600 hover:text-red-500 p-2"
+                                onClick={() => handlePopUpPDFRoomJoin()}
+                                aria-label="Close"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="w-6 h-6"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <div className="py-10 w-full overflow-x-auto overflow-y-auto">
+                                <h4 className="text-xl font-bold text-gray-800 px-5 pb-2">การเข้าดาวน์โหลดเอกสารการเข้าร่วมกิจกรรมโดยแบ่งตามห้องเรียนที่เข้าร่วม</h4>
+                                <div className="px-5">
+                                    <FilterByRoomJoin activityId={activity.actId}/>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+            <div className="min-h-screen bg-gray-50 py-8">
+                <div className="mx-auto px-4">
+                    <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-800">
+                                    {activity.actName}
+                                </h1>
+                                <div className="mt-2">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        isActivityEnded(activity) ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                                    }`}>
+                                        {isActivityEnded(activity) ? 'สิ้นสุดกิจกรรม' : 'กิจกรรมกำลังดำเนินการ'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="mt-8 flex justify-end pb-4">
+                                {!isActivityEnded(activity) && (
+                                    <button
+                                        onClick={handleCheckIn}
+                                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                                    >
+                                        เช็คชื่อนักเรียน
+                                    </button>
                                 )}
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <h2 className="text-xl font-semibold text-gray-700">รายละเอียด</h2>
+                                <p className="text-gray-600 mt-2">{activity.actDesc}</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <h2 className="text-lg font-semibold text-gray-700">วันที่จัดกิจกรรม</h2>
+                                    <p className="text-gray-600">
+                                        {formatDate(activity.actDate)} - {formatDate(activity.actDateEnd)}
+                                    </p>
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-semibold text-gray-700">เวลา</h2>
+                                    <p className="text-gray-600">
+                                        {activity.actStartTime} - {activity.actEndTime} น.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-700">สถานที่</h2>
+                                <p className="text-gray-600">{activity.actLocation}</p>
+                            </div>
+
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-700">ประเภทกิจกรรม</h2>
+                                <p className="text-gray-600">{activity.activityType.actTypeName}</p>
+                            </div>
+
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-700">การจำกัดจำนวน</h2>
+                                <p className="text-gray-600">
+                                    {activity.joinLimit ? 
+                                        (activity.joinLimitNumber ? 
+                                            `จำกัด ${activity.joinLimitNumber} คน` : 
+                                            'จำกัดจำนวน (ไม่ระบุจำนวน)') : 
+                                        'ไม่จำกัดจำนวน'}
+                                </p>
+                            </div>
+
+                            {activity.classroom && activity.classroom.length > 0 && (
+                                <div>
+                                    <h2 className="text-lg font-semibold text-gray-700">ห้องเรียนที่เข้าร่วมได้</h2>
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {activity.classroom
+                                            .sort((a, b) => {
+                                                if (a.classroom.classLevel === b.classroom.classLevel) {
+                                                    return a.classroom.classRoom - b.classroom.classRoom;
+                                                }
+                                                return a.classroom.classLevel - b.classroom.classLevel;
+                                            })
+                                            .map((c) => (
+                                                <span
+                                                    key={c.classCanjoinId}
+                                                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                                                >
+                                                    ม.{c.classroom.classLevel}/{c.classroom.classRoom}
+                                                </span>
+                                            ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {activity.teacher && activity.teacher.length > 0 && (
+                                <div>
+                                    <h2 className="text-lg font-semibold text-gray-700">ครูผู้ดูแล</h2>
+                                    <div className="mt-2">
+                                        {activity.teacher.map((t) => (
+                                            <div key={t.actTeacherId} className="text-gray-600">
+                                                {t.teacher.fName} {t.teacher.lName}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="mt-8">
+                                <h2 className="text-xl font-semibold text-gray-700 mb-4">ประวัติการบันทึก</h2>
+                                
+                                {/* Add classroom filter */}
+                                <div className="flex flex-col  md:flex-row  justify-start gap-4 mb-4 ">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            ดาวน์โหลดเอกสาร:
+                                        </label>
+                                        <DropdownExportDocument>
+                                            {
+                                                selectedClassroom != 'all' &&
+                                                <TextDropdownDocument 
+                                                    title={`สรุปการเข้ากิจกรรมของห้องเรียนที่เลือก (EXCEL)`}
+                                                    actionFunction={() => abstactActivity(activity.actId,selectedClassroom)}
+                                                />
+                                            }
+                                            <TextDropdownDocument
+                                                title={`สรุปการเข้ากิจกรรมโดยแบ่งตามห้องเรียนที่ความเข้าร่วม (EXCEL)`}
+                                                actionFunction={() => abstactActivityFilterByClassroom(activity.actId)}
+                                            />
+                                            <TextDropdownDocument
+                                                title={`สรุปการเข้ากิจกรรมของห้องเรียนที่ (PDF)`}
+                                                actionFunction={() => handlePopUpPDF()}
+                                            />
+                                            <TextDropdownDocument
+                                                title={`สรุปการเข้าร่วมกิจกรรมโดยแบ่งตามห้องเรียนที่เข้าร่วม (PDF)`}
+                                                actionFunction={() => handlePopUpPDFRoomJoin()}
+                                            />
+                                        </DropdownExportDocument>
+                                    </div>
+                                
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            กรองตามห้องเรียน:
+                                        </label>
+                                        <select
+                                            className="border rounded-md px-3 py-2 w-full max-w-xs"
+                                            value={selectedClassroom}
+                                            onChange={(e) => setSelectedClassroom(e.target.value)}
+                                        >
+                                            <option value="all">ทุกห้องเรียน</option>
+                                            {activity && getUniqueClassrooms(activity.actParticipate).map((classroom) => (
+                                                <option key={classroom.classId} value={classroom.classId}>
+                                                    ม.{classroom.classLevel}/{classroom.classRoom}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+
+                                {/* Date selector */}
+                                <div className="relative mb-6">
+                                    <div className="overflow-x-auto pb-2 hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                                        <div className="flex gap-2 px-1">
+                                            {activity && getDatesBetween(activity.actDate, activity.actDateEnd).map((date) => {
+                                                const dateTime = DateTime.fromISO(date).setZone('Asia/Bangkok');
+                                                const isToday = DateTime.now().setZone('Asia/Bangkok').hasSame(dateTime, 'day');
+                                                const thaiMonth = convertNumberToThaiMonth(dateTime.month);
+                                                
+                                                return (
+                                                    <button
+                                                        key={date}
+                                                        onClick={() => setSelectedDate(date)}
+                                                        className={`flex-shrink-0 flex flex-col items-center w-24 py-2 rounded-lg transition-all ${
+                                                            selectedDate === date
+                                                                ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                                                                : 'bg-white border hover:bg-gray-50'
+                                                        } ${isToday ? 'ring-2 ring-blue-400' : ''}`}
+                                                    >
+                                                        <span className="text-xs mb-1">
+                                                            {dateTime.toFormat('ccc')}
+                                                        </span>
+                                                        <span className="text-lg font-semibold">
+                                                            {dateTime.day}
+                                                        </span>
+                                                        <span className="text-xs">
+                                                            {thaiMonth}
+                                                        </span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Participation table */}
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full table-fixed">
+                                        <thead>
+                                            <tr className="bg-gray-100">
+                                                <th className="px-6 py-3 text-left w-32">รหัสนักเรียน</th>
+                                                <th className="px-6 py-3 text-left">ชื่อ-นามสกุล</th>
+                                                <th className="px-6 py-3 text-center w-32">สถานะ</th>
+                                                <th className="px-6 py-3 text-left w-64">หมายเหตุ</th>
+                                                <th className="px-6 py-3 text-left w-48">บันทึกโดย</th>
+                                                <th className="px-6 py-3 text-left w-48">วันเวลาที่บันทึก</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200">
+                                            {filteredParticipations.map((record) => (
+                                                <tr key={record.actParticipateId} className="hover:bg-gray-50">
+                                                    <td className="px-6 py-4 whitespace-nowrap">{record.stdId}</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        {record.student.title === 'BOY' ? 'เด็กชาย' : 'เด็กหญิง'} {record.student.fName} {record.student.lName}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            เข้าร่วม
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        {record.note || '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        {record.operateBy === 'TEACHER' && record.teacher ? (
+                                                            `${record.teacher.tchCode} ${record.teacher.fName}`
+                                                        ) : record.operateBy}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        {formatThaiDateTime(record.joinTimestamp)}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                    {filteredParticipations.length === 0 && (
+                                        <div className="text-center py-8 text-gray-500">
+                                            {selectedDate ? 'ไม่พบข้อมูลการบันทึกในวันที่เลือก' : 'ยังไม่มีประวัติการบันทึก'}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        
     );
 }
 

@@ -17,6 +17,7 @@ const useOutSideClick = (callback) => {
     },[ref])
     return ref;
 }
+
 function DropdownExportDocument({children}){
     
     const [isShow, setIsShow] = useState(false);
@@ -33,7 +34,7 @@ function DropdownExportDocument({children}){
     return (
         <div
             ref={ref} 
-            className={`relative flex flex-col w-[200px] border border-gray-300 ${isShow && `border-blue-300`}  rounded-md `}
+            className={`relative flex flex-col w-[350px] border border-gray-300 ${isShow && `border-blue-300`}  rounded-md `}
             onClick={handleOnclick}
         >
             <div className="flex justify-between items-center h-[48px] px-3 z-40 ">
