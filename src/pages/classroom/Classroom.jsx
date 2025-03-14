@@ -41,18 +41,13 @@ function Classroom() {
                     <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
                         ห้องเรียนที่ปรึกษา
                     </h1>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <div className="grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         {classroooms.map((item, index) => (
                             <div
                                 key={`box-number-${index}`}
                                 className="relative grid grid-cols-1 gap-2 border border-gray-200 rounded-xl shadow-lg bg-white hover:shadow-xl transition-shadow duration-300"
                             >
-                                <div 
-                                    className=" w-full h-20 flex items-center justify-center bg-gradient-to-r rounded-t-lg from-indigo-300 via-blue-300 to-sky-300 text-white"
-                                >
-                                    
-                                </div>
-                                <div id={`box-number-${index}`} className="w-full p-6 pt-2 relative">
+                                <div id={`box-number-${index}`} className="w-full p-6 relative">
                                     <div className="grid grid-cols-1 gap-1">
                                         <p className="text-xl font-semibold text-gray-800">
                                             ปีการศึกษา {item.term.academicYear + 543}
@@ -72,7 +67,13 @@ function Classroom() {
                                             to={'/classroom/detail'}
                                             state={{ classroooms: item }}
                                         >
-                                            <div className="group/item flex items-center">
+                                            <span 
+                                                className="inline-flex text-sm px-4 py-1 rounded-full font-bold text-white bg-blue-700 hover:text-gray-50 hover:bg-blue-600 hover:shadow-md"
+                                            >
+                                                รายละเอียดการเข้าเรียน
+                                            </span>
+                                                
+                                            {/* <div className="group/item flex items-center">
                                                 <span
                                                     className="text-sky-400 border border-sky-400 rounded-full p-1 group-hover/item:rounded-e-none group-hover/item:border-e-0"
                                                 >
@@ -89,7 +90,7 @@ function Classroom() {
                                                 >
                                                     รายละเอียดการเข้าเรียน
                                                 </span>
-                                            </div>
+                                            </div> */}
                                         </Link>
                                     </div>
                                 </div>

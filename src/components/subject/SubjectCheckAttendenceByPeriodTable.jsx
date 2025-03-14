@@ -34,14 +34,14 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
 
     const TableHeader = ({month}) => {
         return (
-            <tr className="shadow-md text-center h-12 bg-blue-300">
-                <th className="whitespace-nowrap px-4 py-2 font-bold text-white" >เลขที่</th>
-                <th className="whitespace-nowrap px-4 py-2 font-bold text-white" >รหัสนักเรียน</th>
-                <th className="whitespace-nowrap px-4 py-2 font-bold text-white" >ชื่อ-นามสกุล</th>
+            <tr>
+                <th className="px-6 py-3" >เลขที่</th>
+                <th className="px-6 py-3" >รหัสนักเรียน</th>
+                <th className="px-6 py-3" >ชื่อ-นามสกุล</th>
                 {
                     studentList.data[0].attendance.map((attendance, index) => (
                     attendance.month === month && (
-                        <th key={index} className="whitespace-nowrap px-4 py-2 font-bold text-white">
+                        <th key={index} className="px-6 py-3">
                             คาบที่ {++indexReal}
                         </th>
                     )
@@ -54,14 +54,14 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
     const TableBody = ({month}) => {
         return (
             studentList.data.map((student, index) => (
-                <tr key={index} className="even:bg-slate-100/70 text-center">
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">{student.stdNo}</td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">{student.stdId}</td>
-                    <td className="whitespace-nowrap px-4 py-2 text-gray-700">{`${student.fName} ${student.lName}`}</td>
+                <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                    <td className="px-6 py-4">{student.stdNo}</td>
+                    <td className="px-6 py-4">{student.stdId}</td>
+                    <td className="px-6 py-4">{`${student.fName} ${student.lName}`}</td>
                     {
                         student.attendance.map((attendance, index) => (
                             attendance.month === month && (
-                            <td key={index} className="whitespace-nowrap px-4 py-2 text-gray-700 text-center">{attendance.attStatus != null ? formatAttStatus(attendance.attStatus.toLowerCase()) : '-'}</td>
+                            <td key={index} className="px-6 py-4">{attendance.attStatus != null ? formatAttStatus(attendance.attStatus.toLowerCase()) : '-'}</td>
                             )
                         ))
                     }
@@ -81,15 +81,15 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
                         {exportExcel}
                     </li>
                 </ul>
-                <div ref={(element) => (ref.current[index] = element)} className="grid gap-2 md:grid-cols-1 overflow-x-auto ">
+                <div ref={(element) => (ref.current[index] = element)}>
                     {/* <span>{month}</span> */}
-                    <div className="border shadow-md border-gray-200 overflow-x-auto">
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
-                                <thead className="ltr:text-left rtl:text-right">
+                    <div>
+                        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                     <TableHeader month={month}/>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
+                                <tbody>
                                     <TableBody month={month}/>
                                 </tbody>
                             </table>

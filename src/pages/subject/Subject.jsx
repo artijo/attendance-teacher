@@ -76,17 +76,6 @@ function Subject() {
                                     to={`/subjects/${subject.subId}/attendance`}
                                     // className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-center"
                                 >
-                                    {/* <div className="group/item flex items-center">
-                                        <span
-                                            className="text-lime-500 border border-lime-500 rounded-full p-1 group-hover/item:rounded-e-none group-hover/item:border-e-0"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                            </svg>
-
-                                        </span>
-                                        
-                                    </div> */}
                                     <span 
                                         className="inline-flex text-sm px-4 py-1 rounded-full font-bold text-white bg-green-700 hover:text-gray-50 hover:bg-green-600 hover:shadow-md"
                                     >

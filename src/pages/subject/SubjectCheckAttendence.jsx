@@ -87,12 +87,9 @@ function SubjectCheckAttendence() {
                             {classrooms.map((item, index) => (
                                 <div
                                     key={`box-number-${index}`}
-                                    className="rounded-xl shadow-lg bg-white hover:shadow-xl transition-shadow duration-300"
+                                    className="h-[230px] rounded-xl shadow-lg bg-white hover:shadow-xl transition-shadow duration-300"
                                 >
-                                    <div 
-                                        className=" w-full h-20 flex items-center justify-center bg-gradient-to-r rounded-t-lg from-indigo-300 via-blue-300 to-sky-300 text-white"
-                                    ></div>
-                                    <div id={`box-number-${index}`} className="w-full p-6 pt-2">
+                                    <div id={`box-number-${index}`} className="w-full h-full flex flex-col justify-between p-6">
                                         <div className="flex flex-col">
                                             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
                                                 ห้อง {item.classLevel}/{item.classRoom} <span className="text-base font-normal">(หลักสูตร {item.classroomType.classTypeNameThai})</span>
@@ -102,58 +99,34 @@ function SubjectCheckAttendence() {
                                                 {
                                                     item.teacher.length > 0 && (
                                                         item.teacher.map((teacher, index) => (
-                                                            <span className="text-xs text-black bg-blue-300 rounded-lg py-[2px] px-2 w-fit" key={`${teacher.fName} ${teacher.lName} ${index}`}>{teacher.fName} {teacher.lName}</span>
+                                                            <span className="text-xs text-black bg-blue-200 rounded-lg py-[2px] px-2 w-fit" key={`${teacher.fName} ${teacher.lName} ${index}`}>{teacher.fName} {teacher.lName}</span>
                                                         ))
                                                     )
                                                 }
                                             </p>
                                         </div>
-                                        <div className="menu-section mt-2 grid grid-col-1 gap-2">
+                                        <div className="menu-section grid grid-col-1 gap-2 text-xs md:text-sm">
                                             <Link
                                                 to={'/subjects/attendance/checkdetail'}
                                                 state={{ classroooms: item , subject:subjectInfo}}
                                             >
-                                                <div className="group/item flex items-center">
-                                                    <span
-                                                        className="text-sky-400 border border-sky-400 rounded-full p-1 group-hover/item:rounded-e-none group-hover/item:border-e-0"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-                                                        </svg>
-                                                    </span>
-                                                    <span 
-                                                        className="
-                                                            font-medium text-black
-                                                            border-sky-400  align-middle w-0 py-1 pe-2 truncate invisible group-hover/item:visible group-hover/item:w-fit group-hover/item:text-clip text-xs
-                                                            group-hover/item:border group-hover/item:rounded-e-full  group-hover/item:border-s-0 
-                                                            "
-                                                        >
-                                                            รายละเอียดการมีสิทธิ์สอบ
-                                                    </span>
-                                                </div>
+                                                <span 
+                                                    className="inline-flex px-4 py-1 rounded-full font-bold text-white bg-blue-700 hover:text-gray-50 hover:bg-blue-600 hover:shadow-md"
+                                                >
+                                                    รายการมีสิทธิ์สอบ
+                                                </span>
+                                                
                                             </Link>
                                             <Link
                                                 to={'/subjects/attendance/byperiod'}
                                                 state={{ classroooms: item , subject:subjectInfo}}
                                             >
-                                                <div className="group/item flex items-center">
-                                                    <span
-                                                        className="text-violet-400 border border-violet-400 rounded-full p-1 group-hover/item:rounded-e-none group-hover/item:border-e-0"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-                                                        </svg>
-                                                    </span>
-                                                    <span 
-                                                        className="
-                                                            font-medium text-black
-                                                            border-violet-400  align-middle w-0 py-1 pe-2 truncate invisible group-hover/item:visible group-hover/item:w-fit group-hover/item:text-clip text-xs
-                                                            group-hover/item:border group-hover/item:rounded-e-full  group-hover/item:border-s-0 
-                                                            "
-                                                        >
-                                                             รายละเอียดการเข้าเรียนตามคาบ
-                                                    </span>
-                                                </div>
+                                                <span 
+                                                    className="inline-flex px-4 py-1 rounded-full font-bold text-white bg-violet-700 hover:text-gray-50 hover:bg-violet-600 hover:shadow-md"
+                                                >
+                                                    รายการเข้าเรียนตามคาบ
+                                                </span>
+
                                             </Link>
                                         
                                         </div>
@@ -162,6 +135,16 @@ function SubjectCheckAttendence() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                )}
+                {classrooms.length === 0 && (
+                    <div className="mt-10">
+                        <span className="flex flex-col items-center justify-center gap-2 py-3 border rounded-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z" />
+                        </svg>
+                        ไม่พบห้องเรียนที่ต้องแสดง 
+                        </span>
                     </div>
                 )}
             </div>
