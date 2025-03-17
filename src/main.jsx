@@ -21,6 +21,8 @@ import StudentAttendance from './pages/classroom/attendance/StudentAttendance.js
 import Activities from './pages/activities/Activities.jsx';
 import ActivityDetail from './pages/activities/ActivityDetail.jsx';
 import CheckIn from './pages/activities/CheckIn.jsx';
+import EditCheckIn from './pages/activities/ActivityEditCheckinByDate.jsx';
+// Subject Check Attendence
 import SubjectCheckAttendence from './pages/subject/SubjectCheckAttendence.jsx';
 import SubjectCheckAttendenceDetail from './pages/subject/SubjectCheckAttendenceDetail.jsx';
 import SubjectCheckAttendenceByPeriod from './pages/subject/SubjectCheckAttendenceByPeriod.jsx';
@@ -48,6 +50,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='activities' element={<Activities/>}/>
           <Route path='activities/:id' element={<ActivityDetail/>}/>
           <Route path='activities/:id/check-in' element={<CheckIn/>}/>
+          <Route path='activities/:id/check-in/edit' element={<EditCheckIn/>}/>
         </Route>
       </Routes>
   </BrowserRouter>,
