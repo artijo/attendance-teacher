@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { HOSTNAME } from "../../config";
+import { HOSTNAME, TIME_ZONE } from "../../config";
 import { formatDate } from "../../helper";
 import { DateTime } from "luxon";
 import { convertNumberToThaiMonth } from "../../helper";
@@ -44,9 +44,9 @@ function ActivityDetail() {
 
     useEffect(() => {
         if (activity) {
-            const now = DateTime.now().setZone('Asia/Bangkok');
-            const startDate = DateTime.fromISO(activity.actDate).setZone('Asia/Bangkok');
-            const endDate = DateTime.fromISO(activity.actDateEnd).setZone('Asia/Bangkok');
+            const now = DateTime.now().setZone(TIME_ZONE);
+            const startDate = DateTime.fromISO(activity.actDate).setZone(TIME_ZONE);
+            const endDate = DateTime.fromISO(activity.actDateEnd).setZone(TIME_ZONE);
             
             // Check if current date is within activity period
             if (now >= startDate && now <= endDate) {
@@ -64,18 +64,28 @@ function ActivityDetail() {
 
     const isActivityEnded = (activity) => {
         const endDate = DateTime.fromISO(activity.actDateEnd)
-            .setZone('Asia/Bangkok')
+            .setZone(TIME_ZONE)
             .set({
                 hour: parseInt(activity.actEndTime.split(':')[0]),
                 minute: parseInt(activity.actEndTime.split(':')[1])
             });
-        return DateTime.now().setZone('Asia/Bangkok') > endDate;
+        return DateTime.now().setZone(TIME_ZONE) > endDate;
+    };
+
+    const isActivityNotStarted = (activity) => {
+        const startDate = DateTime.fromISO(activity.actDate)
+            .setZone(TIME_ZONE)
+            .set({
+                hour: parseInt(activity.actStartTime.split(':')[0]),
+                minute: parseInt(activity.actStartTime.split(':')[1])
+            });
+        return DateTime.now().setZone(TIME_ZONE) < startDate;
     };
 
     const getDatesBetween = (startDate, endDate) => {
         const dates = [];
-        let current = DateTime.fromISO(startDate).setZone('Asia/Bangkok').startOf('day');
-        const end = DateTime.fromISO(endDate).setZone('Asia/Bangkok').startOf('day');
+        let current = DateTime.fromISO(startDate).setZone(TIME_ZONE).startOf('day');
+        const end = DateTime.fromISO(endDate).setZone(TIME_ZONE).startOf('day');
         
         while (current <= end) {
             dates.push(current.toISODate());
@@ -86,8 +96,8 @@ function ActivityDetail() {
 
     const isRecordMatchingDate = (record) => {
         if (!selectedDate) return true;
-        const recordDate = DateTime.fromISO(record.joinTimestamp).setZone('Asia/Bangkok');
-        const filterDate = DateTime.fromISO(selectedDate).setZone('Asia/Bangkok');
+        const recordDate = DateTime.fromISO(record.joinTimestamp).setZone(TIME_ZONE);
+        const filterDate = DateTime.fromISO(selectedDate).setZone(TIME_ZONE);
         return recordDate.hasSame(filterDate, 'day');
     };
 
@@ -121,7 +131,7 @@ function ActivityDetail() {
         }) || [];
 
     const formatThaiDateTime = (dateTime) => {
-        const dt = DateTime.fromISO(dateTime).setZone('Asia/Bangkok');
+        const dt = DateTime.fromISO(dateTime).setZone(TIME_ZONE);
         const day = dt.toFormat('d');
         const month = convertNumberToThaiMonth(dt.month);
         const year = dt.year + 543;
@@ -307,14 +317,18 @@ function ActivityDetail() {
                                 </h1>
                                 <div className="mt-2">
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                        isActivityEnded(activity) ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                                        isActivityEnded(activity) ? 'bg-red-100 text-red-800' : 
+                                        isActivityNotStarted(activity) ? 'bg-yellow-100 text-yellow-800' : 
+                                        'bg-green-100 text-green-800'
                                     }`}>
-                                        {isActivityEnded(activity) ? 'สิ้นสุดกิจกรรม' : 'กิจกรรมกำลังดำเนินการ'}
+                                        {isActivityEnded(activity) ? 'สิ้นสุดกิจกรรม' : 
+                                         isActivityNotStarted(activity) ? 'กิจกรรมยังไม่เริ่ม' : 
+                                         'กิจกรรมกำลังดำเนินการ'}
                                     </span>
                                 </div>
                             </div>
                             <div className="mt-8 flex justify-end pb-4">
-                                {!isActivityEnded(activity) && (
+                                {!isActivityEnded(activity) && !isActivityNotStarted(activity) && (
                                     <button
                                         onClick={handleCheckIn}
                                         className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
