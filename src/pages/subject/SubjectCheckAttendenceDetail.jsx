@@ -29,7 +29,7 @@ function SubjectCheckAttendenceDetail() {
     const handleExportExcelButton = () => {
         if(ref.current){
             const table = ref.current;
-            Table_to_Excel(table);
+            Table_to_Excel(table, `รายชื่อสรุปการมีสิทธิ์สอบของนักเรียน วิชา ${subject.subNameThai} ห้องม.${classroom.classLevel}_${classroom.classRoom}`,"รายการ");
         }
     }
 
@@ -43,8 +43,8 @@ function SubjectCheckAttendenceDetail() {
     return(
         <div className="mx-auto container">
                 
-                <h1 className="text-3xl font-bold text-center mb-8">รายละเอียดการเข้าเรียน</h1>
-                <p className="text-2xl font-medium mb-8">
+                <h1 className="text-3xl font-bold text-center mb-8">รายชื่อสรุปการมีสิทธิ์สอบของนักเรียน</h1>
+                <p className="text-xl font-medium mb-8">
                     {
                         subject != null && (
                             <span>วิชา {subject.subNameThai}({subject.subNameEng}) - {subject.subCode}</span> 
