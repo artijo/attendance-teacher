@@ -40,7 +40,7 @@ function FilterExcelPage() {
                                                 <td className="px-6 py-4">
                                                     <button  
                                                         className="px-4 py-1 text-xs bg-green-600 text-white cursor-pointer rounded-full hover:bg-green-500"
-                                                        onClick={() => handelExportExcel(activityId, classroom.className.split("ม.")[1], activity ) }
+                                                        onClick={() => handelExportExcel(activityId, classroom.className, activity ) }
                                                     >
                                                         ดาวน์โหลด Excel
                                                     </button>

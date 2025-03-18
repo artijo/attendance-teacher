@@ -87,12 +87,13 @@ export async function abstactActivity(activityId, classId, startDate, endDate, c
 }
 
 export async function abstactActivityFilterByClassroom(activityId, filterRoom, activity) {
+    // console.log(filterRoom);
     let response;
     try{
         const responsed = await axios.get(`${HOSTNAME}/a/activity/abstact/${activityId}`);
         if(responsed.status == 200){
             response = responsed.data[filterRoom];
-            console.log(responsed.data[filterRoom]);
+            // console.log(responsed.data[filterRoom]);
         }else{
             throw new Error(response.data.message);
         };
