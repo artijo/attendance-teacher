@@ -26,6 +26,12 @@ import EditCheckIn from './pages/activities/ActivityEditCheckinByDate.jsx';
 import SubjectCheckAttendence from './pages/subject/SubjectCheckAttendence.jsx';
 import SubjectCheckAttendenceDetail from './pages/subject/SubjectCheckAttendenceDetail.jsx';
 import SubjectCheckAttendenceByPeriod from './pages/subject/SubjectCheckAttendenceByPeriod.jsx';
+import ExcelByFilterRoom from './pages/activities/excelmanagedownload/ExcelByRoomJoin.jsx';
+import FilterClassroomPage from './pages/activities/pdfmanagedownload/FilterClassroomPage.jsx';
+import FilterByClassroom from './components/activities/exportPDF/FilterByClassroom.jsx';
+import FilterExcelPage from './pages/activities/excelmanagedownload/ExcelByClassroomPage.jsx';
+import FilterByClassroomJoinPage from './pages/activities/pdfmanagedownload/FilterByClassroomJoinPage.jsx';
+import FilterByRoomJoin from './components/activities/exportPDF/FilterByRoomJoin.jsx';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
@@ -51,6 +57,13 @@ createRoot(document.getElementById('root')).render(
           <Route path='activities/:id' element={<ActivityDetail/>}/>
           <Route path='activities/:id/check-in' element={<CheckIn/>}/>
           <Route path='activities/:id/check-in/edit' element={<EditCheckIn/>}/>
+           {/* By Ohm Section */}
+          <Route path="activity/participate/filterbyclassroom/excel" element={<ExcelByFilterRoom/>} />
+          <Route path="activity/participate/filterbyclassroom" element={<FilterClassroomPage />} />
+          <Route path="activity/participate/filterbyclassroom/pdfpage" element={<FilterByClassroom />} />
+          <Route path="activity/participate/filterbyclassroomjoin/excel" element={<FilterExcelPage/>} />
+          <Route path="activity/participate/filterbyclassroomjoin" element={<FilterByClassroomJoinPage />} />
+          <Route path="activity/participate/filterbyclassroomjoin/pdfpage" element={<FilterByRoomJoin />} />
         </Route>
       </Routes>
   </BrowserRouter>,
