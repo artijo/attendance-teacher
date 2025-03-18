@@ -5,6 +5,8 @@ import { HOSTNAME } from "../../config";
 import { formatTitle } from "../../helper";
 import ExportExcelButton from "../../components/exportExcelButton";
 import { Table_to_Excel } from "../../excel";
+import { tabletojson } from "tabletojson";
+import FilterByIsExam from "../../components/subject/exportPDF/FilterByIsExam";
 
 function SubjectCheckAttendenceDetail() {
     const location = useLocation();
@@ -33,6 +35,7 @@ function SubjectCheckAttendenceDetail() {
         }
     }
 
+
     useEffect(() => {
         if(!classroom || classroom === undefined) return;
         if(!subject || subject==="") return;
@@ -41,8 +44,7 @@ function SubjectCheckAttendenceDetail() {
     },[classroom, subject])
 
     return(
-        <div className="mx-auto container">
-                
+        <div className="mx-auto container">    
                 <h1 className="text-3xl font-bold text-center mb-8">รายชื่อสรุปการมีสิทธิ์สอบของนักเรียน</h1>
                 <p className="text-xl font-medium mb-8">
                     {
@@ -51,17 +53,24 @@ function SubjectCheckAttendenceDetail() {
                         )
                     }
                 </p>
-                <ExportExcelButton handelOnClickFunction={handleExportExcelButton}/>
+                <div className="flex ml-auto w-fit">
+                    <ExportExcelButton handelOnClickFunction={handleExportExcelButton}/>
+                    <FilterByIsExam
+                        className={`ม.${classroom.classLevel}/${classroom.classRoom}`}
+                        subjectName={subject.subNameThai}
+                        abstact={abStact}
+                    />      
+                </div>  
+                            
                 <div>
                     <div>
                         <div>
                             <div className="relative overflow-x-auto shadow-md sm:rounded-lg">   
-                                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400" ref={ref}>
+                                <table ref={ref} className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400" ref={ref}>
                                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                         <tr>
                                             <th className="px-6 py-3">เลขที่</th>
-                                            <th className="px-6 py-3">ชื่อ</th>
-                                            <th className="px-6 py-3">นามสกุล</th>
+                                            <th className="px-6 py-3">ชื่อ-นามสกุล</th>
                                             <th className="px-6 py-3">ขาดเรียน(ครั้ง)</th>
                                             <th className="px-6 py-3">เข้าสาย(ครั้ง)</th>
                                             <th className="px-6 py-3">ลา(ครั้ง)</th>
@@ -80,10 +89,7 @@ function SubjectCheckAttendenceDetail() {
                                                         {parseInt(item.stdNo)}
                                                     </th>
                                                     <td className="px-6 py-4">
-                                                        {formatTitle(item.title)}{item.fName}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {item.lName}
+                                                        {formatTitle(item.title)} {item.fName} {item.lName}
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         {item.attendenceAbsentCount}
@@ -108,9 +114,7 @@ function SubjectCheckAttendenceDetail() {
                                                     </td>
                                                 </tr>
                                             ))
-                                        }
-                                       
-                                            
+                                        }    
                                     </tbody>
                                 </table>
                             </div>

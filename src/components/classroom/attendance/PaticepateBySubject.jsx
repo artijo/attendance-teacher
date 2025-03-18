@@ -13,7 +13,6 @@ function PaticepateBySubject({
     studentInfo,
     className
 }){
-    // console.log(personInfo);
     const MyPDFDocument = () => {
         return (
             <Document
