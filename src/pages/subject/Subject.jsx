@@ -89,7 +89,7 @@ function Subject() {
                                     <span 
                                         className="inline-flex text-sm px-4 py-1 rounded-full font-bold text-white bg-violet-700 hover:text-gray-50 hover:bg-violet-600 hover:shadow-md"
                                     >
-                                        บันทึกการเข้าเรียน
+                                        ตรวจสอบการเข้าเรียน
                                     </span>
                                 </Link>
                             </div>
