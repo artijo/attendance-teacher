@@ -46,8 +46,6 @@ function FilterByClassroom() {
       if (response.status === 200) {
         setParticipate(response.data);
         filterParticipate(response.data);
-        // console.log(response.data[filtersDate]);
-        // console.log(response.data);
       } else {
         throw new Error(response.data.message);
       }

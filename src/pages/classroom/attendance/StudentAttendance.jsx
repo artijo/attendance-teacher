@@ -1,14 +1,22 @@
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 import { HOSTNAME } from "../../../config";
-import { useEffect,useState } from "react";
+import { useEffect,useRef,useState } from "react";
+import PaticepateBySubject from "../../../components/classroom/attendance/PaticepateBySubject";
+import { formatTitle } from "../../../helper";
+import { tabletojson } from "tabletojson";
+import { Table_to_Excel } from "../../../excel";
+import ExportExcelButton from "../../../components/exportExcelButton";
 
 function StudentAttendance(){
     const location = useLocation();
     const classroomId = location.state.classroomsId;
+    const className = location.state.className;
+    // console.log(className);
     const stdId = location.state.stdId;
     const [studentInfo, setStudentInfo] = useState(null);
     const studentInfoMation = studentInfo != null && studentInfo.studentInfo.student;
+    const tableRef = useRef(null);
 
     async function getSubjectName(subId) {
         try{
@@ -44,8 +52,8 @@ function StudentAttendance(){
         try{
             const response =  await axios.get(`${HOSTNAME}/t/classrooms/${classroomId}/${stdId}`);
             if(response.status === 200){
-                console.log(response.data);
-                setStudentInfo(response.data);
+                // console.log(response.data);
+                // setStudentInfo(response.data);
                 changeIdToName(response.data);
             }else{
                 throw new Error(response.data.message);
@@ -54,6 +62,10 @@ function StudentAttendance(){
             console.error(error);
         }
     }
+
+    const handleDownloandExcel = (table,studentInfo) => {
+        Table_to_Excel(table, `สรุปการเข้าเรียนตามวิชาของ ${formatTitle(studentInfo.title)} ${studentInfo.fName} ${studentInfo.lName}`, "สรุปการเข้าเรียนตามวิชา");
+    };
 
     useEffect(() => {
         fecthAttendenceStudent();
@@ -66,15 +78,27 @@ function StudentAttendance(){
                 <div>
                     <h1 className="text-lg font-bold text-start">
                         รายละเอียดการเข้าเรียนตามรายวิชาของ <span>{
-                            `${studentInfoMation.title} ${studentInfoMation.fName} ${studentInfoMation.lName}` 
+                            `${formatTitle(studentInfoMation.title)} ${studentInfoMation.fName} ${studentInfoMation.lName}` 
                         }</span>
                     </h1>
 
                 </div>
                 <div>
                     <div>
-                        <div className="relative overflow-x-auto shadow-md sm:rounded-2xl">   
-                            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                        {tableRef.current != null &&
+                            <div className="flex w-fit ml-auto">
+                                <ExportExcelButton
+                                    handelOnClickFunction={() => handleDownloandExcel(tableRef.current,studentInfoMation )}
+                                />
+                                <PaticepateBySubject
+                                    personInfo={studentInfoMation}
+                                    studentInfo={studentInfo}
+                                    className={className}
+                                />
+                            </div>
+                        }
+                        <div className="relative overflow-x-auto shadow-md sm:rounded-2xl">
+                            <table ref={tableRef}  className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 <thead className="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
                                         <th className="px-6 py-3">วิชา</th>
@@ -121,8 +145,7 @@ function StudentAttendance(){
                                                         </td>
                                                     </tr>       
                                             )
-                                        })
-                                        
+                                        })  
                                     }
                                 </tbody>
                             </table>

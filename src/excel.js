@@ -4,11 +4,11 @@ import axios from 'axios';
 import { convertNumberToThaiMonth, formatTitle } from './helper';
 import { DateTime } from 'luxon';
 
-export function Table_to_Excel(table){
+export function Table_to_Excel(table, fileName, sheetTitle){
     const worksheet = XLSX.utils.table_to_sheet(table);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "SheetDay");
-    XLSX.writeFile(workbook, "Sheets.xlsx", {compression :true});
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetTitle);
+    XLSX.writeFile(workbook, `${fileName}.xlsx`, {compression :true});
 }
 
 export function ClassroomsAbstacTable(json) {

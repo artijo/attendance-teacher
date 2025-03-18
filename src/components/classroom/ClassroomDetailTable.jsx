@@ -4,7 +4,7 @@ import ExportExcelButton from "../exportExcelButton";
 import { ClassroomsAbstacTable } from "../../excel";
 
 function ClassroomDetailTable({classrooms}) {
-    console.log(classrooms);
+    // console.log(classrooms);
     const [selectedPage, setSelectedPage] = useState(1);
     const totalPages = Math.ceil(classrooms.classroomMembers.length / 20);
     const currentPage = selectedPage;
@@ -55,7 +55,8 @@ function ClassroomDetailTable({classrooms}) {
                                                         state={
                                                             {
                                                                 stdId:std.stdId,
-                                                                classroomsId: classrooms.classId
+                                                                classroomsId: classrooms.classId,
+                                                                className: `ม.${classrooms.classLevel}/${classrooms.classRoom}`
                                                             }
                                                         }
                                                     >
