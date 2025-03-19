@@ -3,15 +3,16 @@ import ExportPdfButton from "../exportPdfButton";
 import ExportExcelButton from "../exportExcelButton";
 import { TapAttendenceSummaryOpen } from "../tapAttendenceSummaryOpen";
 import { useEffect, useRef, useState } from "react";
-import { convertNumberToThaiMonth } from "../../helper";
+import { convertNumberToThaiMonth, formatTitle } from "../../helper";
 import { Table_to_Excel } from "../../excel";
+import FilterByPeriod from "./exportPDF/FilterByPeriod";
+import { tabletojson } from "tabletojson";
 
 export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, subject}) => {
     // const subject = subject;
     // const classroom = classrooms;
-    console.log(studentList);
     const ref = useRef([]);
-    const [classroomInfo, setClassroomInfo] = useState(null);
+    // const [classroomInfo, setClassroomInfo] = useState(null);
     const [isTabOpen, setIsTabOpen] = useState([]);
     let indexReal = 0;
 
@@ -57,7 +58,7 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
                 <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                     <td className="px-6 py-4">{student.stdNo}</td>
                     <td className="px-6 py-4">{student.stdId}</td>
-                    <td className="px-6 py-4">{`${student.fName} ${student.lName}`}</td>
+                    <td className="px-6 py-4">{ `${formatTitle(student.title)} ${student.fName} ${student.lName}`}</td>
                     {
                         student.attendance.map((attendance, index) => (
                             attendance.month === month && (
@@ -125,25 +126,16 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
             Table_to_Excel(ref.current[index]);
         }
     }
-    // const [jsonElement, setJsonElement] = useState([]);
-    const navigate = useNavigate();
-    const handelExportPdf = (index, month) => {
+
+    const ButtonExportPDF = ({index,classroomInfo,month,subject}) => {
         const tableElement = ref.current[index];
-        if (tableElement) {
-            // const tableJson = tabletojson.convert(tableElement.outerHTML);
-            navigate('/att/bysubject/pdf', { state: { tableJson: tableJson, classroomInfo:classroomInfo,  subject:subject, month: convertNumberToThaiMonth(month)} });
+        if(tableElement != null){
+            const tableJson = tabletojson.convert(tableElement.outerHTML);
+            return <FilterByPeriod tableJson={tableJson[0]} classroomInfo={classroomInfo} month={month} subject={subject}/>
         }
+        return null;
     }
 
-    const ExportPdfButtonKK = ({ index , month}) => {
-        return (
-            <>
-                <div onClick={() => handelExportPdf(index, month)}>
-                    <ExportPdfButton />
-                </div>
-            </>
-        );
-    }
     return (
         <>
             <div className="mx-auto container flex flex-col gap-2">
@@ -151,8 +143,7 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
                     studentList != null && (
                         studentList.month.map((month, index) => (
                             <div key={index}>
-                                
-                                {console.log(month)}
+                                {/* {console.log(month)} */}
                                 <TapAttendenceSummaryOpen
                                     title={convertNumberToThaiMonth(month)} 
                                     index={index} 
@@ -162,7 +153,7 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
                                     <Table 
                                         month={month} 
                                         index={index} 
-                                        exportPdf={null}//<ExportPdfButtonKK index={index} month={month}/>}
+                                        exportPdf={<ButtonExportPDF index={index} classroomInfo={classrooms} month={month} subject={subject}/>}//<ExportPdfButtonKK index={index} month={month}/>}
                                         exportExcel={ <ExportExcelButton handelOnClickFunction={() => handelExportExcel(index)}/>}
                                     />
                                 </TapAttendenceSummaryOpen>
