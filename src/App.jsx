@@ -66,6 +66,10 @@ function App() {
     setIsMenuOpen(!isMenuOpen);
     document.querySelector("header").classList.toggle("active");
   }
+  function closeMenu() {
+    setIsMenuOpen(false);
+    document.querySelector("header").classList.remove("active");
+  }
 
   const Logout = async () => {
     localStorage.removeItem("accessToken");
@@ -129,7 +133,7 @@ function App() {
 
   return (
     <>
-      <header className="font-heading bg-background-alt text-white sticky left-0 top-0 md:bottom-0 md:fixed md:w-56 h-[4.5rem] md:h-screen flex flex-col">
+      <header className="font-heading bg-accent text-white sticky left-0 top-0 md:bottom-0 md:fixed md:w-56 h-[4.5rem] md:h-screen flex flex-col">
         <div className="p-2 md:p-3 text-white flex sm:block justify-between items-center h-auto">
           <div
             id="toggle"
@@ -215,10 +219,11 @@ function App() {
                   className={({ isActive }) =>
                     `h-full flex flex-col md:flex-row items-center content-center gap-2 border-t-[3px] px-4 py-3 md:border-s-[3px] md:border-t-0 ${
                       isActive
-                        ? "border-blue-500 bg-background-active text-white"
-                        : "border-transparent text-white hover:border-gray-100 hover:bg-gray-800 hover:text-white"
+                        ? "border-blue-500 bg-primary text-white"
+                        : "border-transparent text-white hover:border-gray-100 hover:bg-primary hover:text-white"
                     }`
                   }
+                  onClick={closeMenu}
                 >
                   <img
                     src={`/ico/${link.icon}`}
@@ -241,7 +246,7 @@ function App() {
         </div>
       </header>
       <main className="md:ml-56 min-h-dvh">
-            <div className="hidden md:block sticky top-0 z-10 mt-0 ml-0 mr-0 mb-4 bg-background-alt p-4 shadow-sm">
+            <div className="hidden md:block sticky top-0 z-10 mt-0 ml-0 mr-0 mb-4 bg-accent p-4 shadow-sm">
               <h1 className="text-2xl font-bold text-white">ระบบบันทึกการเข้าเรียนและกิจกรรม</h1>
             </div>
             <div className="p-4">
