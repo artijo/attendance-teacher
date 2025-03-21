@@ -71,26 +71,7 @@ function Classroom() {
                                                 className="inline-flex text-sm px-4 py-1 rounded-full font-bold text-white bg-blue-700 hover:text-gray-50 hover:bg-blue-600 hover:shadow-md"
                                             >
                                                 รายละเอียดการเข้าเรียน
-                                            </span>
-                                                
-                                            {/* <div className="group/item flex items-center">
-                                                <span
-                                                    className="text-sky-400 border border-sky-400 rounded-full p-1 group-hover/item:rounded-e-none group-hover/item:border-e-0"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-                                                    </svg>
-                                                </span>
-                                                <span 
-                                                    className="
-                                                        font-medium text-black
-                                                      border-sky-400  align-middle w-0 py-1 pe-2 truncate invisible group-hover/item:visible group-hover/item:w-fit group-hover/item:text-clip text-xs
-                                                        group-hover/item:border group-hover/item:rounded-e-full  group-hover/item:border-s-0 
-                                                    "
-                                                >
-                                                    รายละเอียดการเข้าเรียน
-                                                </span>
-                                            </div> */}
+                                            </span> 
                                         </Link>
                                     </div>
                                 </div>
