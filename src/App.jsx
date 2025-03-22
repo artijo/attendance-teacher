@@ -54,7 +54,7 @@ function App() {
   const User = userStore((state) => state.user);
   const navLinks = [
     { name: "แดชบอร์ด", path: "/dashboard", icon:"home.svg" },
-    { name: "ห้องเรียน", path: "/classrooms", icon:"classroom.svg" },
+    { name: "ห้องเรียน", path: "/classroom", icon:"classroom.svg" },
     { name: "วิชาที่สอน", path: "/subjects", icon:"subject.svg" },
     { name: "กิจกรรม", path: "/activities", icon:"activity.svg" },
     { name: "คำร้อง", path: "/leavereq", icon: "leave.svg" },

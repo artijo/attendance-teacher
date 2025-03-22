@@ -188,38 +188,69 @@ function EditCheckIn() {
     return (
         <div className="container mx-auto">
             {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative mb-4 flex items-center" role="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
                     <span className="block sm:inline">{error}</span>
                 </div>
             )}
             
             {activity && (
                 <>
-                    <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-                        <h1 className="text-3xl font-bold mb-6">บันทึกการเข้าร่วมกิจกรรม</h1>
-                        <div className="space-y-3">
-                            <p className="text-xl">
-                                <span className="font-bold">กิจกรรม:</span> {activity.actName}
-                            </p>
-                            <p className="text-lg">
-                                <span className="font-bold">ช่วงวันที่กิจกรรม:</span> {formatDate(activity.actDate)} - {formatDate(activity.actDateEnd)}
-                            </p>
-                            <p className="text-lg">
-                                <span className="font-bold">เวลา:</span> {activity.actStartTime} - {activity.actEndTime} น.
-                            </p>
-                            <p className="text-lg">
-                                <span className="font-bold">สถานที่:</span> {activity.actLocation}
-                            </p>
-                            <p className="text-lg">
-                                <span className="font-bold">วันที่บันทึกการเข้าร่วม:</span> {formatDate(targetDate)}
-                            </p>
-                            <div className="mt-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="bg-white rounded-xl shadow-md border border-line p-6 mb-8">
+                        <div className="mb-6">
+                            <h1 className="text-2xl md:text-3xl font-bold text-primary font-heading">แก้ไขการเข้าร่วมกิจกรรม</h1>
+                            <div className="mt-2 h-1 w-16 bg-secondary rounded-full"></div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-body">
+                            <div className="lg:col-span-2 space-y-3">
+                                <div className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm4 5V6a4 4 0 11-8 0v1h8zm-2 6a1 1 0 10-2 0v3a1 1 0 102 0v-3z" clipRule="evenodd" />
+                                    </svg>
+                                    <p className="text-lg">
+                                        <span className="font-medium text-text-color">กิจกรรม:</span> 
+                                        <span className="ml-2 text-text-color">{activity.actName}</span>
+                                    </p>
+                                </div>
+                                <div className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                    </svg>
+                                    <p className="text-lg">
+                                        <span className="font-medium text-text-color">เวลา:</span> 
+                                        <span className="ml-2 text-text-color">{activity.actStartTime} - {activity.actEndTime} น.</span>
+                                    </p>
+                                </div>
+                                <div className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                    </svg>
+                                    <p className="text-lg">
+                                        <span className="font-medium text-text-color">สถานที่:</span> 
+                                        <span className="ml-2 text-text-color">{activity.actLocation}</span>
+                                    </p>
+                                </div>
+                                <div className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                                    </svg>
+                                    <p className="text-lg">
+                                        <span className="font-medium text-text-color">ช่วงวันที่กิจกรรม:</span> 
+                                        <span className="ml-2 text-text-color">{formatDate(activity.actDate)} - {formatDate(activity.actDateEnd)}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <label className="block text-sm font-medium text-text-color-alt mb-2">
                                     เลือกวันที่ต้องการแก้ไข:
                                 </label>
                                 <input 
                                     type="date" 
-                                    className="border rounded-md px-3 py-2"
+                                    className="w-full border-line bg-white rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary"
                                     value={targetDate || ''}
                                     onChange={(e) => {
                                         setTargetDate(e.target.value)
@@ -228,27 +259,40 @@ function EditCheckIn() {
                                     min={DateTime.fromISO(activity.actDate).setZone('Asia/Bangkok').toISODate()}
                                     max={DateTime.fromISO(activity.actDateEnd).setZone('Asia/Bangkok').toISODate()}
                                 />
+                                <p className="text-text-color-alt text-xs mt-2">
+                                    สามารถเลือกวันที่อยู่ในช่วงวันที่จัดกิจกรรมเท่านั้น
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-lg shadow-lg p-6">
-                        <div className="mb-4">
-                            <h2 className="text-2xl font-bold mb-4">รายชื่อนักเรียน</h2>
+                    <div className="bg-white rounded-xl shadow-md border border-line overflow-hidden">
+                        <div className="border-b border-line p-6">
+                            <h2 className="text-xl font-bold text-primary font-heading mb-4 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                รายชื่อนักเรียน
+                            </h2>
                             
                             {!isValidDate && (
-                                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
-                                    <p className="font-bold">แจ้งเตือน</p>
-                                    <p>สามารถบันทึกการเข้าร่วมได้เฉพาะในช่วงวันที่จัดกิจกรรมเท่านั้น</p>
+                                <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 mb-6 rounded-md flex items-start">
+                                    <svg className="h-6 w-6 mr-3 mt-0.5 text-yellow-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0378 2.66667 10.268 4L3.33978 16C2.56998 17.3333 3.53223 19 5.07183 19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <div>
+                                        <p className="font-medium">ไม่สามารถบันทึกการเข้าร่วมได้</p>
+                                        <p className="mt-1 text-sm">กรุณาเลือกวันที่อยู่ในช่วงวันที่จัดกิจกรรม ({formatDate(activity.actDate)} - {formatDate(activity.actDateEnd)})</p>
+                                    </div>
                                 </div>
                             )}
                             
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    กรองตามห้องเรียน:
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-text-color-alt mb-2 font-body">
+                                    กรองตามห้องเรียน
                                 </label>
                                 <select
-                                    className="border rounded-md px-3 py-2 w-full max-w-xs"
+                                    className="w-full md:w-72 py-2.5 px-3 rounded-lg border-line bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-body"
                                     value={selectedClassroomId}
                                     onChange={(e) => handleClassroomFilter(e.target.value)}
                                 >
@@ -262,24 +306,27 @@ function EditCheckIn() {
                             </div>
 
                             {activity.joinLimit && (
-                                <p className="text-gray-600 mb-4">
-                                    จำกัดการเข้าร่วมเฉพาะห้องที่กำหนด
-                                </p>
+                                <div className="mb-6 py-2 px-4 bg-blue-50 text-blue-700 rounded-lg inline-flex items-center">
+                                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" fillRule="evenodd"></path>
+                                    </svg>
+                                    <span className="font-body">จำกัดการเข้าร่วมเฉพาะห้องที่กำหนด</span>
+                                </div>
                             )}
                         </div>
 
                         <div className="overflow-x-auto w-full">
-                            <table className="min-w-full table-fixed">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="px-6 py-3 text-left w-20">เลขที่</th>
-                                        <th className="px-6 py-3 text-left w-32">รหัสนักเรียน</th>
-                                        <th className="px-6 py-3 text-left">ชื่อ-นามสกุล</th>
-                                        <th className="px-6 py-3 text-center w-64">สถานะ</th>
-                                        <th className="px-6 py-3 text-left w-64">หมายเหตุ</th>
+                            <table className="w-full divide-y divide-line">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-color-alt uppercase tracking-wider">เลขที่</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-color-alt uppercase tracking-wider">รหัสนักเรียน</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-color-alt uppercase tracking-wider">ชื่อ-นามสกุล</th>
+                                        <th className="px-6 py-3 text-center text-xs font-medium text-text-color-alt uppercase tracking-wider">สถานะ</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-color-alt uppercase tracking-wider">หมายเหตุ</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
+                                <tbody className="bg-white divide-y divide-line">
                                     {filteredStudents.map((student) => {
                                         const dateParticipation = activity.actParticipate.find(p => {
                                             const participationDate = DateTime.fromISO(p.joinTimestamp)
@@ -296,14 +343,14 @@ function EditCheckIn() {
                                         const canAddNote = dateParticipation && !isAbsent;
                                         
                                         return (
-                                            <tr key={student.stdId} className={`hover:bg-gray-50 ${!isValidDate ? 'opacity-50' : ''}`}>
-                                                <td className="px-6 py-4 whitespace-nowrap">{student.stdNo}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{student.stdId}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                            <tr key={student.stdId} className={`hover:bg-gray-50 transition-colors duration-150 ${!isValidDate ? 'opacity-60' : ''}`}>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-color">{student.stdNo}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-text-color-alt">{student.stdId}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-body text-text-color">
                                                     {student.student.title === 'BOY' ? 'เด็กชาย' : 'เด็กหญิง'} {student.student.fName} {student.student.lName}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex justify-center gap-3">
+                                                    <div className="flex justify-center gap-4">
                                                         <label className={`relative flex items-center gap-2 ${!isValidDate ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
                                                             <input
                                                                 type="radio"
@@ -314,8 +361,12 @@ function EditCheckIn() {
                                                                 className="sr-only peer"
                                                                 disabled={!isValidDate}
                                                             />
-                                                            <div className="w-4 h-4 border-2 border-gray-300 rounded-full peer-checked:border-green-500 peer-checked:bg-green-500"></div>
-                                                            <span className="peer-checked:text-green-500">เข้าร่วม</span>
+                                                            <div className="w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-green-600 peer-checked:bg-green-600 flex justify-center items-center">
+                                                                <svg className="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path fillRule="evenodd" clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <span className={`peer-checked:text-green-600 font-medium ${dateParticipation !== undefined ? 'text-green-600' : 'text-gray-600'}`}>เข้าร่วม</span>
                                                         </label>
                                                         <label className={`relative flex items-center gap-2 ${!isValidDate ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
                                                             <input
@@ -327,16 +378,20 @@ function EditCheckIn() {
                                                                 className="sr-only peer"
                                                                 disabled={!isValidDate}
                                                             />
-                                                            <div className="w-4 h-4 border-2 border-gray-300 rounded-full peer-checked:border-red-500 peer-checked:bg-red-500"></div>
-                                                            <span className="peer-checked:text-red-500">ไม่เข้าร่วม</span>
+                                                            <div className="w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-red-600 peer-checked:bg-red-600 flex justify-center items-center">
+                                                                <svg className="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path fillRule="evenodd" clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <span className={`peer-checked:text-red-600 font-medium ${dateParticipation === undefined ? 'text-red-600' : 'text-gray-600'}`}>ไม่เข้าร่วม</span>
                                                         </label>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <input
                                                         type="text"
-                                                        className={`w-full border rounded px-2 py-1 ${
-                                                            !canAddNote ? 'bg-gray-100 cursor-not-allowed' : ''
+                                                        className={`w-full border rounded-lg px-3 py-2 text-sm font-body ${
+                                                            !canAddNote ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'focus:ring-2 focus:ring-primary focus:border-primary'
                                                         }`}
                                                         placeholder="หมายเหตุ..."
                                                         value={!canAddNote ? '' : (notes[student.stdId] || '')}
@@ -358,6 +413,14 @@ function EditCheckIn() {
                                     })}
                                 </tbody>
                             </table>
+                            {filteredStudents.length === 0 && (
+                                <div className="p-6 text-center text-text-color-alt font-body">
+                                    <svg className="h-12 w-12 text-gray-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <p>ไม่พบรายชื่อนักเรียน</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </>

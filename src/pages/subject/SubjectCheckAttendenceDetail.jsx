@@ -1,11 +1,10 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import { Await, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { HOSTNAME } from "../../config";
 import { formatTitle } from "../../helper";
 import ExportExcelButton from "../../components/exportExcelButton";
 import { Table_to_Excel } from "../../excel";
-import { tabletojson } from "tabletojson";
 import FilterByIsExam from "../../components/subject/exportPDF/FilterByIsExam";
 
 function SubjectCheckAttendenceDetail() {
@@ -14,18 +13,22 @@ function SubjectCheckAttendenceDetail() {
     const subject = location.state.subject;
     const ref = useRef();
     const [abStact, setAbStact] = useState([]);
-    const fetchDataAbstact =  async (subjectId, classroomId) => {
+    const [loading, setLoading] = useState(true);
+
+    const fetchDataAbstact = async (subjectId, classroomId) => {
+        setLoading(true);
         try{
             const response = await axios.get(`${HOSTNAME}/t/classrooms/classrooms/checkdetail/${subjectId}/${classroomId}`);
             if(response.status === 200) {
-                console.log(response.data);
                 setAbStact(response.data);
             }else{
                 throw new Error(response.data.message);
             }
         }catch(error){
             console.error(error);
-        };
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleExportExcelButton = () => {
@@ -35,103 +38,170 @@ function SubjectCheckAttendenceDetail() {
         }
     }
 
+    const getAttendancePercentClass = (percent) => {
+        if (percent >= 90) return "bg-green-100 text-green-800";
+        if (percent >= 80) return "bg-blue-100 text-blue-800";
+        if (percent >= 70) return "bg-yellow-100 text-yellow-800";
+        return "bg-red-100 text-red-800";
+    }
+
+    const getExamStatusClass = (status) => {
+        if (status === "มีสิทธิ์สอบ") return "bg-green-100 text-green-800";
+        return "bg-red-100 text-red-800";
+    }
 
     useEffect(() => {
         if(!classroom || classroom === undefined) return;
-        if(!subject || subject==="") return;
-        fetchDataAbstact(subject.subId,classroom.classId);
-
+        if(!subject || subject === "") return;
+        fetchDataAbstact(subject.subId, classroom.classId);
     },[classroom, subject])
 
     return(
-        <div className="mx-auto container">    
-                <h1 className="text-3xl font-bold text-center mb-8">รายชื่อสรุปการมีสิทธิ์สอบของนักเรียน</h1>
-                <p className="text-xl font-medium mb-8">
-                    {
-                        subject != null && (
-                            <span>วิชา {subject.subNameThai}({subject.subNameEng}) - {subject.subCode}</span> 
-                        )
-                    }
-                </p>
-                <div className="flex ml-auto w-fit">
-                    <ExportExcelButton handelOnClickFunction={handleExportExcelButton}/>
-                    <FilterByIsExam
-                        className={`ม.${classroom.classLevel}/${classroom.classRoom}`}
-                        subjectName={subject.subNameThai}
-                        abstact={abStact}
-                    />      
-                </div>  
-                            
-                <div>
+        <div>
+            <div className="mb-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
-                        <div>
-                            <div className="relative overflow-x-auto shadow-md sm:rounded-lg">   
-                                <table ref={ref} className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400" ref={ref}>
-                                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                        <tr>
-                                            <th className="px-6 py-3">เลขที่</th>
-                                            <th className="px-6 py-3">ชื่อ-นามสกุล</th>
-                                            <th className="px-6 py-3">ขาดเรียน(ครั้ง)</th>
-                                            <th className="px-6 py-3">เข้าสาย(ครั้ง)</th>
-                                            <th className="px-6 py-3">ลา(ครั้ง)</th>
-                                            <th className="px-6 py-3">กิจกรรม(ครั้ง)</th>
-                                            <th className="px-6 py-3">เข้าเรียน(ครั้ง)</th>
-                                            <th className="px-6 py-3">ร้อยละการเข้าเรียนทั้งหมดรวมลา(ครั้ง)</th>
-                                            <th className="px-6 py-3">สถานะไม่มีสิทธ์สอบ</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {
-                                            abStact.length > 0 && 
-                                            abStact.map((item,index) => (
-                                                <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200" key={`${item.stdNo} ${index}`}>
-                                                    <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                        {parseInt(item.stdNo)}
-                                                    </th>
-                                                    <td className="px-6 py-4">
-                                                        {formatTitle(item.title)} {item.fName} {item.lName}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {item.attendenceAbsentCount}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {item.attendenceLateCount}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {item.attendenceLeaveCount}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {item.attendenceActivity}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {item.attendenceCount}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {item.attendencePercent}%
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {item.canExam}
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        }    
-                                    </tbody>
-                                </table>
-                            </div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-primary font-heading">
+                            สรุปสิทธิ์การสอบของนักเรียน
+                        </h1>
+                        <div className="mt-2 h-1 w-16 bg-secondary rounded-full"></div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 font-body">
+                        <div className="bg-primary/10 px-3 py-1.5 rounded-lg">
+                            <span className="font-medium text-primary">รหัสวิชา:</span> {subject.subCode}
+                        </div>
+                        <div className="bg-secondary/10 px-3 py-1.5 rounded-lg">
+                            <span className="font-medium text-secondary">ห้อง:</span> ม.{classroom.classLevel}/{classroom.classRoom}
                         </div>
                     </div>
                 </div>
-                {!abStact.length && (
-                    <div className="mt-2">
-                        <span className="flex flex-col items-center justify-center gap-2 py-3 border rounded-md">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z" />
+                
+                <div className="bg-white rounded-lg p-4 mt-6 shadow-sm border border-line">
+                    <p className="text-lg font-medium text-text-color font-heading">{subject.subNameThai}</p>
+                    <p className="text-text-color-alt font-body">{subject.subNameEng}</p>
+                </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md border border-line overflow-hidden">
+                <div className="border-b border-line p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <h2 className="text-xl font-bold text-primary font-heading flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 0 012 2" />
+                        </svg>
+                        รายงานสรุปการเข้าเรียน
+                    </h2>
+                    
+                    <div className="flex gap-3 w-full md:w-auto">
+                        <ExportExcelButton 
+                            handelOnClickFunction={handleExportExcelButton}
+                            className="text-sm bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-4 rounded-lg inline-flex items-center transition-colors flex-1 md:flex-none justify-center"
+                        >
+                            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"></path>
                             </svg>
-                            ไม่พบข้อมูล
-                        </span>
+                            ส่งออก Excel
+                        </ExportExcelButton>
+                        
+                        <FilterByIsExam
+                            className={`ม.${classroom.classLevel}/${classroom.classRoom}`}
+                            subjectName={subject.subNameThai}
+                            abstact={abStact}
+                            buttonClassName="text-sm bg-primary hover:bg-accent text-white font-medium py-2.5 px-4 rounded-lg inline-flex items-center transition-colors flex-1 md:flex-none justify-center"
+                        />
+                    </div>
+                </div>
+
+                {loading ? (
+                    <div className="flex justify-center items-center h-64">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    </div>
+                ) : abStact.length > 0 ? (
+                    <div className="overflow-x-auto">
+                        <table ref={ref} className="w-full text-sm text-left">
+                            <thead className="text-xs text-white uppercase bg-primary">
+                                <tr>
+                                    <th className="px-6 py-3">เลขที่</th>
+                                    <th className="px-6 py-3">ชื่อ-นามสกุล</th>
+                                    <th className="px-6 py-3 text-center">ขาดเรียน</th>
+                                    <th className="px-6 py-3 text-center">เข้าสาย</th>
+                                    <th className="px-6 py-3 text-center">ลา</th>
+                                    <th className="px-6 py-3 text-center">กิจกรรม</th>
+                                    <th className="px-6 py-3 text-center">เข้าเรียน</th>
+                                    <th className="px-6 py-3 text-center">ร้อยละการเข้าเรียน</th>
+                                    <th className="px-6 py-3 text-center">สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody className="font-body">
+                                {abStact.map((item, index) => (
+                                    <tr 
+                                        key={`${item.stdNo}-${index}`} 
+                                        className="bg-white border-b hover:bg-gray-50 transition-colors"
+                                    >
+                                        <td className="px-6 py-4 font-medium text-text-color">{parseInt(item.stdNo)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {formatTitle(item.title)} {item.fName} {item.lName}
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className={`inline-flex justify-center min-w-6 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                                item.attendenceAbsentCount > 0 ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-800"
+                                            }`}>
+                                                {item.attendenceAbsentCount}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className={`inline-flex justify-center min-w-6 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                                item.attendenceLateCount > 0 ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800"
+                                            }`}>
+                                                {item.attendenceLateCount}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className={`inline-flex justify-center min-w-6 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                                item.attendenceLeaveCount > 0 ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"
+                                            }`}>
+                                                {item.attendenceLeaveCount}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className={`inline-flex justify-center min-w-6 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                                item.attendenceActivity > 0 ? "bg-indigo-100 text-indigo-800" : "bg-gray-100 text-gray-800"
+                                            }`}>
+                                                {item.attendenceActivity}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className={`inline-flex justify-center min-w-6 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                                item.attendenceCount > 0 ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                                            }`}>
+                                                {item.attendenceCount}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className={`inline-flex justify-center min-w-12 rounded-full px-2.5 py-0.5 text-xs font-medium ${getAttendancePercentClass(item.attendencePercent)}`}>
+                                                {item.attendencePercent}%
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className={`inline-flex justify-center min-w-24 rounded-full px-2.5 py-0.5 text-xs font-medium ${getExamStatusClass(item.canExam)}`}>
+                                                {item.canExam}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="p-8 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <h3 className="text-lg font-medium mb-1 text-text-color">ไม่พบข้อมูล</h3>
+                        <p className="text-text-color-alt">ยังไม่มีข้อมูลการเข้าเรียนที่บันทึกไว้</p>
                     </div>
                 )}
-                
+            </div>
         </div>
     );
 };

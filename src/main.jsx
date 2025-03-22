@@ -49,7 +49,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='subjects/attendance/checkdetail' element={<SubjectCheckAttendenceDetail />} />
           <Route path='subjects/attendance/byperiod' element={<SubjectCheckAttendenceByPeriod />} />
           {/* Classroom */}
-          <Route path='classrooms' element={<Classroom/>}/>
+          <Route path='classroom' element={<Classroom/>}/>
           <Route path='classroom/attendance/student' element={<StudentAttendance/>}/>
           <Route path='classroom/detail' element={<ClassroomDetail/>}/>
           {/* Activities */}

@@ -1,18 +1,65 @@
 import { useLocation } from "react-router-dom";
 import ClassroomDetailTable from "../../components/classroom/ClassroomDetailTable";
+import { useState } from "react";
 
 function ClassroomDetail() {
     const location = useLocation();
     const classrooms = location.state.classroooms;
-    // console.log(classrooms);
+    const [activeTab, setActiveTab] = useState("students");
+    
     return (
-        <div className="mx-auto container ">
-            <div>
-                <h1 className="text-3xl font-bold text-start mb-8">รายละเอียดห้อง {classrooms.classLevel}/{classrooms.classRoom} ปีการศึกษา {classrooms.term.academicYear + 543} เทอม {classrooms.term.semester}</h1>
+        <div>
+            <div className="mb-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-primary font-heading">
+                            ข้อมูลห้อง ม.{classrooms.classLevel}/{classrooms.classRoom}
+                        </h1>
+                        <div className="mt-2 h-1 w-16 bg-secondary rounded-full"></div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 font-body text-text-color-alt">
+                        <div className="bg-primary/5 px-3 py-1.5 rounded-lg">
+                            <span className="font-medium text-primary">ปีการศึกษา:</span> {classrooms.term.academicYear + 543}
+                        </div>
+                        <div className="bg-secondary/5 px-3 py-1.5 rounded-lg">
+                            <span className="font-medium text-secondary">ภาคเรียน:</span> {classrooms.term.semester}
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 mt-6 shadow-sm border border-line flex flex-wrap gap-4 justify-between">
+                    <div className="space-y-1 font-body">
+                        <p className="text-text-color-alt">หลักสูตร</p>
+                        <p className="font-medium text-text-color">{classrooms.classroomType.classTypeNameThai}</p>
+                    </div>
+                    <div className="space-y-1 font-body">
+                        <p className="text-text-color-alt">จำนวนนักเรียน</p>
+                        <p className="font-medium text-text-color">{classrooms.classroomMembers.length} คน</p>
+                    </div>
+                </div>
             </div>
-            {
-                classrooms != null && <ClassroomDetailTable classrooms={classrooms}/>
-            }
+
+            <div className="bg-white rounded-xl shadow-md border border-line overflow-hidden">
+                <div className="border-b border-line">
+                    <nav className="flex">
+                        <button
+                            className={`px-4 py-3 font-medium font-body border-b-2 ${
+                                activeTab === "students" 
+                                ? "border-primary text-primary" 
+                                : "border-transparent text-text-color-alt hover:text-text-color"
+                            }`}
+                            onClick={() => setActiveTab("students")}
+                        >
+                            รายชื่อนักเรียน
+                        </button>
+                    </nav>
+                </div>
+                
+                <div className="p-1">
+                    {classrooms != null && <ClassroomDetailTable classrooms={classrooms}/>}
+                </div>
+            </div>
         </div>
     );
 };

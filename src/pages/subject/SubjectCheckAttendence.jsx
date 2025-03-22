@@ -7,44 +7,46 @@ function SubjectCheckAttendence() {
     const params = useParams();
     const location = useLocation();
     const subjectInfo = location.state.subject;
-    // console.log(location.state);
-    // console.log(params.id);
     const subjectid = params.id === undefined || params.id === null || params.id === "" ? "no id" : params.id
-    // console.log(subjectid)
     const [termList, setTermList] = useState([]);
     const [selectValue, setSelectValue] = useState("");
     const [classrooms, setClassrooms] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const fetchData = async () => {
+        setLoading(true);
         try{
             const response = await axios.get(`${HOSTNAME}/t/terms`);
             if(response.status === 200) {
                 const startValue = response.data[0].termId;
                 setTermList(response.data);
                 setSelectValue(startValue.toString());
-                fetchClassroomByTerm(startValue);
+                await fetchClassroomByTerm(startValue);
             }else{
                 throw new Error(response.data.message);
             }
         }catch(error){
             console.error(error);
-        };
+        } finally {
+            setLoading(false);
+        }
     };
 
     const fetchClassroomByTerm = async (termId) => {
+        setLoading(true);
         try{
             const response = await axios.get(`${HOSTNAME}/t/classrooms/check/${termId}/${subjectid}`);
             if(response.status === 200) {
                 setClassrooms(response.data);
-                console.log(response.data);
             }else{
                 throw new Error(response.data.message);
             }
         }catch(error) {
             console.error(error);
-        };
+        } finally {
+            setLoading(false);
+        }
     };
-
 
     const handleSelectOption = (value) => {
         setSelectValue(value);
@@ -55,102 +57,147 @@ function SubjectCheckAttendence() {
         fetchData();
     },[]);
 
-
     return (
-        <>
-            <div className="container mx-auto">
-                <h1 className="text-3xl font-bold text-center mb-8">ตรวจสอบการเข้าเรียน</h1>
-                <p className="text-2xl font-medium mb-8">
-                    {
-                        subjectInfo != null && (
-                            <span>วิชา {subjectInfo.subNameThai}({subjectInfo.subNameEng}) - {subjectInfo.subCode}</span> 
-                        )
-                    }
-                </p>
-                <div>
-                    <label>ปีการศึกษา: </label>
-                    { termList.length > 0 && 
-                        <select name="term" value={selectValue}  className="px-2 border border-slate-700  rounded-lg" onChange={(e) => handleSelectOption(e.target.value)}>
-                            {
-                                termList.map((term, index) => (
-                                    <option value={term.termId} key={`option for term ${index}`}>
-                                        ปีการศึกษา {term.academicYear + 543} เทอม {term.semester}
-                                    </option>
-                                ))
-                            }
-                        </select>
-                    }
-                </div>
-                {classrooms.length > 0 && (
-                    <div className="mx-auto container mt-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                            {classrooms.map((item, index) => (
-                                <div
-                                    key={`box-number-${index}`}
-                                    className="h-[230px] rounded-xl shadow-lg bg-white hover:shadow-xl transition-shadow duration-300"
-                                >
-                                    <div id={`box-number-${index}`} className="w-full h-full flex flex-col justify-between p-6">
-                                        <div className="flex flex-col">
-                                            <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-                                                ห้อง {item.classLevel}/{item.classRoom} <span className="text-base font-normal">(หลักสูตร {item.classroomType.classTypeNameThai})</span>
-                                            </h2>
-                                            <span className="font-medium text-sm text-gray-800">อาจารย์ที่ปรึกษา</span>
-                                            <p className="text-lg text-gray-600 grid">
-                                                {
-                                                    item.teacher.length > 0 && (
-                                                        item.teacher.map((teacher, index) => (
-                                                            <span className="text-xs text-black bg-blue-200 rounded-lg py-[2px] px-2 w-fit" key={`${teacher.fName} ${teacher.lName} ${index}`}>{teacher.fName} {teacher.lName}</span>
-                                                        ))
-                                                    )
-                                                }
-                                            </p>
-                                        </div>
-                                        <div className="menu-section grid grid-col-1 gap-2 text-xs md:text-sm">
-                                            <Link
-                                                to={'/subjects/attendance/checkdetail'}
-                                                state={{ classroooms: item , subject:subjectInfo}}
-                                            >
-                                                <span 
-                                                    className="inline-flex px-4 py-1 rounded-full font-bold text-white bg-blue-700 hover:text-gray-50 hover:bg-blue-600 hover:shadow-md"
-                                                >
-                                                    รายการมีสิทธิ์สอบ
-                                                </span>
-                                                
-                                            </Link>
-                                            <Link
-                                                to={'/subjects/attendance/byperiod'}
-                                                state={{ classroooms: item , subject:subjectInfo}}
-                                            >
-                                                <span 
-                                                    className="inline-flex px-4 py-1 rounded-full font-bold text-white bg-violet-700 hover:text-gray-50 hover:bg-violet-600 hover:shadow-md"
-                                                >
-                                                    รายการเข้าเรียนตามคาบ
-                                                </span>
-
-                                            </Link>
-                                        
-                                        </div>
-
-                                    </div>
-                                </div>
-                            ))}
+        <div>
+            <div className="mb-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-primary font-heading">
+                            ตรวจสอบการเข้าเรียน
+                        </h1>
+                        <div className="mt-2 h-1 w-16 bg-secondary rounded-full"></div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 font-body">
+                        <div className="bg-primary/10 px-3 py-1.5 rounded-lg">
+                            <span className="font-medium text-primary">รหัสวิชา:</span> {subjectInfo.subCode}
+                        </div>
+                        <div className="bg-secondary/10 px-3 py-1.5 rounded-lg">
+                            <span className="font-medium text-secondary">{subjectInfo.subCredit}</span> หน่วยกิต
                         </div>
                     </div>
-                )}
-                {classrooms.length === 0 && (
-                    <div className="mt-10">
-                        <span className="flex flex-col items-center justify-center gap-2 py-3 border rounded-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z" />
-                        </svg>
-                        ไม่พบห้องเรียนที่ต้องแสดง 
-                        </span>
-                    </div>
-                )}
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 mt-6 shadow-sm border border-line">
+                    <p className="text-lg font-medium text-text-color font-heading">{subjectInfo.subNameThai}</p>
+                    <p className="text-text-color-alt font-body">{subjectInfo.subNameEng}</p>
+                </div>
             </div>
-        </>
+            
+            <div className="bg-white rounded-xl shadow-md border border-line overflow-hidden mb-8">
+                <div className="border-b border-line p-4 flex justify-between items-center">
+                    <h2 className="text-lg font-medium text-primary font-heading flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        เลือกปีการศึกษา
+                    </h2>
+                    
+                    {termList.length > 0 && (
+                        <div className="relative">
+                            <select 
+                                name="term" 
+                                value={selectValue} 
+                                onChange={(e) => handleSelectOption(e.target.value)}
+                                className="w-full md:w-72 py-2 px-3 rounded-lg border-line bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-body pr-10"
+                            >
+                                {termList.map((term, index) => (
+                                    <option value={term.termId} key={`option for term ${index}`}>
+                                        ปีการศึกษา {term.academicYear + 543} ภาคเรียนที่ {term.semester}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+            ) : classrooms.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {classrooms.map((item, index) => (
+                        <div
+                            key={`box-number-${index}`}
+                            className="bg-white border border-line rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300"
+                        >
+                            <div className="h-2 bg-gradient-to-r from-primary to-secondary"></div>
+                            <div className="p-6 flex flex-col h-full">
+                                <div className="mb-4">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="bg-primary/10 text-primary rounded-md px-3 py-1.5 text-sm font-medium">
+                                            ม.{item.classLevel}/{item.classRoom}
+                                        </div>
+                                        <div className="bg-secondary/10 text-secondary rounded-md px-3 py-1.5 text-sm font-medium">
+                                            {item.classroomType.classTypeNameThai}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-3">
+                                        <p className="text-text-color-alt text-sm font-body">ครูที่ปรึกษา</p>
+                                        <div className="flex flex-wrap gap-1 mt-1">
+                                            {item.teacher.length > 0 ? (
+                                                item.teacher.map((teacher, idx) => (
+                                                    <span 
+                                                        key={`${teacher.fName}-${idx}`}
+                                                        className="inline-flex items-center bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded-md"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                        </svg>
+                                                        {teacher.fName} {teacher.lName}
+                                                    </span>
+                                                ))
+                                            ) : (
+                                                <span className="text-text-color-alt text-sm">-</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-auto space-y-2">
+                                    <Link to={'/subjects/attendance/checkdetail'} state={{ classroooms: item, subject: subjectInfo }} className="w-full">
+                                        <button className="w-full py-2 px-4 bg-primary text-white rounded-lg hover:bg-accent transition-colors duration-200 flex items-center justify-center text-sm font-medium">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            รายการมีสิทธิ์สอบ
+                                        </button>
+                                    </Link>
+                                    
+                                    <Link to={'/subjects/attendance/byperiod'} state={{ classroooms: item, subject: subjectInfo }} className="w-full">
+                                        <button className="w-full py-2 px-4 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors duration-200 flex items-center justify-center text-sm font-medium">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                            </svg>
+                                            รายการเข้าเรียนตามคาบ
+                                        </button>
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="bg-white rounded-xl shadow-md p-8 text-center border border-line">
+                    <div className="flex justify-center mb-4 text-text-color-alt">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-xl font-semibold text-text-color mb-2 font-heading">ไม่พบข้อมูลห้องเรียน</h2>
+                    <p className="text-text-color-alt font-body">ไม่พบข้อมูลห้องเรียนในเทอมที่เลือก</p>
+                </div>
+            )}
+        </div>
     );
 };
-
 
 export default SubjectCheckAttendence;
