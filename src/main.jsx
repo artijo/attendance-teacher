@@ -32,6 +32,8 @@ import FilterByClassroom from './components/activities/exportPDF/FilterByClassro
 import FilterExcelPage from './pages/activities/excelmanagedownload/ExcelByClassroomPage.jsx';
 import FilterByClassroomJoinPage from './pages/activities/pdfmanagedownload/FilterByClassroomJoinPage.jsx';
 import FilterByRoomJoin from './components/activities/exportPDF/FilterByRoomJoin.jsx';
+import StudentAttendanceFilterByDay from './pages/classroom/attendance/StudentAttendanceFilterByDay.jsx';
+import PaticepateByDay from './components/classroom/attendance/PaticepateByDay.jsx';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
@@ -51,6 +53,8 @@ createRoot(document.getElementById('root')).render(
           {/* Classroom */}
           <Route path='classroom' element={<Classroom/>}/>
           <Route path='classroom/attendance/student' element={<StudentAttendance/>}/>
+          <Route path='classroom/attendance/byday/student'  element={<StudentAttendanceFilterByDay/>}/>
+          <Route path='classroom/attendance/byday/student/infomation'  element={<PaticepateByDay/>}/>
           <Route path='classroom/detail' element={<ClassroomDetail/>}/>
           {/* Activities */}
           <Route path='activities' element={<Activities/>}/>

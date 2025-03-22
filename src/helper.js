@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 export const getDayName = (day) => {
     const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
     return days[day];
@@ -68,10 +70,22 @@ export function formatDayOfWeeks(dayOfWeek) {
     }
 }
 
+export function formatDateTimeISOToDate(dateTimeIso){
+  const utctobangkok = DateTime.fromISO(dateTimeIso).setZone('Asia/Bangkok');
+  const dateSpilt = utctobangkok.toString().split('T');
+  return dateSpilt[0];
+}
+
 export function calculatedTimeToSecondeDouleDot(time) { // สำหรับ :
     const timeSplit = time.split(':');
     return (parseInt(timeSplit[0])*3600)+(parseInt(timeSplit[1])*60);
     // return (parseInt(hour)*3600)+(parseInt(miniute)*60);
+}
+
+export function dateTimeFormat(dateTime){
+  const dateTimeFormat = formatDateTimeISOToDate(dateTime);
+  const dateSplit = dateTimeFormat.split('-');
+  return `${dateSplit[2]}/${dateSplit[1]}/${parseInt(dateSplit[0])+543}`;
 }
 
 
@@ -110,6 +124,23 @@ export function formatDateToThai(date){ // YYYY-MM-DD
   }
 
   return `${day} ${month} ${year}`
+}
+
+
+export function daybetween(start, end) {
+  const dates = [];
+  if (start !== "" && end !== "") {
+      const startDate = DateTime.fromISO(start).setZone('Asia/Bangkok');
+      const endDate = DateTime.fromISO(end).setZone('Asia/Bangkok');
+      let currentDate = startDate;
+      while (currentDate <= endDate) {
+          dates.push(currentDate.toISODate().split("-").join("-")); // เพิ่มวันที่ในรูปแบบ YYYY-MM-DD
+          currentDate = currentDate.plus({ days: 1 }); // เพิ่มวันทีละ 1
+      }
+  } else {
+      console.error("termStart or termEnd is not set!");
+  }
+  return dates;
 }
 
 
