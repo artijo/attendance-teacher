@@ -162,7 +162,7 @@ function SubjectCheckAttendence() {
                                     </div>
                                 </div>
                                 
-                                <div className="mt-auto space-y-2">
+                                <div className="grid grid-cols-1 gap-1 mt-auto space-y-2">
                                     <Link to={'/subjects/attendance/checkdetail'} state={{ classroooms: item, subject: subjectInfo }} className="w-full">
                                         <button className="w-full py-2 px-4 bg-primary text-white rounded-lg hover:bg-accent transition-colors duration-200 flex items-center justify-center text-sm font-medium">
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
