@@ -121,9 +121,9 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
         }
     },[studentList])
 
-    const handelExportExcel = (index) => {
+    const handelExportExcel = (index,classroominfo, month , subject) => {
         if(ref.current[index]){
-            Table_to_Excel(ref.current[index]);
+            Table_to_Excel(ref.current[index],`สรุปการเข้าเรียนตามคาบวิชา ${subject.subNameThai} เดือน ${convertNumberToThaiMonth(month)} ห้องม.${classroominfo.classLevel}/${classroominfo.classRoom} `);
         }
     }
 
@@ -154,7 +154,7 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
                                         month={month} 
                                         index={index} 
                                         exportPdf={<ButtonExportPDF index={index} classroomInfo={classrooms} month={month} subject={subject}/>}//<ExportPdfButtonKK index={index} month={month}/>}
-                                        exportExcel={ <ExportExcelButton handelOnClickFunction={() => handelExportExcel(index)}/>}
+                                        exportExcel={ <ExportExcelButton handelOnClickFunction={() => handelExportExcel(index, classrooms, month, subject)}/>}
                                     />
                                 </TapAttendenceSummaryOpen>
                             </div>
