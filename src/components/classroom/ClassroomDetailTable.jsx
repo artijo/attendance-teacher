@@ -21,93 +21,12 @@ function ClassroomDetailTable({classrooms}) {
     
     return (
         <>
-            {/* <ExportExcelButton handelOnClickFunction={handleExportExcelButton}/> */}
-            <div>
-                <div>
-                    <div className="relative overflow-x-auto shadow-md sm:rounded-2xl">   
-                        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <thead className="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th className="px-6 py-3">เลขที่</th>
-                                    <th className="px-6 py-3">รหัสนักเรียน</th>
-                                    <th className="px-6 py-3">ชื่อ</th>
-                                    <th className="px-6 py-3">นามสกุล</th>
-                                    <th className="px-6 py-3">คะแนนจิตวิสัย</th>
-                                    <th className="px-6 py-3">จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    sliceStudentList.map((std, index) => (
-                                        <tr 
-                                            key={`student ${index}`}
-                                            className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
-                                        >
-                                            <td className="px-6 py-4">
-                                                {parseInt(std.stdNo)}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {std.student.stdId}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {std.student.fName}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {std.student.lName}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {std.behaviourScore} คะแนน
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className='inline-flex overflow-hidden rounded-md border bg-white shadow-sm'>
-                                                    <Link 
-                                                        to={`/classroom/attendance/student`} 
-                                                        state={
-                                                            {
-                                                                stdId:std.stdId,
-                                                                classroomsId: classrooms.classId,
-                                                                className: `ม.${classrooms.classLevel}/${classrooms.classRoom}`
-                                                            }
-                                                        }
-                                                    >
-                                                        <button 
-                                                            className="text-xs inline-flex items-center gap-2 p-3 text-blue-600 hover:bg-gray-50 focus:relative"
-
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                                            </svg>
-                                                            สรุปการเข้าเรียนตามรายวิชา
-                                                        </button>
-                                                    </Link>
-                                                    <Link 
-                                                        to={`/classroom/attendance/byday/student`} 
-                                                        state={
-                                                            {
-                                                                student:std,
-                                                                classroom: classrooms,
-                                                                className: `ม.${classrooms.classLevel}/${classrooms.classRoom}`
-                                                            }
-                                                        }
-                                                    >
-                                                        <button 
-                                                            className="text-xs inline-flex items-center gap-2 p-3 text-violet-600 hover:bg-gray-50 focus:relative"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z" />
-                                                            </svg>
-                                                            การเข้าเรียนตามคาบหรือวัน
-                                                        </button>
-                                                    </Link>
-                                                </span>
-                                                
-                                            </td>
-                                            
-                                        </tr>
-                                    ))                        
-                                }
-                            </tbody>
-                        </table>
+            <div className="p-4 flex flex-col md:flex-row gap-4 justify-between items-center">
+                <div className="relative w-full md:w-64">
+                    <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg className="w-4 h-4 text-text-color-alt" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
                     </div>
                     <input
                         type="text"
