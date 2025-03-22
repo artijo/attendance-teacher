@@ -12,7 +12,6 @@ function StudentAttendance(){
     const location = useLocation();
     const classroomId = location.state.classroomsId;
     const className = location.state.className;
-    // console.log(className);
     const stdId = location.state.stdId;
     const [studentInfo, setStudentInfo] = useState(null);
     const studentInfoMation = studentInfo != null && studentInfo.studentInfo.student;
@@ -76,7 +75,7 @@ function StudentAttendance(){
         <div className="mx-auto container">
             <div className="grid grid-cols-1 gap-8">
                 <div>
-                    <h1 className="text-lg font-bold text-start">
+                    <h1 className="text-lg font-bold text-center">
                         รายละเอียดการเข้าเรียนตามรายวิชาของ <span>{
                             `${formatTitle(studentInfoMation.title)} ${studentInfoMation.fName} ${studentInfoMation.lName}` 
                         }</span>
