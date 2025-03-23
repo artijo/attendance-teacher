@@ -111,6 +111,8 @@ function Login() {
             <div className="text-center">
               <span className="text-text-color-alt text-sm">ยังไม่มีบัญชี? </span>
               <a href="#" className="text-secondary hover:underline text-sm">ติดต่อผู้ดูแลระบบ</a>
+              <span className="text-text-color-alt text-sm"> หรือ </span>
+              <a href="/new-login" className="text-secondary hover:underline text-sm">เข้าใช้งานครั้งแรก?</a>
             </div>
           </div>
         </div>

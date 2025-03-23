@@ -35,11 +35,17 @@ import FilterByRoomJoin from './components/activities/exportPDF/FilterByRoomJoin
 import StudentAttendanceFilterByDay from './pages/classroom/attendance/StudentAttendanceFilterByDay.jsx';
 import PaticepateByDay from './components/classroom/attendance/PaticepateByDay.jsx';
 
+// Auth
+import NewLogin from './pages/New-Account.jsx';
+import NewPassword from './pages/New-Password.jsx';
+
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
   <BrowserRouter>
       <Routes>
       <Route path="login" element={<Login />} />
+      <Route path="new-login" element={<NewLogin />} />
+      <Route path="new-password" element={<NewPassword />} />
       <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/" element={<App />} >
           <Route path='dashboard' element={<Dashboard />} />
