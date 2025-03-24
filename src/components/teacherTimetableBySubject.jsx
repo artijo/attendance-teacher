@@ -70,6 +70,9 @@ function TeacherTimetableBySubject({subject}) {
                 <th className="whitespace-nowrap border px-4 py-2 font-medium text-white">
                 <span>7</span>
                 </th>
+                <th className="whitespace-nowrap border px-4 py-2 font-medium text-white">
+                <span>8</span>
+                </th>
             </tr>
             <tr className="h-16 shadow-md">
                 <th className="whitespace-nowrap border px-4 py-2 font-medium text-white">
