@@ -24,6 +24,7 @@ function TeacherTimetableBySubject({subject}) {
         "13.00 - 13.50",
         "13.50 - 14.40",
         "14.40 - 15.30",
+        "15:30 - 16.20"
     ]
 
     useEffect(() => {
