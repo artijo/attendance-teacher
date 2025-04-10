@@ -21,15 +21,31 @@ import StudentAttendance from './pages/classroom/attendance/StudentAttendance.js
 import Activities from './pages/activities/Activities.jsx';
 import ActivityDetail from './pages/activities/ActivityDetail.jsx';
 import CheckIn from './pages/activities/CheckIn.jsx';
+import EditCheckIn from './pages/activities/ActivityEditCheckinByDate.jsx';
+// Subject Check Attendence
 import SubjectCheckAttendence from './pages/subject/SubjectCheckAttendence.jsx';
 import SubjectCheckAttendenceDetail from './pages/subject/SubjectCheckAttendenceDetail.jsx';
 import SubjectCheckAttendenceByPeriod from './pages/subject/SubjectCheckAttendenceByPeriod.jsx';
+import ExcelByFilterRoom from './pages/activities/excelmanagedownload/ExcelByRoomJoin.jsx';
+import FilterClassroomPage from './pages/activities/pdfmanagedownload/FilterClassroomPage.jsx';
+import FilterByClassroom from './components/activities/exportPDF/FilterByClassroom.jsx';
+import FilterExcelPage from './pages/activities/excelmanagedownload/ExcelByClassroomPage.jsx';
+import FilterByClassroomJoinPage from './pages/activities/pdfmanagedownload/FilterByClassroomJoinPage.jsx';
+import FilterByRoomJoin from './components/activities/exportPDF/FilterByRoomJoin.jsx';
+import StudentAttendanceFilterByDay from './pages/classroom/attendance/StudentAttendanceFilterByDay.jsx';
+import PaticepateByDay from './components/classroom/attendance/PaticepateByDay.jsx';
+
+// Auth
+import NewLogin from './pages/New-Account.jsx';
+import NewPassword from './pages/New-Password.jsx';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
   <BrowserRouter>
       <Routes>
       <Route path="login" element={<Login />} />
+      <Route path="new-login" element={<NewLogin />} />
+      <Route path="new-password" element={<NewPassword />} />
       <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/" element={<App />} >
           <Route path='dashboard' element={<Dashboard />} />
@@ -41,13 +57,23 @@ createRoot(document.getElementById('root')).render(
           <Route path='subjects/attendance/checkdetail' element={<SubjectCheckAttendenceDetail />} />
           <Route path='subjects/attendance/byperiod' element={<SubjectCheckAttendenceByPeriod />} />
           {/* Classroom */}
-          <Route path='classrooms' element={<Classroom/>}/>
+          <Route path='classroom' element={<Classroom/>}/>
           <Route path='classroom/attendance/student' element={<StudentAttendance/>}/>
+          <Route path='classroom/attendance/byday/student'  element={<StudentAttendanceFilterByDay/>}/>
+          <Route path='classroom/attendance/byday/student/infomation'  element={<PaticepateByDay/>}/>
           <Route path='classroom/detail' element={<ClassroomDetail/>}/>
           {/* Activities */}
           <Route path='activities' element={<Activities/>}/>
           <Route path='activities/:id' element={<ActivityDetail/>}/>
           <Route path='activities/:id/check-in' element={<CheckIn/>}/>
+          <Route path='activities/:id/check-in/edit' element={<EditCheckIn/>}/>
+           {/* By Ohm Section */}
+          <Route path="activity/participate/filterbyclassroom/excel" element={<ExcelByFilterRoom/>} />
+          <Route path="activity/participate/filterbyclassroom" element={<FilterClassroomPage />} />
+          <Route path="activity/participate/filterbyclassroom/pdfpage" element={<FilterByClassroom />} />
+          <Route path="activity/participate/filterbyclassroomjoin/excel" element={<FilterExcelPage/>} />
+          <Route path="activity/participate/filterbyclassroomjoin" element={<FilterByClassroomJoinPage />} />
+          <Route path="activity/participate/filterbyclassroomjoin/pdfpage" element={<FilterByRoomJoin />} />
         </Route>
       </Routes>
   </BrowserRouter>,

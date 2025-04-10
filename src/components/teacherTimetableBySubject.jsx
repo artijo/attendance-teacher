@@ -5,7 +5,7 @@ import { calculatedTimeToSeconde, calculatedTimeToSecondeDouleDot, formatDayOfWe
 
 function TeacherTimetableBySubject({subject}) {
     const [timetables, setTimetables] = useState(null);
-    console.log(timetables);
+    // console.log(timetables);
     const fecthData = async () => {
         try{
             const response = await axios.post(`${HOSTNAME}/t/timetable/teacher`,{subject:subject});
@@ -24,6 +24,7 @@ function TeacherTimetableBySubject({subject}) {
         "13.00 - 13.50",
         "13.50 - 14.40",
         "14.40 - 15.30",
+        "15:30 - 16.20"
     ]
 
     useEffect(() => {
@@ -68,6 +69,9 @@ function TeacherTimetableBySubject({subject}) {
                 </th>
                 <th className="whitespace-nowrap border px-4 py-2 font-medium text-white">
                 <span>7</span>
+                </th>
+                <th className="whitespace-nowrap border px-4 py-2 font-medium text-white">
+                <span>8</span>
                 </th>
             </tr>
             <tr className="h-16 shadow-md">
@@ -141,8 +145,8 @@ function TeacherTimetableBySubject({subject}) {
 
     return (
         <>
-            <div>
-                <table className="mx-auto bg-white border-collapse border ">
+            <div className="w-full">
+                <table className="w-full mx-auto bg-white border-collapse border ">
                     <TableHead/>
                     <TableBody/>
                 </table>

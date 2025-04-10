@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { HOSTNAME } from "../../config";
+import { HOSTNAME, TIME_ZONE } from "../../config";
 import { formatDate } from "../../helper";
 import { DateTime } from "luxon";
 import { convertNumberToThaiMonth } from "../../helper";
+import DropdownExportDocument from "../../components/DropdownExportDocument";
+import TextDropdownDocument from "../../components/TextDropdownDocument";
 
 function ActivityDetail() {
     const { id } = useParams();
@@ -37,9 +39,9 @@ function ActivityDetail() {
 
     useEffect(() => {
         if (activity) {
-            const now = DateTime.now().setZone('Asia/Bangkok');
-            const startDate = DateTime.fromISO(activity.actDate).setZone('Asia/Bangkok');
-            const endDate = DateTime.fromISO(activity.actDateEnd).setZone('Asia/Bangkok');
+            const now = DateTime.now().setZone(TIME_ZONE);
+            const startDate = DateTime.fromISO(activity.actDate).setZone(TIME_ZONE);
+            const endDate = DateTime.fromISO(activity.actDateEnd).setZone(TIME_ZONE);
             
             // Check if current date is within activity period
             if (now >= startDate && now <= endDate) {
@@ -57,18 +59,28 @@ function ActivityDetail() {
 
     const isActivityEnded = (activity) => {
         const endDate = DateTime.fromISO(activity.actDateEnd)
-            .setZone('Asia/Bangkok')
+            .setZone(TIME_ZONE)
             .set({
                 hour: parseInt(activity.actEndTime.split(':')[0]),
                 minute: parseInt(activity.actEndTime.split(':')[1])
             });
-        return DateTime.now().setZone('Asia/Bangkok') > endDate;
+        return DateTime.now().setZone(TIME_ZONE) > endDate;
+    };
+
+    const isActivityNotStarted = (activity) => {
+        const startDate = DateTime.fromISO(activity.actDate)
+            .setZone(TIME_ZONE)
+            .set({
+                hour: parseInt(activity.actStartTime.split(':')[0]),
+                minute: parseInt(activity.actStartTime.split(':')[1])
+            });
+        return DateTime.now().setZone(TIME_ZONE) < startDate;
     };
 
     const getDatesBetween = (startDate, endDate) => {
         const dates = [];
-        let current = DateTime.fromISO(startDate).setZone('Asia/Bangkok').startOf('day');
-        const end = DateTime.fromISO(endDate).setZone('Asia/Bangkok').startOf('day');
+        let current = DateTime.fromISO(startDate).setZone(TIME_ZONE).startOf('day');
+        const end = DateTime.fromISO(endDate).setZone(TIME_ZONE).startOf('day');
         
         while (current <= end) {
             dates.push(current.toISODate());
@@ -79,8 +91,8 @@ function ActivityDetail() {
 
     const isRecordMatchingDate = (record) => {
         if (!selectedDate) return true;
-        const recordDate = DateTime.fromISO(record.joinTimestamp).setZone('Asia/Bangkok');
-        const filterDate = DateTime.fromISO(selectedDate).setZone('Asia/Bangkok');
+        const recordDate = DateTime.fromISO(record.joinTimestamp).setZone(TIME_ZONE);
+        const filterDate = DateTime.fromISO(selectedDate).setZone(TIME_ZONE);
         return recordDate.hasSame(filterDate, 'day');
     };
 
@@ -90,9 +102,9 @@ function ActivityDetail() {
             .map(p => ({
                 classId: p.student.classroomMembers[0].classroom.classId,
                 classLevel: p.student.classroomMembers[0].classroom.classLevel,
-                classRoom: p.student.classroomMembers[0].classroom.classRoom
+                classRoom: p.student.classroomMembers[0].classroom.classRoom,
+                className: `${p.student.classroomMembers[0].classroom.classLevel}/${p.student.classroomMembers[0].classroom.classRoom}`
             }));
-
         // Remove duplicates
         return Array.from(new Map(classrooms.map(item => 
             [item.classId, item]
@@ -114,7 +126,7 @@ function ActivityDetail() {
         }) || [];
 
     const formatThaiDateTime = (dateTime) => {
-        const dt = DateTime.fromISO(dateTime).setZone('Asia/Bangkok');
+        const dt = DateTime.fromISO(dateTime).setZone(TIME_ZONE);
         const day = dt.toFormat('d');
         const month = convertNumberToThaiMonth(dt.month);
         const year = dt.year + 543;
@@ -122,241 +134,419 @@ function ActivityDetail() {
         return `${day} ${month} ${year} ${time}`;
     };
 
+    const handleNaviatePDFFilterByRoom = () => {
+        const classrooms = getUniqueClassrooms(activity.actParticipate);
+        const activityId = activity.actId;
+        navigate(
+            `/activity/participate/filterbyclassroom`,
+            {state:{classrooms: classrooms, activityId: activityId, activity: activity}}
+        );
+    }
+
+    const handleNaviatePDFByRoomJoin = () => {
+        const classrooms = getUniqueClassrooms(activity.actParticipate);
+        const activityId = activity.actId;
+        navigate(
+            `/activity/participate/filterbyclassroomjoin`,
+            {state:{classrooms: classrooms, activityId: activityId, activity: activity}}
+        );
+    }
+
+    const handleNavigateExcelFilterByRoom = () => {
+        const classrooms = getUniqueClassrooms(activity.actParticipate);
+        const activityId = activity.actId;
+        navigate(
+            `/activity/participate/filterbyclassroom/excel`,
+            {state:{classrooms: classrooms, activityId: activityId, activity: activity}}
+        );
+    }
+
+    const handleNavigateExcelFilterPage = () => {
+        const classrooms = getUniqueClassrooms(activity.actParticipate);
+        const activityId = activity.actId;
+        navigate(
+            `/activity/participate/filterbyclassroomjoin/excel`,
+            {state:{classrooms: classrooms, activityId: activityId, activity: activity}}
+        );
+    }
+
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-xl">กำลังโหลด...</div>
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-xl text-red-500">{error}</div>
+            <div className="bg-white rounded-xl shadow-md p-8 text-center border border-line mt-8">
+                <div className="flex justify-center mb-4 text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h2 className="text-xl font-semibold text-text-color mb-2 font-heading">เกิดข้อผิดพลาด</h2>
+                <p className="text-text-color-alt font-body">{error}</p>
             </div>
         );
     }
 
     if (!activity) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-xl">ไม่พบข้อมูลกิจกรรม</div>
+            <div className="bg-white rounded-xl shadow-md p-8 text-center border border-line mt-8">
+                <div className="flex justify-center mb-4 text-text-color-alt">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                </div>
+                <h2 className="text-xl font-semibold text-text-color mb-2 font-heading">ไม่พบข้อมูลกิจกรรม</h2>
+                <p className="text-text-color-alt font-body">ไม่พบข้อมูลกิจกรรมที่ต้องการ</p>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="mx-auto px-4">
-                <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-800">
-                                {activity.actName}
-                            </h1>
-                            <div className="mt-2">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                    isActivityEnded(activity) ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                                }`}>
-                                    {isActivityEnded(activity) ? 'สิ้นสุดกิจกรรม' : 'กิจกรรมกำลังดำเนินการ'}
-                                </span>
+        <div>
+            <div className="mb-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-primary font-heading">
+                            {activity.actName}
+                        </h1>
+                        <div className="mt-2 h-1 w-16 bg-secondary rounded-full"></div>
+                    </div>
+                    
+                    <div>
+                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium font-body ${
+                            isActivityEnded(activity) ? 'bg-red-100 text-red-800' : 
+                            isActivityNotStarted(activity) ? 'bg-yellow-100 text-yellow-800' : 
+                            'bg-green-100 text-green-800'
+                        }`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {isActivityEnded(activity) ? 'สิ้นสุดกิจกรรม' : 
+                            isActivityNotStarted(activity) ? 'กิจกรรมยังไม่เริ่ม' : 
+                            'กิจกรรมกำลังดำเนินการ'}
+                        </span>
+                    </div>
+                </div>
+                
+                {!isActivityEnded(activity) && !isActivityNotStarted(activity) && (
+                    <div className="mt-4 flex justify-end">
+                        <button
+                            onClick={handleCheckIn}
+                            className="py-2.5 px-4 text-sm font-medium text-white bg-primary hover:bg-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-300 flex items-center"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            เช็คชื่อนักเรียน
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div className="lg:col-span-2">
+                    <div className="bg-white rounded-xl shadow-md border border-line p-6">
+                        <h2 className="text-xl font-bold text-primary font-heading mb-4 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            รายละเอียดกิจกรรม
+                        </h2>
+                        
+                        <div className="space-y-6 font-body">
+                            <div>
+                                <p className="text-text-color-alt mb-1">คำอธิบายกิจกรรม</p>
+                                <p className="text-text-color">{activity.actDesc}</p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-text-color-alt mb-1">วันที่จัดกิจกรรม</p>
+                                    <div className="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <p className="text-text-color">
+                                            {formatDate(activity.actDate)} - {formatDate(activity.actDateEnd)}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <p className="text-text-color-alt mb-1">เวลากิจกรรม</p>
+                                    <div className="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p className="text-text-color">
+                                            {activity.actStartTime} - {activity.actEndTime} น.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <p className="text-text-color-alt mb-1">สถานที่จัดกิจกรรม</p>
+                                <div className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <p className="text-text-color">{activity.actLocation}</p>
+                                </div>
                             </div>
                         </div>
-                        <div className="mt-8 flex justify-end pb-4">
-                            {!isActivityEnded(activity) && (
-                                <button
-                                    onClick={handleCheckIn}
-                                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-                                >
-                                    เช็คชื่อนักเรียน
-                                </button>
+                    </div>
+                </div>
+                
+                <div className="lg:col-span-1">
+                    <div className="bg-white rounded-xl shadow-md border border-line p-6">
+                        <h2 className="text-xl font-bold text-primary font-heading mb-4 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            ข้อมูลเพิ่มเติม
+                        </h2>
+                        
+                        <div className="space-y-4 font-body">
+                            <div>
+                                <p className="text-text-color-alt mb-1">ประเภทกิจกรรม</p>
+                                <div className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                    <p className="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-sm">
+                                        {activity.activityType.actTypeName}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <p className="text-text-color-alt mb-1">การจำกัดจำนวน</p>
+                                <div className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    <p className="text-text-color">
+                                        {activity.joinLimit ? 
+                                            (activity.joinLimitNumber ? 
+                                                `จำกัด ${activity.joinLimitNumber} คน` : 
+                                                'จำกัดจำนวน (ไม่ระบุจำนวน)') : 
+                                            'ไม่จำกัดจำนวน'}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            {activity.classroom && activity.classroom.length > 0 && (
+                                <div>
+                                    <p className="text-text-color-alt mb-1">ห้องเรียนที่เข้าร่วมได้</p>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {activity.classroom
+                                            .sort((a, b) => {
+                                                if (a.classroom.classLevel === b.classroom.classLevel) {
+                                                    return a.classroom.classRoom - b.classroom.classRoom;
+                                                }
+                                                return a.classroom.classLevel - b.classroom.classLevel;
+                                            })
+                                            .map((c) => (
+                                                <span
+                                                    key={c.classCanjoinId}
+                                                    className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs"
+                                                >
+                                                    ม.{c.classroom.classLevel}/{c.classroom.classRoom}
+                                                </span>
+                                            ))}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {activity.teacher && activity.teacher.length > 0 && (
+                                <div>
+                                    <p className="text-text-color-alt mb-1">ครูผู้ดูแล</p>
+                                    <ul className="space-y-2">
+                                        {activity.teacher.map((t) => (
+                                            <li key={t.actTeacherId} className="flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                                <span className="text-text-color">
+                                                    {t.teacher.fName} {t.teacher.lName}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             )}
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow-md border border-line overflow-hidden">
+                <div className="border-b border-line p-4">
+                    <h2 className="text-xl font-bold text-primary font-heading flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        ประวัติการบันทึกการเข้าร่วม
+                    </h2>
+                </div>
+
+                <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-700">รายละเอียด</h2>
-                            <p className="text-gray-600 mt-2">{activity.actDesc}</p>
+                            <label className="block text-sm font-medium text-text-color-alt mb-2 font-body">
+                                ดาวน์โหลดเอกสาร
+                            </label>
+                            <DropdownExportDocument className="w-full">
+                                <TextDropdownDocument 
+                                    title="สรุปการเข้าร่วมแบ่งตามห้อง (Excel)"
+                                    actionFunction={() => handleNavigateExcelFilterByRoom()}
+                                />
+                                <TextDropdownDocument 
+                                    title="สรุปจำนวนการเข้าร่วมแบ่งตามห้อง (Excel)"
+                                    actionFunction={() => handleNavigateExcelFilterPage()}
+                                /> 
+                                <TextDropdownDocument
+                                    title="สรุปการเข้าร่วมแบ่งตามห้อง (PDF)"
+                                    actionFunction={() => handleNaviatePDFFilterByRoom()}
+                                />
+                                <TextDropdownDocument
+                                    title="สรุปจำนวนการเข้าร่วมแบ่งตามห้อง (PDF)"
+                                    actionFunction={() => handleNaviatePDFByRoomJoin()}
+                                />
+                            </DropdownExportDocument>
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-700">วันที่จัดกิจกรรม</h2>
-                                <p className="text-gray-600">
-                                    {formatDate(activity.actDate)} - {formatDate(activity.actDateEnd)}
-                                </p>
-                            </div>
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-700">เวลา</h2>
-                                <p className="text-gray-600">
-                                    {activity.actStartTime} - {activity.actEndTime} น.
-                                </p>
-                            </div>
-                        </div>
-
+                        
                         <div>
-                            <h2 className="text-lg font-semibold text-gray-700">สถานที่</h2>
-                            <p className="text-gray-600">{activity.actLocation}</p>
+                            <label className="block text-sm font-medium text-text-color-alt mb-2 font-body">
+                                กรองตามห้องเรียน
+                            </label>
+                            <select
+                                className="w-full py-2.5 px-3 rounded-lg border-line bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-body"
+                                value={selectedClassroom}
+                                onChange={(e) => setSelectedClassroom(e.target.value)}
+                            >
+                                <option value="all">ทุกห้องเรียน</option>
+                                {activity && getUniqueClassrooms(activity.actParticipate).map((classroom) => (
+                                    <option key={classroom.classId} value={classroom.classId}>
+                                        ม.{classroom.classLevel}/{classroom.classRoom}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
-
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-700">ประเภทกิจกรรม</h2>
-                            <p className="text-gray-600">{activity.activityType.actTypeName}</p>
+                        
+                        <div className="lg:col-span-1 flex justify-end items-end">
+                            <button
+                                className="py-2.5 px-4 text-sm font-medium text-white bg-secondary hover:bg-secondary/80 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 transition-all duration-300 flex items-center"
+                                onClick={() => navigate(`/activities/${id}/check-in/edit?date=${selectedDate}`)}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                                แก้ไขการเข้าร่วมของวันที่เลือก
+                            </button>
                         </div>
-
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-700">การจำกัดจำนวน</h2>
-                            <p className="text-gray-600">
-                                {activity.joinLimit ? 
-                                    (activity.joinLimitNumber ? 
-                                        `จำกัด ${activity.joinLimitNumber} คน` : 
-                                        'จำกัดจำนวน (ไม่ระบุจำนวน)') : 
-                                    'ไม่จำกัดจำนวน'}
-                            </p>
-                        </div>
-
-                        {activity.classroom && activity.classroom.length > 0 && (
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-700">ห้องเรียนที่เข้าร่วมได้</h2>
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                    {activity.classroom
-                                        .sort((a, b) => {
-                                            if (a.classroom.classLevel === b.classroom.classLevel) {
-                                                return a.classroom.classRoom - b.classroom.classRoom;
-                                            }
-                                            return a.classroom.classLevel - b.classroom.classLevel;
-                                        })
-                                        .map((c) => (
-                                            <span
-                                                key={c.classCanjoinId}
-                                                className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                                            >
-                                                ม.{c.classroom.classLevel}/{c.classroom.classRoom}
+                    </div>
+                    
+                    <div className="relative mb-6">
+                        <div className="overflow-x-auto pb-2 hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                            <div className="flex gap-2 px-1">
+                                {activity && getDatesBetween(activity.actDate, activity.actDateEnd).map((date) => {
+                                    const dateTime = DateTime.fromISO(date).setZone('Asia/Bangkok');
+                                    const isToday = DateTime.now().setZone('Asia/Bangkok').hasSame(dateTime, 'day');
+                                    const thaiMonth = convertNumberToThaiMonth(dateTime.month);
+                                    
+                                    return (
+                                        <button
+                                            key={date}
+                                            onClick={() => setSelectedDate(date)}
+                                            className={`flex-shrink-0 flex flex-col items-center w-24 py-2 rounded-lg transition-all ${
+                                                selectedDate === date
+                                                    ? 'bg-primary text-white shadow-lg transform scale-105'
+                                                    : 'bg-white border-line border hover:bg-gray-50'
+                                            } ${isToday ? 'ring-2 ring-primary' : ''}`}
+                                        >
+                                            <span className="text-xs mb-1">
+                                                {dateTime.toFormat('ccc')}
                                             </span>
-                                        ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {activity.teacher && activity.teacher.length > 0 && (
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-700">ครูผู้ดูแล</h2>
-                                <div className="mt-2">
-                                    {activity.teacher.map((t) => (
-                                        <div key={t.actTeacherId} className="text-gray-600">
-                                            {t.teacher.fName} {t.teacher.lName}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="mt-8">
-                            <h2 className="text-xl font-semibold text-gray-700 mb-4">ประวัติการบันทึก</h2>
-                            
-                            {/* Add classroom filter */}
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    กรองตามห้องเรียน:
-                                </label>
-                                <select
-                                    className="border rounded-md px-3 py-2 w-full max-w-xs"
-                                    value={selectedClassroom}
-                                    onChange={(e) => setSelectedClassroom(e.target.value)}
-                                >
-                                    <option value="all">ทุกห้องเรียน</option>
-                                    {activity && getUniqueClassrooms(activity.actParticipate).map((classroom) => (
-                                        <option key={classroom.classId} value={classroom.classId}>
-                                            ม.{classroom.classLevel}/{classroom.classRoom}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Date selector */}
-                            <div className="relative mb-6">
-                                <div className="overflow-x-auto pb-2 hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
-                                    <div className="flex gap-2 px-1">
-                                        {activity && getDatesBetween(activity.actDate, activity.actDateEnd).map((date) => {
-                                            const dateTime = DateTime.fromISO(date).setZone('Asia/Bangkok');
-                                            const isToday = DateTime.now().setZone('Asia/Bangkok').hasSame(dateTime, 'day');
-                                            const thaiMonth = convertNumberToThaiMonth(dateTime.month);
-                                            
-                                            return (
-                                                <button
-                                                    key={date}
-                                                    onClick={() => setSelectedDate(date)}
-                                                    className={`flex-shrink-0 flex flex-col items-center w-24 py-2 rounded-lg transition-all ${
-                                                        selectedDate === date
-                                                            ? 'bg-blue-600 text-white shadow-lg transform scale-105'
-                                                            : 'bg-white border hover:bg-gray-50'
-                                                    } ${isToday ? 'ring-2 ring-blue-400' : ''}`}
-                                                >
-                                                    <span className="text-xs mb-1">
-                                                        {dateTime.toFormat('ccc')}
-                                                    </span>
-                                                    <span className="text-lg font-semibold">
-                                                        {dateTime.day}
-                                                    </span>
-                                                    <span className="text-xs">
-                                                        {thaiMonth}
-                                                    </span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Participation table */}
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full table-fixed">
-                                    <thead>
-                                        <tr className="bg-gray-100">
-                                            <th className="px-6 py-3 text-left w-32">รหัสนักเรียน</th>
-                                            <th className="px-6 py-3 text-left">ชื่อ-นามสกุล</th>
-                                            <th className="px-6 py-3 text-center w-32">สถานะ</th>
-                                            <th className="px-6 py-3 text-left w-64">หมายเหตุ</th>
-                                            <th className="px-6 py-3 text-left w-48">บันทึกโดย</th>
-                                            <th className="px-6 py-3 text-left w-48">วันเวลาที่บันทึก</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200">
-                                        {filteredParticipations.map((record) => (
-                                            <tr key={record.actParticipateId} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">{record.stdId}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {record.student.title === 'BOY' ? 'เด็กชาย' : 'เด็กหญิง'} {record.student.fName} {record.student.lName}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        เข้าร่วม
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {record.note || '-'}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {record.operateBy === 'TEACHER' && record.teacher ? (
-                                                        `${record.teacher.tchCode} ${record.teacher.fName}`
-                                                    ) : record.operateBy}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {formatThaiDateTime(record.joinTimestamp)}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                {filteredParticipations.length === 0 && (
-                                    <div className="text-center py-8 text-gray-500">
-                                        {selectedDate ? 'ไม่พบข้อมูลการบันทึกในวันที่เลือก' : 'ยังไม่มีประวัติการบันทึก'}
-                                    </div>
-                                )}
+                                            <span className="text-lg font-semibold">
+                                                {dateTime.day}
+                                            </span>
+                                            <span className="text-xs">
+                                                {thaiMonth}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
+                    </div>
+
+                    <div className="overflow-x-auto border border-line rounded-lg">
+                        <table className="w-full divide-y divide-line font-body">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-color-alt uppercase tracking-wider">รหัสนักเรียน</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-color-alt uppercase tracking-wider">ชื่อ-นามสกุล</th>
+                                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-text-color-alt uppercase tracking-wider">สถานะ</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-color-alt uppercase tracking-wider">หมายเหตุ</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-color-alt uppercase tracking-wider">บันทึกโดย</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-color-alt uppercase tracking-wider">วันเวลาที่บันทึก</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-line">
+                                {filteredParticipations.map((record) => (
+                                    <tr key={record.actParticipateId} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-color-alt">{record.stdId}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-color">
+                                            {record.student.title === 'BOY' ? 'เด็กชาย' : 'เด็กหญิง'} {record.student.fName} {record.student.lName}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
+                                                </svg>
+                                                เข้าร่วม
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-color">
+                                            {record.note || '-'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-color">
+                                            {record.operateBy === 'TEACHER' && record.teacher ? (
+                                                <span className="inline-flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                    </svg>
+                                                    {record.teacher.tchCode} {record.teacher.fName}
+                                                </span>
+                                            ) : record.operateBy}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-color">
+                                            {formatThaiDateTime(record.joinTimestamp)}
+                                        </td>
+                                    </tr>
+                                ))}
+                                {filteredParticipations.length === 0 && (
+                                    <tr>
+                                        <td colSpan="6" className="px-6 py-8 text-center text-sm text-text-color-alt">
+                                            <div className="flex flex-col items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <p>{selectedDate ? 'ไม่พบข้อมูลการบันทึกในวันที่เลือก' : 'ยังไม่มีประวัติการบันทึก'}</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

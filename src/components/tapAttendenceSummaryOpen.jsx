@@ -2,7 +2,7 @@ export const TapAttendenceSummaryOpen = ({children, isTabOpen, title, handleIsTa
     return (
         <>
             <div>
-                <div className="w-full px-9 h-12 mb-2 bg-white border rounded-lg flex justify-between items-center border-t-4">
+                <div className="w-full px-9 h-12 mb-2 bg-white border rounded-lg flex justify-between items-center">
                     <span>{title}</span>
                     <div className={!isTabOpen[index] ? "block" : "hidden"} onClick={
                         () => { handleIsTabOpen(index); }
