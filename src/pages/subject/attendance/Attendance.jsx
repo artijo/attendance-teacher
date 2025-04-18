@@ -12,6 +12,7 @@ function Attendance() {
     const [notes, setNotes] = useState({}); // Add notes state
     const [isSaving, setIsSaving] = useState(false);
     const [changes, setChanges] = useState({}); // Track changes
+    const [searchQuery, setSearchQuery] = useState(''); // Add search query state
 
     useEffect(() => {
         axios.get(`${HOSTNAME}/t/studyTime/${studingid}`)
@@ -136,6 +137,18 @@ function Attendance() {
         }
     };
 
+    // Filter students based on search query
+    const filteredStudents = studyTime?.timetable.classroom.classroomMembers.filter(member => {
+        if (!searchQuery) return true;
+        
+        const query = searchQuery.toLowerCase();
+        const studentName = `${formatTitle(member.student.title)} ${member.student.fName} ${member.student.lName}`.toLowerCase();
+        const studentId = member.stdId.toLowerCase();
+        const studentNo = member.stdNo.toString();
+        
+        return studentName.includes(query) || studentId.includes(query) || studentNo.includes(query);
+    });
+
     const statusOptions = [
         { value: 'PRESENT', label: 'มาเรียน', color: 'bg-green-100', hoverColor: 'hover:bg-green-200', borderColor: 'border-green-300' },
         { value: 'ABSENT', label: 'ขาดเรียน', color: 'bg-red-100', hoverColor: 'hover:bg-red-200', borderColor: 'border-red-300' },
@@ -207,6 +220,39 @@ function Attendance() {
                             </h2>
                             <p className="text-text-color-alt font-body text-sm">บันทึกสถานะการเข้าเรียนของนักเรียนในคาบเรียนนี้</p>
                             
+                            {/* Add search input field */}
+                            <div className="mt-4">
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="ค้นหาตามชื่อ หรือ เลขที่..."
+                                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                                    />
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                    {searchQuery && (
+                                        <button 
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                            onClick={() => setSearchQuery('')}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    )}
+                                </div>
+                                {searchQuery && (
+                                    <div className="mt-2 text-sm text-primary font-medium">
+                                        พบ {filteredStudents.length} คน จากทั้งหมด {studyTime.timetable.classroom.classroomMembers.length} คน
+                                    </div>
+                                )}
+                            </div>
+                            
                             {Object.keys(changes).length > 0 && (
                                 <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-3 rounded-md flex items-start">
                                     <svg className="h-5 w-5 mr-2 mt-0.5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -233,8 +279,8 @@ function Attendance() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {studyTime.timetable.classroom.classroomMembers
-                                        .sort((a, b) => parseInt(a.stdNo) - parseInt(b.stdNo))
+                                    {filteredStudents
+                                        ?.sort((a, b) => parseInt(a.stdNo) - parseInt(b.stdNo))
                                         .map((member) => {
                                             const attendance = studyTime.attendance.find(att => att.stdId === member.stdId);
                                             return (
@@ -323,6 +369,16 @@ function Attendance() {
                                         })}
                                 </tbody>
                             </table>
+                            
+                            {filteredStudents && filteredStudents.length === 0 && (
+                                <div className="text-center py-8 text-text-color-alt">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <p className="text-lg font-medium">ไม่พบนักเรียนที่ตรงกับการค้นหา</p>
+                                    <p className="text-sm mt-1">ลองเปลี่ยนคำค้นหาหรือลบการค้นหา</p>
+                                </div>
+                            )}
                         </div>
                         
                         <div className="p-6 border-t border-line">
