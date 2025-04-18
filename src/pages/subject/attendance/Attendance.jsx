@@ -20,6 +20,18 @@ function Attendance() {
                 // Initialize attendance status from existing data
                 const initialStatus = {};
                 const initialNotes = {}; // Initialize notes
+                
+                // First set a default "PRESENT" status for all students
+                response.data.timetable.classroom.classroomMembers.forEach(member => {
+                    initialStatus[member.stdId] = {
+                        status: 'PRESENT', // Default to "PRESENT"
+                        method: 'Manual',
+                        timestamp: new Date().toISOString()
+                    };
+                    initialNotes[member.stdId] = '';
+                });
+                
+                // Then override with actual attendance data if it exists
                 response.data.attendance.forEach(att => {
                     initialStatus[att.stdId] = {
                         status: att.attStatus,
@@ -29,6 +41,7 @@ function Attendance() {
                     };
                     initialNotes[att.stdId] = att.note || ''; // Set initial notes
                 });
+                
                 setAttendanceStatus(initialStatus);
                 setNotes(initialNotes);
             })
@@ -69,7 +82,7 @@ function Attendance() {
                 attId: attendanceStatus[stdId]?.attId, // Include if updating existing record
                 stdId,
                 studingTimeId: studingid,
-                attStatus: attendanceStatus[stdId]?.status || 'ABSENT', // Default to ABSENT if not set
+                attStatus: attendanceStatus[stdId]?.status || 'PRESENT', // Default to PRESENT if not set
                 note: notes[stdId] || ''
             }));
 
