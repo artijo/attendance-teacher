@@ -157,6 +157,31 @@ function Attendance() {
         { value: 'LEAVE', label: 'ลา', color: 'bg-purple-100', hoverColor: 'hover:bg-purple-200', borderColor: 'border-purple-300' }
     ];
 
+    // Calculate attendance summary
+    const calculateSummary = () => {
+        if (!attendanceStatus || Object.keys(attendanceStatus).length === 0) return {};
+        
+        const summary = {
+            PRESENT: 0,
+            ABSENT: 0,
+            LATE: 0,
+            LEAVE: 0,
+            ACTIVITY: 0,
+            total: 0
+        };
+        
+        Object.values(attendanceStatus).forEach(status => {
+            if (status.status) {
+                summary[status.status] = (summary[status.status] || 0) + 1;
+                summary.total++;
+            }
+        });
+        
+        return summary;
+    };
+    
+    const attendanceSummary = calculateSummary();
+
     return (
         <div>
             {studyTime ? (
@@ -220,7 +245,64 @@ function Attendance() {
                             </h2>
                             <p className="text-text-color-alt font-body text-sm">บันทึกสถานะการเข้าเรียนของนักเรียนในคาบเรียนนี้</p>
                             
-                            {/* Add search input field */}
+                            {/* Add attendance summary */}
+                            {attendanceSummary.total > 0 && (
+                                <div className="mt-4 bg-gray-50 border border-line rounded-lg p-4">
+                                    <h3 className="text-sm font-medium text-text-color mb-3 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+                                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+                                        </svg>
+                                        สรุปการเข้าเรียน
+                                    </h3>
+                                    <div className="flex flex-wrap gap-3">
+                                        {statusOptions.map(option => (
+                                            <div key={option.value} className={`flex items-center px-3 py-2 rounded-md ${option.color}`}>
+                                                <div className="text-sm mr-2 font-medium">{option.label}:</div>
+                                                <div className="text-sm font-bold">
+                                                    {attendanceSummary[option.value] || 0} คน
+                                                    {attendanceSummary.total > 0 && (
+                                                        <span className="text-xs ml-1 text-text-color-alt">
+                                                            ({Math.round((attendanceSummary[option.value] || 0) / attendanceSummary.total * 100)}%)
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        
+                                        <div className="flex items-center px-3 py-2 rounded-md bg-gray-100">
+                                            <div className="text-sm mr-2 font-medium">ทั้งหมด:</div>
+                                            <div className="text-sm font-bold">{attendanceSummary.total} คน</div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Visual progress bar representation */}
+                                    <div className="mt-3 h-3 w-full bg-gray-200 rounded-full overflow-hidden flex">
+                                        {statusOptions.map((option, index) => {
+                                            const percentage = (attendanceSummary[option.value] || 0) / attendanceSummary.total * 100;
+                                            return (
+                                                <div
+                                                    key={option.value}
+                                                    style={{
+                                                        width: `${percentage}%`,
+                                                        height: '100%',
+                                                    }}
+                                                    className={`
+                                                        ${option.value === 'PRESENT' ? 'bg-green-500' : ''}
+                                                        ${option.value === 'ABSENT' ? 'bg-red-500' : ''}
+                                                        ${option.value === 'LATE' ? 'bg-yellow-500' : ''}
+                                                        ${option.value === 'ACTIVITY' ? 'bg-blue-500' : ''}
+                                                        ${option.value === 'LEAVE' ? 'bg-purple-500' : ''}
+                                                    `}
+                                                    title={`${option.label}: ${attendanceSummary[option.value] || 0} คน (${Math.round(percentage)}%)`}
+                                                ></div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Search input field */}
                             <div className="mt-4">
                                 <div className="relative">
                                     <input
