@@ -1,5 +1,3 @@
-import { useNavigate } from "react-router-dom";
-import ExportPdfButton from "../exportPdfButton";
 import ExportExcelButton from "../exportExcelButton";
 import { TapAttendenceSummaryOpen } from "../tapAttendenceSummaryOpen";
 import { useEffect, useRef, useState } from "react";
@@ -15,6 +13,39 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
     // const [classroomInfo, setClassroomInfo] = useState(null);
     const [isTabOpen, setIsTabOpen] = useState([]);
     let indexReal = 0;
+
+    // Function to calculate attendance summary for each period
+    const calculatePeriodSummary = (month) => {
+        // Get all periods for the month
+        const periodAttendances = studentList.data[0].attendance.filter(att => att.month === month);
+        
+        // Initialize summary object for each period
+        const summary = {};
+        
+        periodAttendances.forEach((_, periodIndex) => {
+            summary[periodIndex] = {
+                present: 0,
+                absent: 0,
+                late: 0,
+                activity: 0,
+                leave: 0,
+                total: 0,
+                null: 0
+            };
+            
+            // Count each status for this period across all students
+            studentList.data.forEach(student => {
+                const attendance = student.attendance.filter(att => att.month === month)[periodIndex];
+                if (attendance) {
+                    const status = attendance.attStatus?.toLowerCase() || null;
+                    summary[periodIndex][status || 'null'] += 1;
+                    summary[periodIndex].total += 1;
+                }
+            });
+        });
+        
+        return summary;
+    };
 
     const formatAttStatus = (status) => {
         switch (status) {
@@ -71,6 +102,38 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
         )
     }
 
+    // New component for summary rows
+    const TableSummary = ({ month }) => {
+        const summary = calculatePeriodSummary(month);
+        
+        return (
+            <>
+                <tr className="bg-gray-100 font-medium text-gray-700 border-t-2 border-gray-300">
+                    <td colSpan={3} className="px-6 py-3 text-right font-bold">สรุปการเข้าเรียน:</td>
+                    {Object.keys(summary).map((periodIndex) => (
+                        <td key={periodIndex} className="px-6 py-3 text-left">
+                            <div className="flex flex-col gap-1">
+                                <span className="text-gray-700">มาเรียน: {summary[periodIndex].present}</span>
+                                <span className="text-gray-700">ขาดเรียน: {summary[periodIndex].absent}</span>
+                                <span className="text-gray-700">มาสาย: {summary[periodIndex].late}</span>
+                                <span className="text-gray-700">กิจกรรม: {summary[periodIndex].activity}</span>
+                                <span className="text-gray-700">ลา: {summary[periodIndex].leave}</span>
+                            </div>
+                        </td>
+                    ))}
+                </tr>
+                <tr className="bg-gray-100 font-medium text-gray-700 border-b border-gray-300">
+                    <td colSpan={3} className="px-6 py-3 text-right">รวมทั้งหมด:</td>
+                    {Object.keys(summary).map((periodIndex) => (
+                        <td key={periodIndex} className="px-6 py-3 text-center font-bold">
+                            {summary[periodIndex].total} คน
+                        </td>
+                    ))}
+                </tr>
+            </>
+        );
+    };
+
     const Table = ({month,exportPdf, exportExcel,index}) => {
         return(
             <>
@@ -92,13 +155,13 @@ export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, su
                                 </thead>
                                 <tbody>
                                     <TableBody month={month}/>
+                                    <TableSummary month={month} />
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </>
-            
         )
         
     }
