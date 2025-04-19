@@ -13,6 +13,7 @@ function Attendance() {
     const [isSaving, setIsSaving] = useState(false);
     const [changes, setChanges] = useState({}); // Track changes
     const [searchQuery, setSearchQuery] = useState(''); // Add search query state
+    const [hasExistingRecords, setHasExistingRecords] = useState(false);
 
     useEffect(() => {
         axios.get(`${HOSTNAME}/t/studyTime/${studingid}`)
@@ -31,6 +32,10 @@ function Attendance() {
                     };
                     initialNotes[member.stdId] = '';
                 });
+                
+                // Check if we have existing attendance records
+                const hasRecords = response.data.attendance.length > 0;
+                setHasExistingRecords(hasRecords);
                 
                 // Then override with actual attendance data if it exists
                 response.data.attendance.forEach(att => {
@@ -78,23 +83,40 @@ function Attendance() {
     const handleSaveAttendance = async () => {
         try {
             setIsSaving(true);
-            // Filter only changed records
-            const changedRecords = Object.keys(changes).map(stdId => ({
-                attId: attendanceStatus[stdId]?.attId, // Include if updating existing record
-                stdId,
-                studingTimeId: studingid,
-                attStatus: attendanceStatus[stdId]?.status || 'PRESENT', // Default to PRESENT if not set
-                note: notes[stdId] || ''
-            }));
-
-            if (changedRecords.length === 0) {
-                alert('ไม่มีการเปลี่ยนแปลงข้อมูล');
-                return;
+            
+            // If there are no changes but it's the first time (no existing records),
+            // we need to create records for all students
+            let recordsToSave;
+            
+            if (!hasExistingRecords) {
+                // First time saving - create records for all students
+                recordsToSave = Object.keys(attendanceStatus).map(stdId => ({
+                    attId: attendanceStatus[stdId]?.attId,
+                    stdId,
+                    studingTimeId: studingid,
+                    attStatus: attendanceStatus[stdId]?.status || 'PRESENT',
+                    note: notes[stdId] || ''
+                }));
+            } else {
+                // Subsequent saves - only save changed records
+                recordsToSave = Object.keys(changes).map(stdId => ({
+                    attId: attendanceStatus[stdId]?.attId,
+                    stdId,
+                    studingTimeId: studingid,
+                    attStatus: attendanceStatus[stdId]?.status || 'PRESENT',
+                    note: notes[stdId] || ''
+                }));
+                
+                if (recordsToSave.length === 0) {
+                    alert('ไม่มีการเปลี่ยนแปลงข้อมูล');
+                    setIsSaving(false);
+                    return;
+                }
             }
 
             // Separate new and existing records
-            const newRecords = changedRecords.filter(record => !record.attId);
-            const updatedRecords = changedRecords.filter(record => record.attId);
+            const newRecords = recordsToSave.filter(record => !record.attId);
+            const updatedRecords = recordsToSave.filter(record => record.attId);
 
             // Send updates in parallel if needed
             await Promise.all([
@@ -103,6 +125,11 @@ function Attendance() {
             ]);
 
             alert('บันทึกการเข้าเรียนเรียบร้อย');
+            // After saving first time, mark as having existing records
+            setHasExistingRecords(true);
+            // Clear changes state
+            setChanges({});
+            
             navigate(-1);
         } catch (error) {
             console.error('Error saving attendance:', error);
@@ -476,9 +503,9 @@ function Attendance() {
                                 </button>
                                 <button
                                     onClick={handleSaveAttendance}
-                                    disabled={isSaving || Object.keys(changes).length === 0}
+                                    disabled={isSaving || (hasExistingRecords && Object.keys(changes).length === 0)}
                                     className={`px-4 py-2 bg-primary hover:bg-accent text-white rounded-lg transition-colors flex items-center
-                                        ${(isSaving || Object.keys(changes).length === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        ${(isSaving || (hasExistingRecords && Object.keys(changes).length === 0)) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     {isSaving ? (
                                         <>
