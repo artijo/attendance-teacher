@@ -13,7 +13,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom', 'axios', 'luxon', 'tabletojson', 'xlsx', 'yup', 'zod', '@ag-media/react-pdf-table', '@react-pdf/renderer','zusyand']
+          vendor: ['react', 'react-dom', 'react-router-dom', 'axios', 'luxon', 'tabletojson', 'xlsx', 'yup', 'zod', '@ag-media/react-pdf-table', '@react-pdf/renderer','zustand']
           // Add other libraries you want to split into separate chunks here
         },
       },
