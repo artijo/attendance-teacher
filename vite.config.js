@@ -9,13 +9,18 @@ export default defineConfig({
     port : 5174
   },
   build: {
-    sourcemap: true,
+    sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom', 'axios', 'luxon', 'tabletojson', 'xlsx', 'yup', 'zod', '@ag-media/react-pdf-table', '@react-pdf/renderer','zustand']
-          // Add other libraries you want to split into separate chunks here
-        },
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            return id
+              .toString()
+              .split('node_modules/')[1]
+              .split('/')[0]
+              .toString()
+          }
+        }
       },
     },
   },
