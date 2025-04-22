@@ -119,7 +119,7 @@ function Login() {
       </div>
       
       <div className="mt-4 text-text-color-alt text-sm font-body">
-        © {new Date().getFullYear()} ระบบบันทึกและติดตามการเข้าเรียนและกิจกรรมของนักเรียน
+        © 2025 ระบบบันทึกและติดตามการเข้าเรียนและกิจกรรมของนักเรียน
       </div>
     </div>
   );
