@@ -1,52 +1,61 @@
-import { StrictMode } from 'react'
+import { StrictMode, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 
-// import pages
-import Login from './pages/Login.jsx'
-import Dashboard from './pages/Dashboard.jsx'
+// Lazy load all page components
+// Auth
+const Login = lazy(() => import('./pages/Login.jsx'));
+const NewLogin = lazy(() => import('./pages/New-Account.jsx'));
+const NewPassword = lazy(() => import('./pages/New-Password.jsx'));
+const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
 
 // Subject Page
-import Subject from './pages/subject/Subject.jsx';
-import SubjectDetail from './pages/subject/SubjectDetail.jsx';
-import SubjectAttendance from './pages/subject/SubjectAttendance.jsx';
-import Attendance from './pages/subject/attendance/Attendance.jsx';
-// Classroom Page
-import Classroom from './pages/classroom/Classroom.jsx';
-import ClassroomDetail from './pages/classroom/ClassroomDetail.jsx';
-import StudentAttendance from './pages/classroom/attendance/StudentAttendance.jsx';
-// Activity Page
-import Activities from './pages/activities/Activities.jsx';
-import ActivityDetail from './pages/activities/ActivityDetail.jsx';
-import CheckIn from './pages/activities/CheckIn.jsx';
-import EditCheckIn from './pages/activities/ActivityEditCheckinByDate.jsx';
-// Subject Check Attendence
-import SubjectCheckAttendence from './pages/subject/SubjectCheckAttendence.jsx';
-import SubjectCheckAttendenceDetail from './pages/subject/SubjectCheckAttendenceDetail.jsx';
-import SubjectCheckAttendenceByPeriod from './pages/subject/SubjectCheckAttendenceByPeriod.jsx';
-import ExcelByFilterRoom from './pages/activities/excelmanagedownload/ExcelByRoomJoin.jsx';
-import FilterClassroomPage from './pages/activities/pdfmanagedownload/FilterClassroomPage.jsx';
-import FilterByClassroom from './components/activities/exportPDF/FilterByClassroom.jsx';
-import FilterExcelPage from './pages/activities/excelmanagedownload/ExcelByClassroomPage.jsx';
-import FilterByClassroomJoinPage from './pages/activities/pdfmanagedownload/FilterByClassroomJoinPage.jsx';
-import FilterByRoomJoin from './components/activities/exportPDF/FilterByRoomJoin.jsx';
-import StudentAttendanceFilterByDay from './pages/classroom/attendance/StudentAttendanceFilterByDay.jsx';
-import PaticepateByDay from './components/classroom/attendance/PaticepateByDay.jsx';
+const Subject = lazy(() => import('./pages/subject/Subject.jsx'));
+const SubjectDetail = lazy(() => import('./pages/subject/SubjectDetail.jsx'));
+const SubjectAttendance = lazy(() => import('./pages/subject/SubjectAttendance.jsx'));
+const Attendance = lazy(() => import('./pages/subject/attendance/Attendance.jsx'));
+const SubjectCheckAttendence = lazy(() => import('./pages/subject/SubjectCheckAttendence.jsx'));
+const SubjectCheckAttendenceDetail = lazy(() => import('./pages/subject/SubjectCheckAttendenceDetail.jsx'));
+const SubjectCheckAttendenceByPeriod = lazy(() => import('./pages/subject/SubjectCheckAttendenceByPeriod.jsx'));
 
-// Auth
-import NewLogin from './pages/New-Account.jsx';
-import NewPassword from './pages/New-Password.jsx';
+// Classroom Page
+const Classroom = lazy(() => import('./pages/classroom/Classroom.jsx'));
+const ClassroomDetail = lazy(() => import('./pages/classroom/ClassroomDetail.jsx'));
+const StudentAttendance = lazy(() => import('./pages/classroom/attendance/StudentAttendance.jsx'));
+const StudentAttendanceFilterByDay = lazy(() => import('./pages/classroom/attendance/StudentAttendanceFilterByDay.jsx'));
+const PaticepateByDay = lazy(() => import('./components/classroom/attendance/PaticepateByDay.jsx'));
+
+// Activity Page
+const Activities = lazy(() => import('./pages/activities/Activities.jsx'));
+const ActivityDetail = lazy(() => import('./pages/activities/ActivityDetail.jsx'));
+const CheckIn = lazy(() => import('./pages/activities/CheckIn.jsx'));
+const EditCheckIn = lazy(() => import('./pages/activities/ActivityEditCheckinByDate.jsx'));
+const ExcelByFilterRoom = lazy(() => import('./pages/activities/excelmanagedownload/ExcelByRoomJoin.jsx'));
+const FilterClassroomPage = lazy(() => import('./pages/activities/pdfmanagedownload/FilterClassroomPage.jsx'));
+const FilterByClassroom = lazy(() => import('./components/activities/exportPDF/FilterByClassroom.jsx'));
+const FilterExcelPage = lazy(() => import('./pages/activities/excelmanagedownload/ExcelByClassroomPage.jsx'));
+const FilterByClassroomJoinPage = lazy(() => import('./pages/activities/pdfmanagedownload/FilterByClassroomJoinPage.jsx'));
+const FilterByRoomJoin = lazy(() => import('./components/activities/exportPDF/FilterByRoomJoin.jsx'));
+
+// Loading component for Suspense fallback
+const LoadingSpinner = () => (
+  <div className="loading-spinner">
+    <div className="spinner"></div>
+    <p>Loading...</p>
+  </div>
+);
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
   <BrowserRouter>
+    <Suspense fallback={<LoadingSpinner />}>
       <Routes>
-      <Route path="login" element={<Login />} />
-      <Route path="new-login" element={<NewLogin />} />
-      <Route path="new-password" element={<NewPassword />} />
-      <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="login" element={<Login />} />
+        <Route path="new-login" element={<NewLogin />} />
+        <Route path="new-password" element={<NewPassword />} />
+        <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/" element={<App />} >
           <Route path='dashboard' element={<Dashboard />} />
           <Route path='subjects' element={<Subject />} />
@@ -76,6 +85,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="activity/participate/filterbyclassroomjoin/pdfpage" element={<FilterByRoomJoin />} />
         </Route>
       </Routes>
+    </Suspense>
   </BrowserRouter>,
   // </StrictMode>,
 )
