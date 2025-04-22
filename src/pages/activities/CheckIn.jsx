@@ -19,6 +19,7 @@ function CheckIn() {
     const [notes, setNotes] = useState({});
     const [studentStatuses, setStudentStatuses] = useState({});
     const [isValidDate, setIsValidDate] = useState(false);
+    const [searchQuery, setSearchQuery] = useState(''); // Add search query state
 
     const checkValidDate = (activity) => {
         const now = DateTime.now().setZone('Asia/Bangkok');
@@ -113,11 +114,23 @@ function CheckIn() {
                 student.classId === selectedClassroomId
             );
         }
+        
+        // Add search functionality
+        if (searchQuery.trim() !== '') {
+            const query = searchQuery.toLowerCase();
+            result = result.filter(student => {
+                const studentName = `${student.student.title === 'BOY' ? 'เด็กชาย' : 'เด็กหญิง'} ${student.student.fName} ${student.student.lName}`.toLowerCase();
+                const studentId = student.stdId.toLowerCase();
+                const studentNo = student.stdNo.toString();
+                
+                return studentName.includes(query) || studentId.includes(query) || studentNo.includes(query);
+            });
+        }
 
         result.sort((a, b) => parseInt(a.stdNo) - parseInt(b.stdNo));
         
         setFilteredStudents(result);
-    }, [students, selectedClassroomId]);
+    }, [students, selectedClassroomId, searchQuery]);
 
     const handleAttendanceChange = async (studentId, status, note = notes[studentId] || '') => {
         if (!isValidDate) {
@@ -245,23 +258,68 @@ function CheckIn() {
                                 </div>
                             )}
                             
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium text-text-color-alt mb-2 font-body">
-                                    กรองตามห้องเรียน
-                                </label>
-                                <select
-                                    className="w-full md:w-72 py-2.5 px-3 rounded-lg border-line bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-body"
-                                    value={selectedClassroomId}
-                                    onChange={(e) => handleClassroomFilter(e.target.value)}
-                                >
-                                    <option value="all">ทุกห้องเรียน</option>
-                                    {availableClassrooms.map((classroom) => (
-                                        <option key={classroom.classId} value={classroom.classId}>
-                                            ม.{classroom.classLevel}/{classroom.classRoom}
-                                        </option>
-                                    ))}
-                                </select>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-text-color-alt mb-2 font-body">
+                                        กรองตามห้องเรียน
+                                    </label>
+                                    <select
+                                        className="w-full py-2.5 px-3 rounded-lg border-line bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm font-body"
+                                        value={selectedClassroomId}
+                                        onChange={(e) => handleClassroomFilter(e.target.value)}
+                                    >
+                                        <option value="all">ทุกห้องเรียน</option>
+                                        {availableClassrooms.map((classroom) => (
+                                            <option key={classroom.classId} value={classroom.classId}>
+                                                ม.{classroom.classLevel}/{classroom.classRoom}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                
+                                {/* Add search input */}
+                                <div>
+                                    <label className="block text-sm font-medium text-text-color-alt mb-2 font-body">
+                                        ค้นหานักเรียน
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            placeholder="ค้นหาตามชื่อ รหัสนักเรียน หรือเลขที่..."
+                                            className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm"
+                                        />
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                            </svg>
+                                        </div>
+                                        {searchQuery && (
+                                            <button 
+                                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                                onClick={() => setSearchQuery('')}
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
+
+                            {/* Show search results count when searching */}
+                            {searchQuery && (
+                                <div className="mb-4 text-sm">
+                                    <span className="font-medium text-primary">
+                                        พบ {filteredStudents.length} คน
+                                    </span>
+                                    {filteredStudents.length !== students.length && (
+                                        <span className="text-text-color-alt"> จากทั้งหมด {students.length} คน</span>
+                                    )}
+                                </div>
+                            )}
 
                             {activity.joinLimit && (
                                 <div className="mb-6 py-2 px-4 bg-blue-50 text-blue-700 rounded-lg inline-flex items-center">

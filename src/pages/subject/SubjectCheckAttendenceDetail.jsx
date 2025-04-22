@@ -189,6 +189,30 @@ function SubjectCheckAttendenceDetail() {
                                         </td>
                                     </tr>
                                 ))}
+                                
+                                {/* Add summary row for students without exam rights */}
+                                <tr className="bg-gray-50 border-t-2 border-gray-300 font-medium">
+                                    <td colSpan={8} className="px-6 py-4 text-right">
+                                        จำนวนนักเรียนที่ไม่มีสิทธิ์สอบ (มส):
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <span className="inline-flex justify-center min-w-12 rounded-full px-3 py-1 text-sm font-bold bg-red-100 text-red-800">
+                                            {abStact.filter(item => item.canExam === "ไม่มีสิทธิ์สอบ").length} คน
+                                        </span>
+                                    </td>
+                                </tr>
+                                
+                                {/* Add summary row for total students */}
+                                <tr className="bg-gray-50 border-b-2 border-gray-300 font-medium">
+                                    <td colSpan={8} className="px-6 py-4 text-right">
+                                        จำนวนนักเรียนทั้งหมด:
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <span className="inline-flex justify-center min-w-12 rounded-full px-3 py-1 text-sm font-bold bg-gray-100 text-gray-800">
+                                            {abStact.length} คน
+                                        </span>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

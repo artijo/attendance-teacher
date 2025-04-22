@@ -12,6 +12,8 @@ function Attendance() {
     const [notes, setNotes] = useState({}); // Add notes state
     const [isSaving, setIsSaving] = useState(false);
     const [changes, setChanges] = useState({}); // Track changes
+    const [searchQuery, setSearchQuery] = useState(''); // Add search query state
+    const [hasExistingRecords, setHasExistingRecords] = useState(false);
 
     useEffect(() => {
         axios.get(`${HOSTNAME}/t/studyTime/${studingid}`)
@@ -20,6 +22,22 @@ function Attendance() {
                 // Initialize attendance status from existing data
                 const initialStatus = {};
                 const initialNotes = {}; // Initialize notes
+                
+                // First set a default "PRESENT" status for all students
+                response.data.timetable.classroom.classroomMembers.forEach(member => {
+                    initialStatus[member.stdId] = {
+                        status: 'PRESENT', // Default to "PRESENT"
+                        method: 'Manual',
+                        timestamp: new Date().toISOString()
+                    };
+                    initialNotes[member.stdId] = '';
+                });
+                
+                // Check if we have existing attendance records
+                const hasRecords = response.data.attendance.length > 0;
+                setHasExistingRecords(hasRecords);
+                
+                // Then override with actual attendance data if it exists
                 response.data.attendance.forEach(att => {
                     initialStatus[att.stdId] = {
                         status: att.attStatus,
@@ -29,6 +47,7 @@ function Attendance() {
                     };
                     initialNotes[att.stdId] = att.note || ''; // Set initial notes
                 });
+                
                 setAttendanceStatus(initialStatus);
                 setNotes(initialNotes);
             })
@@ -64,23 +83,40 @@ function Attendance() {
     const handleSaveAttendance = async () => {
         try {
             setIsSaving(true);
-            // Filter only changed records
-            const changedRecords = Object.keys(changes).map(stdId => ({
-                attId: attendanceStatus[stdId]?.attId, // Include if updating existing record
-                stdId,
-                studingTimeId: studingid,
-                attStatus: attendanceStatus[stdId]?.status || 'ABSENT', // Default to ABSENT if not set
-                note: notes[stdId] || ''
-            }));
-
-            if (changedRecords.length === 0) {
-                alert('ไม่มีการเปลี่ยนแปลงข้อมูล');
-                return;
+            
+            // If there are no changes but it's the first time (no existing records),
+            // we need to create records for all students
+            let recordsToSave;
+            
+            if (!hasExistingRecords) {
+                // First time saving - create records for all students
+                recordsToSave = Object.keys(attendanceStatus).map(stdId => ({
+                    attId: attendanceStatus[stdId]?.attId,
+                    stdId,
+                    studingTimeId: studingid,
+                    attStatus: attendanceStatus[stdId]?.status || 'PRESENT',
+                    note: notes[stdId] || ''
+                }));
+            } else {
+                // Subsequent saves - only save changed records
+                recordsToSave = Object.keys(changes).map(stdId => ({
+                    attId: attendanceStatus[stdId]?.attId,
+                    stdId,
+                    studingTimeId: studingid,
+                    attStatus: attendanceStatus[stdId]?.status || 'PRESENT',
+                    note: notes[stdId] || ''
+                }));
+                
+                if (recordsToSave.length === 0) {
+                    alert('ไม่มีการเปลี่ยนแปลงข้อมูล');
+                    setIsSaving(false);
+                    return;
+                }
             }
 
             // Separate new and existing records
-            const newRecords = changedRecords.filter(record => !record.attId);
-            const updatedRecords = changedRecords.filter(record => record.attId);
+            const newRecords = recordsToSave.filter(record => !record.attId);
+            const updatedRecords = recordsToSave.filter(record => record.attId);
 
             // Send updates in parallel if needed
             await Promise.all([
@@ -89,6 +125,11 @@ function Attendance() {
             ]);
 
             alert('บันทึกการเข้าเรียนเรียบร้อย');
+            // After saving first time, mark as having existing records
+            setHasExistingRecords(true);
+            // Clear changes state
+            setChanges({});
+            
             navigate(-1);
         } catch (error) {
             console.error('Error saving attendance:', error);
@@ -123,6 +164,18 @@ function Attendance() {
         }
     };
 
+    // Filter students based on search query
+    const filteredStudents = studyTime?.timetable.classroom.classroomMembers.filter(member => {
+        if (!searchQuery) return true;
+        
+        const query = searchQuery.toLowerCase();
+        const studentName = `${formatTitle(member.student.title)} ${member.student.fName} ${member.student.lName}`.toLowerCase();
+        const studentId = member.stdId.toLowerCase();
+        const studentNo = member.stdNo.toString();
+        
+        return studentName.includes(query) || studentId.includes(query) || studentNo.includes(query);
+    });
+
     const statusOptions = [
         { value: 'PRESENT', label: 'มาเรียน', color: 'bg-green-100', hoverColor: 'hover:bg-green-200', borderColor: 'border-green-300' },
         { value: 'ABSENT', label: 'ขาดเรียน', color: 'bg-red-100', hoverColor: 'hover:bg-red-200', borderColor: 'border-red-300' },
@@ -130,6 +183,31 @@ function Attendance() {
         { value: 'ACTIVITY', label: 'กิจกรรม', color: 'bg-blue-100', hoverColor: 'hover:bg-blue-200', borderColor: 'border-blue-300' },
         { value: 'LEAVE', label: 'ลา', color: 'bg-purple-100', hoverColor: 'hover:bg-purple-200', borderColor: 'border-purple-300' }
     ];
+
+    // Calculate attendance summary
+    const calculateSummary = () => {
+        if (!attendanceStatus || Object.keys(attendanceStatus).length === 0) return {};
+        
+        const summary = {
+            PRESENT: 0,
+            ABSENT: 0,
+            LATE: 0,
+            LEAVE: 0,
+            ACTIVITY: 0,
+            total: 0
+        };
+        
+        Object.values(attendanceStatus).forEach(status => {
+            if (status.status) {
+                summary[status.status] = (summary[status.status] || 0) + 1;
+                summary.total++;
+            }
+        });
+        
+        return summary;
+    };
+    
+    const attendanceSummary = calculateSummary();
 
     return (
         <div>
@@ -194,6 +272,96 @@ function Attendance() {
                             </h2>
                             <p className="text-text-color-alt font-body text-sm">บันทึกสถานะการเข้าเรียนของนักเรียนในคาบเรียนนี้</p>
                             
+                            {/* Add attendance summary */}
+                            {attendanceSummary.total > 0 && (
+                                <div className="mt-4 bg-gray-50 border border-line rounded-lg p-4">
+                                    <h3 className="text-sm font-medium text-text-color mb-3 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+                                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+                                        </svg>
+                                        สรุปการเข้าเรียน
+                                    </h3>
+                                    <div className="flex flex-wrap gap-3">
+                                        {statusOptions.map(option => (
+                                            <div key={option.value} className={`flex items-center px-3 py-2 rounded-md ${option.color}`}>
+                                                <div className="text-sm mr-2 font-medium">{option.label}:</div>
+                                                <div className="text-sm font-bold">
+                                                    {attendanceSummary[option.value] || 0} คน
+                                                    {attendanceSummary.total > 0 && (
+                                                        <span className="text-xs ml-1 text-text-color-alt">
+                                                            ({Math.round((attendanceSummary[option.value] || 0) / attendanceSummary.total * 100)}%)
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        
+                                        <div className="flex items-center px-3 py-2 rounded-md bg-gray-100">
+                                            <div className="text-sm mr-2 font-medium">ทั้งหมด:</div>
+                                            <div className="text-sm font-bold">{attendanceSummary.total} คน</div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Visual progress bar representation */}
+                                    <div className="mt-3 h-3 w-full bg-gray-200 rounded-full overflow-hidden flex">
+                                        {statusOptions.map((option, index) => {
+                                            const percentage = (attendanceSummary[option.value] || 0) / attendanceSummary.total * 100;
+                                            return (
+                                                <div
+                                                    key={option.value}
+                                                    style={{
+                                                        width: `${percentage}%`,
+                                                        height: '100%',
+                                                    }}
+                                                    className={`
+                                                        ${option.value === 'PRESENT' ? 'bg-green-500' : ''}
+                                                        ${option.value === 'ABSENT' ? 'bg-red-500' : ''}
+                                                        ${option.value === 'LATE' ? 'bg-yellow-500' : ''}
+                                                        ${option.value === 'ACTIVITY' ? 'bg-blue-500' : ''}
+                                                        ${option.value === 'LEAVE' ? 'bg-purple-500' : ''}
+                                                    `}
+                                                    title={`${option.label}: ${attendanceSummary[option.value] || 0} คน (${Math.round(percentage)}%)`}
+                                                ></div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Search input field */}
+                            <div className="mt-4">
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="ค้นหาตามชื่อ หรือ เลขที่..."
+                                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                                    />
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                    {searchQuery && (
+                                        <button 
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                            onClick={() => setSearchQuery('')}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    )}
+                                </div>
+                                {searchQuery && (
+                                    <div className="mt-2 text-sm text-primary font-medium">
+                                        พบ {filteredStudents.length} คน จากทั้งหมด {studyTime.timetable.classroom.classroomMembers.length} คน
+                                    </div>
+                                )}
+                            </div>
+                            
                             {Object.keys(changes).length > 0 && (
                                 <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-3 rounded-md flex items-start">
                                     <svg className="h-5 w-5 mr-2 mt-0.5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -220,8 +388,8 @@ function Attendance() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {studyTime.timetable.classroom.classroomMembers
-                                        .sort((a, b) => parseInt(a.stdNo) - parseInt(b.stdNo))
+                                    {filteredStudents
+                                        ?.sort((a, b) => parseInt(a.stdNo) - parseInt(b.stdNo))
                                         .map((member) => {
                                             const attendance = studyTime.attendance.find(att => att.stdId === member.stdId);
                                             return (
@@ -310,6 +478,16 @@ function Attendance() {
                                         })}
                                 </tbody>
                             </table>
+                            
+                            {filteredStudents && filteredStudents.length === 0 && (
+                                <div className="text-center py-8 text-text-color-alt">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <p className="text-lg font-medium">ไม่พบนักเรียนที่ตรงกับการค้นหา</p>
+                                    <p className="text-sm mt-1">ลองเปลี่ยนคำค้นหาหรือลบการค้นหา</p>
+                                </div>
+                            )}
                         </div>
                         
                         <div className="p-6 border-t border-line">
@@ -325,9 +503,9 @@ function Attendance() {
                                 </button>
                                 <button
                                     onClick={handleSaveAttendance}
-                                    disabled={isSaving || Object.keys(changes).length === 0}
+                                    disabled={isSaving || (hasExistingRecords && Object.keys(changes).length === 0)}
                                     className={`px-4 py-2 bg-primary hover:bg-accent text-white rounded-lg transition-colors flex items-center
-                                        ${(isSaving || Object.keys(changes).length === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        ${(isSaving || (hasExistingRecords && Object.keys(changes).length === 0)) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     {isSaving ? (
                                         <>
