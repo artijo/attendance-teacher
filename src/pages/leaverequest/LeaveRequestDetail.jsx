@@ -12,6 +12,10 @@ function LeaveRequestDetail() {
     const [processingIds, setProcessingIds] = useState([]);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
+    const [showDialog, setShowDialog] = useState(false);
+    const [dialogAction, setDialogAction] = useState(null);
+    const [currentRequestId, setCurrentRequestId] = useState(null);
+    const [rejectReason, setRejectReason] = useState("");
     
     const user = userStore((state) => state.user);
     const teacherId = user?.tchId || null;
@@ -103,10 +107,50 @@ function LeaveRequestDetail() {
         });
     };
     
+    const formatDateTime = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('th-TH', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
+    
     const formatTime = (timeString) => {
         if (!timeString) return '';
         const [hours, minutes] = timeString.split(':');
         return `${hours}:${minutes}`;
+    };
+    
+    const openConfirmationDialog = (leaveRequestStudingTimeId, action) => {
+        setCurrentRequestId(leaveRequestStudingTimeId);
+        setDialogAction(action);
+        setRejectReason(""); // Clear previous reason
+        setShowDialog(true);
+    };
+    
+    const closeDialog = () => {
+        setShowDialog(false);
+        setCurrentRequestId(null);
+        setDialogAction(null);
+        setRejectReason("");
+    };
+    
+    const confirmAction = () => {
+        if (!currentRequestId || !dialogAction) return;
+        
+        // If rejecting without a reason, show an error
+        if (dialogAction === 'REJECT' && !rejectReason.trim()) {
+            alert("กรุณาระบุเหตุผลในการไม่อนุมัติ");
+            return;
+        }
+        
+        // Proceed with the action
+        handleAction(currentRequestId, dialogAction);
+        closeDialog();
     };
     
     const handleAction = (leaveRequestStudingTimeId, action) => {
@@ -114,10 +158,18 @@ function LeaveRequestDetail() {
         setError(null);
         setSuccess(null);
         
-        axios.put(`${HOSTNAME}/t/leave-requests/studingtime/${leaveRequestStudingTimeId}`, { 
+        // Create request payload
+        const payload = { 
             action,
-            teacherId  // Pass the teacher ID for tracking who approved/rejected
-        })
+            teacherId
+        };
+        
+        // Add reason if rejecting
+        if (action === 'REJECT') {
+            payload.rejectReason = rejectReason;
+        }
+        
+        axios.put(`${HOSTNAME}/t/leave-requests/studingtime/${leaveRequestStudingTimeId}`, payload)
             .then((response) => {
                 setSuccess(`${action === 'APPROVE' ? 'อนุมัติ' : 'ปฏิเสธ'}คำขอลาสำเร็จ`);
                 
@@ -131,6 +183,7 @@ function LeaveRequestDetail() {
                                 ...time,
                                 leaveStatus: action === 'APPROVE' ? 'APPROVE' : 'REJECT',
                                 tacherApproveId: teacherId,
+                                rejectReason: action === 'REJECT' ? rejectReason : null,
                                 approverTimestamp: new Date().toISOString()
                             };
                         }
@@ -279,6 +332,12 @@ function LeaveRequestDetail() {
                                         <p className="text-sm text-text-color-alt">วันที่ลา</p>
                                         <p className="text-base font-medium">{formatDate(leaveRequest.leaveDate)}</p>
                                     </div>
+                                    
+                                    {/* Add submission date */}
+                                    <div>
+                                        <p className="text-sm text-text-color-alt">วันที่ส่งคำร้อง</p>
+                                        <p className="text-base font-medium">{formatDateTime(leaveRequest.createdDate || leaveRequest.createdAt)}</p>
+                                    </div>
                                 </div>
                                 
                                 <div className="mb-6">
@@ -355,19 +414,24 @@ function LeaveRequestDetail() {
                                                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(timeEntry.leaveStatus)}`}>
                                                                 {getStatusText(timeEntry.leaveStatus)}
                                                             </span>
+                                                            {timeEntry.leaveStatus === 'REJECT' && timeEntry.rejectReason && (
+                                                                <div className="mt-1 text-xs text-red-600">
+                                                                    เหตุผล: {timeEntry.rejectReason}
+                                                                </div>
+                                                            )}
                                                         </td>
                                                         <td className="px-4 py-4 whitespace-nowrap text-sm">
                                                             {timeEntry.leaveStatus === 'WAITING' ? (
                                                                 <div className="flex gap-2">
                                                                     <button 
-                                                                        onClick={() => handleAction(timeEntry.leaveRequestStudingTimeId, 'APPROVE')}
+                                                                        onClick={() => openConfirmationDialog(timeEntry.leaveRequestStudingTimeId, 'APPROVE')}
                                                                         disabled={processingIds.includes(timeEntry.leaveRequestStudingTimeId)}
                                                                         className="bg-green-600 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-700 transition-colors duration-200 disabled:opacity-50"
                                                                     >
                                                                         {processingIds.includes(timeEntry.leaveRequestStudingTimeId) ? 'กำลังดำเนินการ...' : 'อนุมัติ'}
                                                                     </button>
                                                                     <button 
-                                                                        onClick={() => handleAction(timeEntry.leaveRequestStudingTimeId, 'REJECT')}
+                                                                        onClick={() => openConfirmationDialog(timeEntry.leaveRequestStudingTimeId, 'REJECT')}
                                                                         disabled={processingIds.includes(timeEntry.leaveRequestStudingTimeId)}
                                                                         className="bg-red-600 text-white py-1 px-3 rounded-lg text-sm hover:bg-red-700 transition-colors duration-200 disabled:opacity-50"
                                                                     >
@@ -431,6 +495,57 @@ function LeaveRequestDetail() {
                             กลับไปหน้ารายการคำขอลา
                         </button>
                     </Link>
+                </div>
+            )}
+            
+            {/* Confirmation Dialog */}
+            {showDialog && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-fade-in">
+                        <h3 className="text-xl font-semibold text-text-color mb-4">
+                            {dialogAction === 'APPROVE' ? 'ยืนยันการอนุมัติ' : 'ยืนยันการไม่อนุมัติ'}
+                        </h3>
+                        
+                        <p className="text-text-color-alt mb-6">
+                            {dialogAction === 'APPROVE' 
+                                ? 'คุณต้องการอนุมัติคำขอลาหรือไม่?' 
+                                : 'คุณต้องการไม่อนุมัติคำขอลาหรือไม่?'}
+                        </p>
+                        
+                        {dialogAction === 'REJECT' && (
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-text-color mb-1">
+                                    เหตุผลในการไม่อนุมัติ <span className="text-red-500">*</span>
+                                </label>
+                                <textarea 
+                                    value={rejectReason}
+                                    onChange={(e) => setRejectReason(e.target.value)}
+                                    className="w-full px-3 py-2 border border-line rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
+                                    rows="3"
+                                    placeholder="กรุณาระบุเหตุผลในการไม่อนุมัติ"
+                                ></textarea>
+                            </div>
+                        )}
+                        
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={closeDialog}
+                                className="px-4 py-2 border border-line rounded-lg text-text-color hover:bg-gray-50 transition-colors"
+                            >
+                                ยกเลิก
+                            </button>
+                            <button
+                                onClick={confirmAction}
+                                className={`px-4 py-2 text-white rounded-lg transition-colors ${
+                                    dialogAction === 'APPROVE' 
+                                        ? 'bg-green-600 hover:bg-green-700' 
+                                        : 'bg-red-600 hover:bg-red-700'
+                                }`}
+                            >
+                                ยืนยัน
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
