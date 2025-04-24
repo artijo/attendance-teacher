@@ -112,7 +112,7 @@ function LeaveRequest() {
         switch(status) {
             case 'WAITING':
                 return 'bg-yellow-100 text-yellow-800';
-            case 'APPROVE':
+            case 'APPROVED':
                 return 'bg-green-100 text-green-800';
             case 'REJECT':
                 return 'bg-red-100 text-red-800';
@@ -125,7 +125,7 @@ function LeaveRequest() {
         switch(status) {
             case 'WAITING':
                 return 'รอการอนุมัติ';
-            case 'APPROVE':
+            case 'APPROVED':
                 return 'อนุมัติแล้ว';
             case 'REJECT':
                 return 'ไม่อนุมัติ';
@@ -186,9 +186,9 @@ function LeaveRequest() {
                             รอการอนุมัติ
                         </button>
                         <button 
-                            onClick={() => setStatusFilter('APPROVE')} 
+                            onClick={() => setStatusFilter('APPROVED')} 
                             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                                statusFilter === 'APPROVE' 
+                                statusFilter === 'APPROVED' 
                                     ? 'bg-green-600 text-white' 
                                     : 'bg-white text-text-color border border-line hover:bg-gray-50'
                             }`}

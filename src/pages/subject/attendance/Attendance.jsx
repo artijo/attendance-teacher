@@ -22,34 +22,50 @@ function Attendance() {
                 // Initialize attendance status from existing data
                 const initialStatus = {};
                 const initialNotes = {}; // Initialize notes
+                const initialChanges = {}; // Track which students need saving
                 
-                // First set a default "PRESENT" status for all students
-                response.data.timetable.classroom.classroomMembers.forEach(member => {
-                    initialStatus[member.stdId] = {
-                        status: 'PRESENT', // Default to "PRESENT"
-                        method: 'Manual',
-                        timestamp: new Date().toISOString()
-                    };
-                    initialNotes[member.stdId] = '';
+                // First check which students have attendance records
+                const studentsWithRecords = new Set();
+                response.data.attendance.forEach(att => {
+                    studentsWithRecords.add(att.stdId);
                 });
                 
-                // Check if we have existing attendance records
+                // Set default "PRESENT" for students without records
+                response.data.timetable.classroom.classroomMembers.forEach(member => {
+                    if (!studentsWithRecords.has(member.stdId)) {
+                        initialStatus[member.stdId] = {
+                            status: 'PRESENT', // Default to "PRESENT"
+                            method: 'Manual',
+                            timestamp: new Date().toISOString()
+                        };
+                        initialNotes[member.stdId] = '';
+                        initialChanges[member.stdId] = true; // Mark as needing to be saved
+                    }
+                });
+                
+                // Check if we have at least one existing attendance record
                 const hasRecords = response.data.attendance.length > 0;
                 setHasExistingRecords(hasRecords);
                 
-                // Then override with actual attendance data if it exists
+                // Then load actual attendance data for students who have records
                 response.data.attendance.forEach(att => {
                     initialStatus[att.stdId] = {
                         status: att.attStatus,
                         method: att.attMethod.attMethodName,
                         timestamp: att.attTimestamp,
-                        attId: att.attId // Store existing attendance ID
+                        attId: att.attId, // Store existing attendance ID
+                        fromSystem: true // Mark as coming from system
                     };
                     initialNotes[att.stdId] = att.note || ''; // Set initial notes
                 });
                 
                 setAttendanceStatus(initialStatus);
                 setNotes(initialNotes);
+                
+                // If there are students without records, mark them for saving
+                if (Object.keys(initialChanges).length > 0) {
+                    setChanges(initialChanges);
+                }
             })
             .catch((error) => {
                 console.error(error);
@@ -84,34 +100,25 @@ function Attendance() {
         try {
             setIsSaving(true);
             
-            // If there are no changes but it's the first time (no existing records),
-            // we need to create records for all students
-            let recordsToSave;
+            // Collect records that need to be saved
+            // These are either new records or modified existing records
+            const recordsToSave = Object.keys(attendanceStatus)
+                .filter(stdId => {
+                    // Include if it's a new record or if it has been changed
+                    return !attendanceStatus[stdId]?.attId || changes[stdId];
+                })
+                .map(stdId => ({
+                    attId: attendanceStatus[stdId]?.attId,
+                    stdId,
+                    studingTimeId: studingid,
+                    attStatus: attendanceStatus[stdId]?.status || 'PRESENT',
+                    note: notes[stdId] || ''
+                }));
             
-            if (!hasExistingRecords) {
-                // First time saving - create records for all students
-                recordsToSave = Object.keys(attendanceStatus).map(stdId => ({
-                    attId: attendanceStatus[stdId]?.attId,
-                    stdId,
-                    studingTimeId: studingid,
-                    attStatus: attendanceStatus[stdId]?.status || 'PRESENT',
-                    note: notes[stdId] || ''
-                }));
-            } else {
-                // Subsequent saves - only save changed records
-                recordsToSave = Object.keys(changes).map(stdId => ({
-                    attId: attendanceStatus[stdId]?.attId,
-                    stdId,
-                    studingTimeId: studingid,
-                    attStatus: attendanceStatus[stdId]?.status || 'PRESENT',
-                    note: notes[stdId] || ''
-                }));
-                
-                if (recordsToSave.length === 0) {
-                    alert('ไม่มีการเปลี่ยนแปลงข้อมูล');
-                    setIsSaving(false);
-                    return;
-                }
+            if (recordsToSave.length === 0) {
+                alert('ไม่มีการเปลี่ยนแปลงข้อมูล');
+                setIsSaving(false);
+                return;
             }
 
             // Separate new and existing records
@@ -125,7 +132,7 @@ function Attendance() {
             ]);
 
             alert('บันทึกการเข้าเรียนเรียบร้อย');
-            // After saving first time, mark as having existing records
+            // After saving, mark as having existing records
             setHasExistingRecords(true);
             // Clear changes state
             setChanges({});
@@ -368,7 +375,7 @@ function Attendance() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
                                     <div>
-                                        <p className="font-medium">คุณได้ทำการเปลี่ยนแปลงข้อมูล {Object.keys(changes).length} รายการ</p>
+                                        <p className="font-medium">คุณมีข้อมูลที่ต้องบันทึก {Object.keys(changes).length} รายการ</p>
                                         <p className="text-sm mt-1">กรุณากดปุ่ม "บันทึกการเข้าเรียน" เพื่อบันทึกการเปลี่ยนแปลง</p>
                                     </div>
                                 </div>
@@ -392,17 +399,25 @@ function Attendance() {
                                         ?.sort((a, b) => parseInt(a.stdNo) - parseInt(b.stdNo))
                                         .map((member) => {
                                             const attendance = studyTime.attendance.find(att => att.stdId === member.stdId);
+                                            const isFromSystem = attendanceStatus[member.stdId]?.fromSystem;
                                             return (
                                                 <tr 
                                                     key={member.stdId} 
                                                     className={`border-b hover:bg-gray-50 transition-colors duration-200 ${
                                                         changes[member.stdId] ? 'bg-yellow-50' : ''
+                                                    } ${
+                                                        isFromSystem && !changes[member.stdId] ? 'bg-blue-50' : ''
                                                     }`}
                                                 >
                                                     <td className="px-3 py-4 whitespace-nowrap font-medium text-text-color">{member.stdNo}</td>
                                                     <td className="px-3 py-4 whitespace-nowrap text-text-color-alt">{member.stdId}</td>
                                                     <td className="px-3 py-4 whitespace-nowrap">
                                                         {formatTitle(member.student.title)} {member.student.fName} {member.student.lName}
+                                                        {isFromSystem && !changes[member.stdId] && (
+                                                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                                บันทึกจากระบบ
+                                                            </span>
+                                                        )}
                                                     </td>
                                                     <td className="px-3 py-4">
                                                         <div className="flex flex-wrap gap-1 md:gap-2">
@@ -503,9 +518,9 @@ function Attendance() {
                                 </button>
                                 <button
                                     onClick={handleSaveAttendance}
-                                    disabled={isSaving || (hasExistingRecords && Object.keys(changes).length === 0)}
+                                    disabled={isSaving || Object.keys(changes).length === 0}
                                     className={`px-4 py-2 bg-primary hover:bg-accent text-white rounded-lg transition-colors flex items-center
-                                        ${(isSaving || (hasExistingRecords && Object.keys(changes).length === 0)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        ${(isSaving || Object.keys(changes).length === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     {isSaving ? (
                                         <>
@@ -520,7 +535,7 @@ function Attendance() {
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                             </svg>
-                                            บันทึกการเข้าเรียน
+                                            บันทึกการเข้าเรียน {Object.keys(changes).length > 0 && `(${Object.keys(changes).length})`}
                                         </>
                                     )}
                                 </button>
