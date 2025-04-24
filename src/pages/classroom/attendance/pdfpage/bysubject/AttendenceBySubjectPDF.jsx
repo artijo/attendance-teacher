@@ -5,7 +5,7 @@ import { styles } from "../style.js";
 function AttendenceBySubjectPDF() {
     const location = useLocation();
     const { studentInfo, dataInfo, className, stdId, classroom } = location.state;
-    console.log(dataInfo);
+    // console.log(dataInfo);
     // {studentInfo: studentInfoMation,dataInfo: studentInfo, className: className, stdId:stdId, classroom: classroom}}
 
     return (

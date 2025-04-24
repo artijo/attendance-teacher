@@ -4,6 +4,8 @@ import './index.css'
 import App from './App.jsx'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import AttendenceBySubjectPDF from './pages/classroom/attendance/pdfpage/bysubject/AttendenceBySubjectPDF.jsx';
+import AttendanceIsExamPDF from './pages/subject/attendance/pdfpage/IsExam/AttendanceIsExamPDF.jsx';
+import AttendenceBySubjectPDFSubject from './pages/subject/attendance/pdfpage/bysubject/AttendenceBySubjectPDFSubject.jsx';
 
 // Lazy load all page components
 // Auth
@@ -69,6 +71,8 @@ createRoot(document.getElementById('root')).render(
           <Route path='subjects/:id/attendance/:studingid' element={<Attendance />} />
           <Route path='subjects/:id/attendance/check' element={<SubjectCheckAttendence />} />
           <Route path='subjects/attendance/checkdetail' element={<SubjectCheckAttendenceDetail />} />
+          <Route path='subjects/attendance/checkdetail/pdfpage' element={<AttendanceIsExamPDF />} />
+          <Route path='subjects/attendances/abstract/subject' element={<AttendenceBySubjectPDFSubject />} />
           <Route path='subjects/attendance/byperiod' element={<SubjectCheckAttendenceByPeriod />} />
           {/* Classroom */}
           <Route path='classroom' element={<Classroom/>}/>

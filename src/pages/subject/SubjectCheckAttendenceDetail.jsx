@@ -1,11 +1,12 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { HOSTNAME } from "../../config";
 import { formatTitle } from "../../helper";
 import ExportExcelButton from "../../components/exportExcelButton";
-import { Table_to_Excel } from "../../excel";
-import FilterByIsExam from "../../components/subject/exportPDF/FilterByIsExam";
+import { summarySubjectIsExam, Table_to_Excel } from "../../excel";
+// import FilterByIsExam from "../../components/subject/exportPDF/FilterByIsExam";
+import ExportPdfButton from "../../components/exportPdfButton";
 
 function SubjectCheckAttendenceDetail() {
     const location = useLocation();
@@ -14,6 +15,8 @@ function SubjectCheckAttendenceDetail() {
     const ref = useRef();
     const [abStact, setAbStact] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+    console.log(classroom);
 
     const fetchDataAbstact = async (subjectId, classroomId) => {
         setLoading(true);
@@ -32,10 +35,7 @@ function SubjectCheckAttendenceDetail() {
     };
 
     const handleExportExcelButton = () => {
-        if(ref.current){
-            const table = ref.current;
-            Table_to_Excel(table, `รายชื่อสรุปการมีสิทธิ์สอบของนักเรียน วิชา ${subject.subNameThai} ห้องม.${classroom.classLevel}_${classroom.classRoom}`,"รายการ");
-        }
+        summarySubjectIsExam(abStact, classroom, subject);
     }
 
     const getAttendancePercentClass = (percent) => {
@@ -43,6 +43,14 @@ function SubjectCheckAttendenceDetail() {
         if (percent >= 80) return "bg-blue-100 text-blue-800";
         if (percent >= 70) return "bg-yellow-100 text-yellow-800";
         return "bg-red-100 text-red-800";
+    }
+
+    const navigateToPDFpage = () => {
+        navigate("/subjects/attendance/checkdetail/pdfpage", {state: {
+            classroomInfo: classroom,
+            subject: subject,
+            abstact: abStact
+        }})
     }
 
     const getExamStatusClass = (status) => {
@@ -102,13 +110,10 @@ function SubjectCheckAttendenceDetail() {
                             </svg>
                             ส่งออก Excel
                         </ExportExcelButton>
-                        
-                        <FilterByIsExam
-                            className={`ม.${classroom.classLevel}/${classroom.classRoom}`}
-                            subjectName={subject.subNameThai}
-                            abstact={abStact}
-                            buttonClassName="text-sm bg-primary hover:bg-accent text-white font-medium py-2.5 px-4 rounded-lg inline-flex items-center transition-colors flex-1 md:flex-none justify-center"
+                        <ExportPdfButton
+                            onClikFunction={navigateToPDFpage}
                         />
+                        
                     </div>
                 </div>
 
@@ -122,6 +127,7 @@ function SubjectCheckAttendenceDetail() {
                             <thead className="text-xs text-white uppercase bg-primary">
                                 <tr>
                                     <th className="px-6 py-3">เลขที่</th>
+                                    <th className="px-6 py-3">รหัสนักเรียน</th>
                                     <th className="px-6 py-3">ชื่อ-นามสกุล</th>
                                     <th className="px-6 py-3 text-center">ขาดเรียน</th>
                                     <th className="px-6 py-3 text-center">เข้าสาย</th>
@@ -139,6 +145,7 @@ function SubjectCheckAttendenceDetail() {
                                         className="bg-white border-b hover:bg-gray-50 transition-colors"
                                     >
                                         <td className="px-6 py-4 font-medium text-text-color">{parseInt(item.stdNo)}</td>
+                                        <td className="px-6 py-4 font-medium text-text-color">{item.stdId}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {formatTitle(item.title)} {item.fName} {item.lName}
                                         </td>
@@ -192,19 +199,19 @@ function SubjectCheckAttendenceDetail() {
                                 
                                 {/* Add summary row for students without exam rights */}
                                 <tr className="bg-gray-50 border-t-2 border-gray-300 font-medium">
-                                    <td colSpan={8} className="px-6 py-4 text-right">
+                                    <td colSpan={9} className="px-6 py-4 text-right">
                                         จำนวนนักเรียนที่ไม่มีสิทธิ์สอบ (มส):
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <span className="inline-flex justify-center min-w-12 rounded-full px-3 py-1 text-sm font-bold bg-red-100 text-red-800">
-                                            {abStact.filter(item => item.canExam === "ไม่มีสิทธิ์สอบ").length} คน
+                                            {abStact.filter(item => item.canExam === "มส.").length} คน
                                         </span>
                                     </td>
                                 </tr>
                                 
                                 {/* Add summary row for total students */}
                                 <tr className="bg-gray-50 border-b-2 border-gray-300 font-medium">
-                                    <td colSpan={8} className="px-6 py-4 text-right">
+                                    <td colSpan={9} className="px-6 py-4 text-right">
                                         จำนวนนักเรียนทั้งหมด:
                                     </td>
                                     <td className="px-6 py-4 text-center">
