@@ -39,6 +39,10 @@ const FilterExcelPage = lazy(() => import('./pages/activities/excelmanagedownloa
 const FilterByClassroomJoinPage = lazy(() => import('./pages/activities/pdfmanagedownload/FilterByClassroomJoinPage.jsx'));
 const FilterByRoomJoin = lazy(() => import('./components/activities/exportPDF/FilterByRoomJoin.jsx'));
 
+// Leave Request Page
+const LeaveRequest = lazy(() => import('./pages/leaverequest/LeaveRequest.jsx'));
+const LeaveRequestDetail = lazy(() => import('./pages/leaverequest/LeaveRequestDetail.jsx'));
+
 // Loading component for Suspense fallback
 const LoadingSpinner = () => (
   <div className="loading-spinner">
@@ -83,6 +87,10 @@ createRoot(document.getElementById('root')).render(
           <Route path="activity/participate/filterbyclassroomjoin/excel" element={<FilterExcelPage/>} />
           <Route path="activity/participate/filterbyclassroomjoin" element={<FilterByClassroomJoinPage />} />
           <Route path="activity/participate/filterbyclassroomjoin/pdfpage" element={<FilterByRoomJoin />} />
+          {/* Leave Request */}
+          <Route path='leavereq' element={<LeaveRequest />} />
+          <Route path='leavereq/:id' element={<LeaveRequestDetail />} />
+          {/* Redirect to dashboard if no match */}
         </Route>
       </Routes>
     </Suspense>
