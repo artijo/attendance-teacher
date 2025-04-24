@@ -19,7 +19,6 @@ function LeaveRequestDetail() {
     
     const user = userStore((state) => state.user);
     const teacherId = user?.tchId || null;
-    console.log("Teacher ID:", teacherId);
     
     useEffect(() => {
         setLoading(true);
@@ -75,7 +74,7 @@ function LeaveRequestDetail() {
         switch(status) {
             case 'WAITING':
                 return 'bg-yellow-100 text-yellow-800';
-            case 'APPROVE':
+            case 'APPROVED':
                 return 'bg-green-100 text-green-800';
             case 'REJECT':
                 return 'bg-red-100 text-red-800';
@@ -88,7 +87,7 @@ function LeaveRequestDetail() {
         switch(status) {
             case 'WAITING':
                 return 'รอการอนุมัติ';
-            case 'APPROVE':
+            case 'APPROVED':
                 return 'อนุมัติแล้ว';
             case 'REJECT':
                 return 'ไม่อนุมัติ';
@@ -171,7 +170,7 @@ function LeaveRequestDetail() {
         
         axios.put(`${HOSTNAME}/t/leave-requests/studingtime/${leaveRequestStudingTimeId}`, payload)
             .then((response) => {
-                setSuccess(`${action === 'APPROVE' ? 'อนุมัติ' : 'ปฏิเสธ'}คำขอลาสำเร็จ`);
+                setSuccess(`${action === 'APPROVED' ? 'อนุมัติ' : 'ปฏิเสธ'}คำขอลาสำเร็จ`);
                 
                 // Update the leave request data in state
                 setLeaveRequest(prevState => {
@@ -181,7 +180,7 @@ function LeaveRequestDetail() {
                         if (time.leaveRequestStudingTimeId === leaveRequestStudingTimeId) {
                             return {
                                 ...time,
-                                leaveStatus: action === 'APPROVE' ? 'APPROVE' : 'REJECT',
+                                leaveStatus: action === 'APPROVED' ? 'APPROVED' : 'REJECT',
                                 tacherApproveId: teacherId,
                                 rejectReason: action === 'REJECT' ? rejectReason : null,
                                 approverTimestamp: new Date().toISOString()
@@ -198,7 +197,7 @@ function LeaveRequestDetail() {
             })
             .catch((error) => {
                 console.error(error);
-                setError(`ไม่สามารถ${action === 'APPROVE' ? 'อนุมัติ' : 'ปฏิเสธ'}คำขอลาได้ กรุณาลองอีกครั้ง`);
+                setError(`ไม่สามารถ${action === 'APPROVED' ? 'อนุมัติ' : 'ปฏิเสธ'}คำขอลาได้ กรุณาลองอีกครั้ง`);
             })
             .finally(() => {
                 setProcessingIds(prev => prev.filter(id => id !== leaveRequestStudingTimeId));
@@ -208,7 +207,7 @@ function LeaveRequestDetail() {
     // Add a safe check for allApprovedOrRejected
     const allApprovedOrRejected = leaveRequest?.studingTime && leaveRequest.studingTime.length > 0 ? 
         leaveRequest.studingTime.every(time => 
-            time.leaveStatus === 'APPROVE' || time.leaveStatus === 'REJECT'
+            time.leaveStatus === 'APPROVED' || time.leaveStatus === 'REJECT'
         ) : true;
 
     const formatStudyDate = (dateString) => {
@@ -424,7 +423,7 @@ function LeaveRequestDetail() {
                                                             {timeEntry.leaveStatus === 'WAITING' ? (
                                                                 <div className="flex gap-2">
                                                                     <button 
-                                                                        onClick={() => openConfirmationDialog(timeEntry.leaveRequestStudingTimeId, 'APPROVE')}
+                                                                        onClick={() => openConfirmationDialog(timeEntry.leaveRequestStudingTimeId, 'APPROVED')}
                                                                         disabled={processingIds.includes(timeEntry.leaveRequestStudingTimeId)}
                                                                         className="bg-green-600 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-700 transition-colors duration-200 disabled:opacity-50"
                                                                     >
@@ -438,7 +437,7 @@ function LeaveRequestDetail() {
                                                                         {processingIds.includes(timeEntry.leaveRequestStudingTimeId) ? 'กำลังดำเนินการ...' : 'ไม่อนุมัติ'}
                                                                     </button>
                                                                 </div>
-                                                            ) : timeEntry.leaveStatus === 'APPROVE' ? (
+                                                            ) : timeEntry.leaveStatus === 'APPROVED' ? (
                                                                 <div className="text-green-600 flex items-center">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -503,11 +502,11 @@ function LeaveRequestDetail() {
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-fade-in">
                         <h3 className="text-xl font-semibold text-text-color mb-4">
-                            {dialogAction === 'APPROVE' ? 'ยืนยันการอนุมัติ' : 'ยืนยันการไม่อนุมัติ'}
+                            {dialogAction === 'APPROVED' ? 'ยืนยันการอนุมัติ' : 'ยืนยันการไม่อนุมัติ'}
                         </h3>
                         
                         <p className="text-text-color-alt mb-6">
-                            {dialogAction === 'APPROVE' 
+                            {dialogAction === 'APPROVED' 
                                 ? 'คุณต้องการอนุมัติคำขอลาหรือไม่?' 
                                 : 'คุณต้องการไม่อนุมัติคำขอลาหรือไม่?'}
                         </p>
@@ -537,7 +536,7 @@ function LeaveRequestDetail() {
                             <button
                                 onClick={confirmAction}
                                 className={`px-4 py-2 text-white rounded-lg transition-colors ${
-                                    dialogAction === 'APPROVE' 
+                                    dialogAction === 'APPROVED' 
                                         ? 'bg-green-600 hover:bg-green-700' 
                                         : 'bg-red-600 hover:bg-red-700'
                                 }`}
