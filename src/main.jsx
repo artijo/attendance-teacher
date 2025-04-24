@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
+import AttendenceBySubjectPDF from './pages/classroom/attendance/pdfpage/bysubject/AttendenceBySubjectPDF.jsx';
 
 // Lazy load all page components
 // Auth
@@ -72,9 +73,11 @@ createRoot(document.getElementById('root')).render(
           {/* Classroom */}
           <Route path='classroom' element={<Classroom/>}/>
           <Route path='classroom/attendance/student' element={<StudentAttendance/>}/>
-          <Route path='classroom/attendance/byday/student'  element={<StudentAttendanceFilterByDay/>}/>
-          <Route path='classroom/attendance/byday/student/infomation'  element={<PaticepateByDay/>}/>
+          <Route path='classroom/attendence/student/pdf' element={<AttendenceBySubjectPDF/>}/>
+          {/* <Route path='classroom/attendance/byday/student'  element={<StudentAttendanceFilterByDay/>}/>
+          <Route path='classroom/attendance/byday/student/infomation'  element={<PaticepateByDay/>}/> */}
           <Route path='classroom/detail' element={<ClassroomDetail/>}/>
+          
           {/* Activities */}
           <Route path='activities' element={<Activities/>}/>
           <Route path='activities/:id' element={<ActivityDetail/>}/>

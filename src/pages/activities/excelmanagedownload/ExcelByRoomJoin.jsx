@@ -48,7 +48,7 @@ function ExcelByFilterRoom() {
     const handelExportExcel = async (activityId, classId, startDate, endDate, className, activityName) => {
         setLoading({...loading, [classId]: true});
         try {
-            await abstactActivity(activityId, classId, startDate, endDate, className, activityName);
+            await abstactActivity(activityId, classId, startDate, endDate, className, activityName, activity);
         } finally {
             setLoading({...loading, [classId]: false});
         }

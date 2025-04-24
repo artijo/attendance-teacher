@@ -7,6 +7,8 @@ function ClassroomDetail() {
     const classrooms = location.state.classroooms;
     const [activeTab, setActiveTab] = useState("students");
     
+
+    
     return (
         <div>
             <div className="mb-6">

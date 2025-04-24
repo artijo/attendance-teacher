@@ -94,6 +94,7 @@ function ClassroomDetailTable({classrooms}) {
                                             state={{
                                                 stdId:std.stdId,
                                                 classroomsId: classrooms.classId,
+                                                classroom: classrooms,
                                                 className: `ม.${classrooms.classLevel}/${classrooms.classRoom}`
                                             }}
                                             className="text-xs inline-flex items-center gap-2 px-3 py-2 rounded-lg text-white bg-primary hover:bg-accent transition-colors"
