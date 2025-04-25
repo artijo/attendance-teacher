@@ -253,6 +253,9 @@ function LeaveRequest() {
                                 <table className="min-w-full divide-y divide-line">
                                     <thead className="bg-gray-50">
                                         <tr>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                หมายเลขคำร้อง
+                                            </th>
                                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 รหัสนักเรียน
                                             </th>
@@ -279,6 +282,14 @@ function LeaveRequest() {
                                     <tbody className="bg-white divide-y divide-line">
                                         {filteredRequests.map((request) => (
                                             <tr key={request.leaveId} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-color">
+                                                    <Link
+                                                    to={`/leavereq/${request.leaveId}`}>
+                                                        
+                                                            {request.leaveId.substring(0, 8)
+                                                        }
+                                                </Link>
+                                                </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-color">
                                                     {request.stdId}
                                                 </td>

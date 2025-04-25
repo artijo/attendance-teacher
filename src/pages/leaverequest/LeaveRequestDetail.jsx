@@ -324,6 +324,11 @@ function LeaveRequestDetail() {
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                     <div>
+                                        <p className="text-sm text-text-color-alt">หมายเลขคำร้อง</p>
+                                        <p className="text-base font-medium">{leaveRequest.leaveId?.substring(0, 8) || '-'}</p>
+                                    </div>
+
+                                    <div>
                                         <p className="text-sm text-text-color-alt">ประเภทการลา</p>
                                         <p className="text-base font-medium">{leaveRequest.leaveRequestType?.leaveTypeName || '-'}</p>
                                     </div>
