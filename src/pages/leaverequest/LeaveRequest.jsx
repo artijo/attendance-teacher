@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { userStore } from "../../store";
+import { formatTitle } from "../../helper";
 
 function LeaveRequest() {
     const [leaveRequests, setLeaveRequests] = useState([]);
@@ -282,7 +283,7 @@ function LeaveRequest() {
                                                     {request.stdId}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-text-color">
-                                                    {`${request.student?.title || ''} ${request.student?.fName || ''} ${request.student?.lName || ''}`}
+                                                    {`${formatTitle(request.student?.title) || ''}${request.student?.fName || ''} ${request.student?.lName || ''}`}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-text-color">
                                                     {request.leaveRequestType?.leaveTypeName || ''}

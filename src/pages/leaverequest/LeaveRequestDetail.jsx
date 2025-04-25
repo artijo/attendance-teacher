@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { userStore } from "../../store";
+import { formatTitle } from "../../helper";
 
 function LeaveRequestDetail() {
     const { id } = useParams();
@@ -296,7 +297,7 @@ function LeaveRequestDetail() {
                                     <div>
                                         <p className="text-sm text-text-color-alt">ชื่อ-นามสกุล</p>
                                         <p className="text-base font-medium">
-                                            {`${leaveRequest.student?.title || ''} ${leaveRequest.student?.fName || ''} ${leaveRequest.student?.lName || ''}`}
+                                            {`${formatTitle(leaveRequest.student?.title) || ''}${leaveRequest.student?.fName || ''} ${leaveRequest.student?.lName || ''}`}
                                         </p>
                                     </div>
                                     
