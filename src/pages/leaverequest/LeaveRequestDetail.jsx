@@ -414,9 +414,9 @@ function LeaveRequestDetail() {
                                                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(timeEntry.leaveStatus)}`}>
                                                                 {getStatusText(timeEntry.leaveStatus)}
                                                             </span>
-                                                            {timeEntry.leaveStatus === 'REJECTED' && timeEntry.rejectReason && (
+                                                            {timeEntry.leaveStatus === 'REJECTED' && timeEntry.rejectedNote && (
                                                                 <div className="mt-1 text-xs text-red-600">
-                                                                    เหตุผล: {timeEntry.rejectReason}
+                                                                    เหตุผล: {timeEntry.rejectedNote}
                                                                 </div>
                                                             )}
                                                         </td>
