@@ -76,7 +76,7 @@ function LeaveRequestDetail() {
                 return 'bg-yellow-100 text-yellow-800';
             case 'APPROVED':
                 return 'bg-green-100 text-green-800';
-            case 'REJECT':
+            case 'REJECTED':
                 return 'bg-red-100 text-red-800';
             default:
                 return 'bg-gray-100 text-gray-800';
@@ -89,7 +89,7 @@ function LeaveRequestDetail() {
                 return 'รอการอนุมัติ';
             case 'APPROVED':
                 return 'อนุมัติแล้ว';
-            case 'REJECT':
+            case 'REJECTED':
                 return 'ไม่อนุมัติ';
             default:
                 return 'ไม่ทราบสถานะ';
@@ -142,7 +142,7 @@ function LeaveRequestDetail() {
         if (!currentRequestId || !dialogAction) return;
         
         // If rejecting without a reason, show an error
-        if (dialogAction === 'REJECT' && !rejectReason.trim()) {
+        if (dialogAction === 'REJECTED' && !rejectReason.trim()) {
             alert("กรุณาระบุเหตุผลในการไม่อนุมัติ");
             return;
         }
@@ -164,7 +164,7 @@ function LeaveRequestDetail() {
         };
         
         // Add reason if rejecting
-        if (action === 'REJECT') {
+        if (action === 'REJECTED') {
             payload.rejectReason = rejectReason;
         }
         
@@ -180,9 +180,9 @@ function LeaveRequestDetail() {
                         if (time.leaveRequestStudingTimeId === leaveRequestStudingTimeId) {
                             return {
                                 ...time,
-                                leaveStatus: action === 'APPROVED' ? 'APPROVED' : 'REJECT',
+                                leaveStatus: action === 'APPROVED' ? 'APPROVED' : 'REJECTED',
                                 tacherApproveId: teacherId,
-                                rejectReason: action === 'REJECT' ? rejectReason : null,
+                                rejectReason: action === 'REJECTED' ? rejectReason : null,
                                 approverTimestamp: new Date().toISOString()
                             };
                         }
@@ -207,7 +207,7 @@ function LeaveRequestDetail() {
     // Add a safe check for allApprovedOrRejected
     const allApprovedOrRejected = leaveRequest?.studingTime && leaveRequest.studingTime.length > 0 ? 
         leaveRequest.studingTime.every(time => 
-            time.leaveStatus === 'APPROVED' || time.leaveStatus === 'REJECT'
+            time.leaveStatus === 'APPROVED' || time.leaveStatus === 'REJECTED'
         ) : true;
 
     const formatStudyDate = (dateString) => {
@@ -413,7 +413,7 @@ function LeaveRequestDetail() {
                                                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(timeEntry.leaveStatus)}`}>
                                                                 {getStatusText(timeEntry.leaveStatus)}
                                                             </span>
-                                                            {timeEntry.leaveStatus === 'REJECT' && timeEntry.rejectReason && (
+                                                            {timeEntry.leaveStatus === 'REJECTED' && timeEntry.rejectReason && (
                                                                 <div className="mt-1 text-xs text-red-600">
                                                                     เหตุผล: {timeEntry.rejectReason}
                                                                 </div>
@@ -430,7 +430,7 @@ function LeaveRequestDetail() {
                                                                         {processingIds.includes(timeEntry.leaveRequestStudingTimeId) ? 'กำลังดำเนินการ...' : 'อนุมัติ'}
                                                                     </button>
                                                                     <button 
-                                                                        onClick={() => openConfirmationDialog(timeEntry.leaveRequestStudingTimeId, 'REJECT')}
+                                                                        onClick={() => openConfirmationDialog(timeEntry.leaveRequestStudingTimeId, 'REJECTED')}
                                                                         disabled={processingIds.includes(timeEntry.leaveRequestStudingTimeId)}
                                                                         className="bg-red-600 text-white py-1 px-3 rounded-lg text-sm hover:bg-red-700 transition-colors duration-200 disabled:opacity-50"
                                                                     >
@@ -511,7 +511,7 @@ function LeaveRequestDetail() {
                                 : 'คุณต้องการไม่อนุมัติคำขอลาหรือไม่?'}
                         </p>
                         
-                        {dialogAction === 'REJECT' && (
+                        {dialogAction === 'REJECTED' && (
                             <div className="mb-6">
                                 <label className="block text-sm font-medium text-text-color mb-1">
                                     เหตุผลในการไม่อนุมัติ <span className="text-red-500">*</span>
