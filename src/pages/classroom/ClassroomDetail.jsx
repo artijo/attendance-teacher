@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import ClassroomDetailTable from "../../components/classroom/ClassroomDetailTable";
 import { useState } from "react";
+import { formatTitle } from "../../helper";
 
 function ClassroomDetail() {
     const location = useLocation();
@@ -39,6 +40,14 @@ function ClassroomDetail() {
                         <p className="text-text-color-alt">จำนวนนักเรียน</p>
                         <p className="font-medium text-text-color">{classrooms.classroomMembers.length} คน</p>
                     </div>
+                    {classrooms.leader && classrooms.leader.student && (
+                        <div className="space-y-1 font-body">
+                            <p className="text-text-color-alt">หัวหน้าห้อง</p>
+                            <p className="font-medium text-text-color">
+                                {formatTitle(classrooms.leader.student.title)}{classrooms.leader.student.fName} {classrooms.leader.student.lName}
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 
