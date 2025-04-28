@@ -307,12 +307,16 @@ function AttendanceChart() {
       plugins: {
         legend: {
           position: 'top',
+          font : {
+            family: 'lineseed'
+          }
         },
         title: {
           display: true,
           text: `สถิติการเข้าเรียน ${selectedClassroomDisplay} วัน${dayName} (${timeStartString}-${timeEndString} น.)`,
           font: {
-            size: 18
+            size: 18,
+            family: 'lineseed'
           }
         },
         tooltip: {
