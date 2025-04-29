@@ -22,6 +22,7 @@ const Attendance = lazy(() => import('./pages/subject/attendance/Attendance.jsx'
 const SubjectCheckAttendence = lazy(() => import('./pages/subject/SubjectCheckAttendence.jsx'));
 const SubjectCheckAttendenceDetail = lazy(() => import('./pages/subject/SubjectCheckAttendenceDetail.jsx'));
 const SubjectCheckAttendenceByPeriod = lazy(() => import('./pages/subject/SubjectCheckAttendenceByPeriod.jsx'));
+const AttendanceWithQR = lazy(() => import('./pages/subject/AttendanceQRCode.jsx'))
 
 // Classroom Page
 const Classroom = lazy(() => import('./pages/classroom/Classroom.jsx'));
@@ -69,6 +70,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='subjects/:id' element={<SubjectDetail />} />
           <Route path='subjects/:id/attendance' element={<SubjectAttendance />} />
           <Route path='subjects/:id/attendance/:studingid' element={<Attendance />} />
+          <Route path='subjects/:subjectId/qrcode/:studyTimeId' element={<AttendanceWithQR />} />
           <Route path='subjects/:id/attendance/check' element={<SubjectCheckAttendence />} />
           <Route path='subjects/attendance/checkdetail' element={<SubjectCheckAttendenceDetail />} />
           <Route path='subjects/attendance/checkdetail/pdfpage' element={<AttendanceIsExamPDF />} />
