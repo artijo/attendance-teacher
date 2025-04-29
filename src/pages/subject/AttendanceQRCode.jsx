@@ -12,7 +12,10 @@ function AttendanceQRCode() {
     const [subject, setSubject] = useState(null);
     const [studyTime, setStudyTime] = useState(null);
     const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+    const [isExpired, setIsExpired] = useState(false); // New state to track if QR code is expired
+    const [copyFeedback, setCopyFeedback] = useState(false); // New state to show copy feedback
     const timerRef = useRef(null);
+    const copyFeedbackTimeoutRef = useRef(null); // Ref for copy feedback timeout
 
     // Function to format time as MM:SS
     const formatTime = (seconds) => {
@@ -25,6 +28,7 @@ function AttendanceQRCode() {
     const generateQRCode = async () => {
         setLoading(true);
         setError(null);
+        setIsExpired(false); // Reset expired state when generating a new QR code
         try {
             // Request QR code link from backend
             const packdata = {
@@ -38,6 +42,30 @@ function AttendanceQRCode() {
             setError('เกิดข้อผิดพลาดในการสร้าง QR Code กรุณาลองใหม่อีกครั้ง');
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Handle link copy with feedback
+    const handleCopyLink = () => {
+        if (qrCodeData && qrCodeData.link) {
+            navigator.clipboard.writeText(qrCodeData.link)
+                .then(() => {
+                    // Show feedback
+                    setCopyFeedback(true);
+                    
+                    // Clear any existing timeout
+                    if (copyFeedbackTimeoutRef.current) {
+                        clearTimeout(copyFeedbackTimeoutRef.current);
+                    }
+                    
+                    // Hide feedback after 3 seconds
+                    copyFeedbackTimeoutRef.current = setTimeout(() => {
+                        setCopyFeedback(false);
+                    }, 3000);
+                })
+                .catch(err => {
+                    console.error("Failed to copy: ", err);
+                });
         }
     };
 
@@ -82,12 +110,13 @@ function AttendanceQRCode() {
         
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
+            if (copyFeedbackTimeoutRef.current) clearTimeout(copyFeedbackTimeoutRef.current);
         };
     }, [subjectId, studyTimeId]);
 
     // Setup countdown timer
     useEffect(() => {
-        if (qrCodeData) {
+        if (qrCodeData && !isExpired) {
             // Clear any existing timer
             if (timerRef.current) clearInterval(timerRef.current);
             
@@ -95,10 +124,10 @@ function AttendanceQRCode() {
             timerRef.current = setInterval(() => {
                 setTimeLeft(prev => {
                     if (prev <= 1) {
-                        // Time's up, generate new QR code
+                        // Time's up, mark as expired and clear interval
                         clearInterval(timerRef.current);
-                        generateQRCode();
-                        return 600;
+                        setIsExpired(true);
+                        return 0;
                     }
                     return prev - 1;
                 });
@@ -108,7 +137,7 @@ function AttendanceQRCode() {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
         };
-    }, [qrCodeData]);
+    }, [qrCodeData, isExpired]);
 
     const formatDate = (dateString) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -236,54 +265,95 @@ function AttendanceQRCode() {
                                     <h3 className="text-2xl md:text-3xl font-medium text-primary mb-2">สแกน QR Code เพื่อเช็คชื่อ</h3>
                                     <p className="text-text-color-alt text-sm md:text-base">กรุณาให้นักเรียนสแกน QR Code เพื่อบันทึกการเข้าเรียน</p>
                                     
-                                    <div className="flex items-center justify-center gap-3 mt-4 bg-red-50 py-2.5 px-4 rounded-full border border-red-100">
-                                        <div className="relative w-5 h-5">
-                                            <div className="absolute inset-0 rounded-full bg-red-200 animate-ping opacity-75"></div>
-                                            <div className="relative w-5 h-5 rounded-full bg-red-500"></div>
+                                    {!isExpired ? (
+                                        <div className="flex items-center justify-center gap-3 mt-4 bg-red-50 py-2.5 px-4 rounded-full border border-red-100">
+                                            <div className="relative w-5 h-5">
+                                                <div className="absolute inset-0 rounded-full bg-red-200 animate-ping opacity-75"></div>
+                                                <div className="relative w-5 h-5 rounded-full bg-red-500"></div>
+                                            </div>
+                                            <p className="text-sm text-red-800">
+                                                QR Code จะหมดอายุในอีก <span className="font-bold">{formatTime(timeLeft)}</span>
+                                            </p>
                                         </div>
-                                        <p className="text-sm text-red-800">
-                                            QR Code จะหมดอายุในอีก <span className="font-bold">{formatTime(timeLeft)}</span>
-                                        </p>
-                                    </div>
+                                    ) : (
+                                        <div className="flex items-center justify-center gap-3 mt-4 bg-gray-50 py-2.5 px-4 rounded-full border border-gray-200">
+                                            <div className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </div>
+                                            <p className="text-sm text-gray-700">
+                                                QR Code หมดอายุแล้ว กรุณาสร้าง QR Code ใหม่
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                                 
                                 <div className="relative mb-8 group">
                                     {/* Decoration elements */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/20 to-primary/20 rounded-2xl blur-xl opacity-60 animate-pulse scale-105 group-hover:scale-110 transition-transform"></div>
-                                    <div className="absolute -top-3 -left-3 w-12 h-12 border-t-4 border-l-4 border-primary rounded-tl-xl"></div>
-                                    <div className="absolute -bottom-3 -right-3 w-12 h-12 border-b-4 border-r-4 border-secondary rounded-br-xl"></div>
+                                    <div className={`absolute inset-0 ${isExpired ? 'bg-gray-200' : 'bg-gradient-to-br from-primary/20 via-secondary/20 to-primary/20'} rounded-2xl blur-xl opacity-60 ${isExpired ? '' : 'animate-pulse'} scale-105 group-hover:scale-110 transition-transform`}></div>
+                                    <div className={`absolute -top-3 -left-3 w-12 h-12 border-t-4 border-l-4 ${isExpired ? 'border-gray-400' : 'border-primary'} rounded-tl-xl`}></div>
+                                    <div className={`absolute -bottom-3 -right-3 w-12 h-12 border-b-4 border-r-4 ${isExpired ? 'border-gray-400' : 'border-secondary'} rounded-br-xl`}></div>
                                     
                                     {/* QR Code container */}
-                                    <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 border-2 border-primary/30 relative z-10 group-hover:shadow-xl transition-shadow transform group-hover:scale-[1.02] duration-300">
-                                        
-                                        {/* QR Code */}
+                                    <div className={`bg-white rounded-xl shadow-lg p-6 md:p-8 border-2 ${isExpired ? 'border-gray-300' : 'border-primary/30'} relative z-10 group-hover:shadow-xl transition-shadow transform group-hover:scale-[1.02] duration-300`}>
+                                      
+                                        {/* QR Code or Expired Message */}
                                         <div className="p-2 bg-white rounded-lg border border-line/50">
-                                            <QRCode 
-                                                value={qrCodeData.link || "https://example.com"} 
-                                                size={350}
-                                                level="H"
-                                                includeMargin={true}
-                                                renderAs="svg"
-                                                bgColor={"#FFFFFF"}
-                                                fgColor={"#0054A6"}
-                                                imageSettings={{
-                                                    src: "/Logo_NPS.png",
-                                                    x: undefined,
-                                                    y: undefined,
-                                                    height: 60,
-                                                    width: 60,
-                                                    excavate: true,
-                                                }}
-                                            />
+                                            {!isExpired ? (
+                                                <QRCode 
+                                                    value={qrCodeData.link || "https://example.com"} 
+                                                    size={350}
+                                                    level="H"
+                                                    includeMargin={true}
+                                                    renderAs="svg"
+                                                    bgColor={"#FFFFFF"}
+                                                    fgColor={"#0054A6"}
+                                                    imageSettings={{
+                                                        src: "/Logo_NPS.png",
+                                                        x: undefined,
+                                                        y: undefined,
+                                                        height: 60,
+                                                        width: 60,
+                                                        excavate: true,
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div className="w-[280px] h-[280px] flex flex-col items-center justify-center bg-gray-50">
+                                                    <div className="bg-gray-200 rounded-full p-4 mb-4">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    </div>
+                                                    <h4 className="text-xl font-medium text-gray-700 mb-2">QR Code หมดอายุ</h4>
+                                                    <p className="text-gray-500 text-center max-w-[200px]">
+                                                        กรุณากดปุ่มสร้าง QR Code ใหม่เพื่อเช็คชื่อต่อ
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
                                         
                                         <div className="mt-4 text-center">
-                                            <p className="text-sm text-text-color-alt">สแกน QR Code ด้วย Mobile Application หรือกดที่ QR Code</p>
-                                            <p className="mt-2 text-xs font-medium px-3 py-1.5 bg-primary/10 text-primary rounded-full inline-block">
-                                                Link: {qrCodeData.link?.substring(0, 30)}...
-                                            </p>
+                                            {!isExpired ? (
+                                                <>
+                                                    <p className="text-sm text-text-color-alt">สแกน QR Code ด้วย Mobile Application หรือกดที่ QR Code</p>
+                                                    <p className="mt-2 text-xs font-medium px-3 py-1.5 bg-primary/10 text-primary rounded-full inline-block">
+                                                        Link: {qrCodeData.link?.substring(0, 30)}...
+                                                    </p>
+                                                </>
+                                            ) : (
+                                                <p className="text-sm text-gray-500">ระยะเวลาเช็คชื่อสิ้นสุดแล้ว</p>
+                                            )}
                                         </div>
                                     </div>
+                                </div>
+                                
+                                {/* Copy feedback toast */}
+                                <div className={`fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-md shadow-lg transition-opacity duration-300 flex items-center gap-2 ${copyFeedback ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                    คัดลอกลิงก์สำเร็จ
                                 </div>
                                 
                                 <div className="w-full flex flex-col sm:flex-row justify-center gap-4">
@@ -298,8 +368,9 @@ function AttendanceQRCode() {
                                     </button>
                                     
                                     <button 
-                                        onClick={() => navigator.clipboard.writeText(qrCodeData.link)} 
-                                        className="bg-white text-primary border border-primary px-6 py-3 rounded-lg hover:bg-primary/5 transition-colors shadow-md hover:shadow-lg flex items-center justify-center"
+                                        onClick={handleCopyLink} 
+                                        disabled={isExpired}
+                                        className={`${isExpired ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-primary border-primary hover:bg-primary/5'} border px-6 py-3 rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center`}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -354,11 +425,6 @@ function AttendanceQRCode() {
                         </div>
                     </div>
                 )}
-                
-                {/* Footer */}
-                <div className="mt-8 text-center text-text-color-alt text-sm">
-                    <p>© {new Date().getFullYear()} ระบบจัดการเช็คชื่อนักเรียน</p>
-                </div>
             </div>
         </div>
     );
