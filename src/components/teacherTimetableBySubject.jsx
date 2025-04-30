@@ -146,19 +146,23 @@ function TeacherTimetableBySubject({ subject }) {
 
     return (
         <div className="w-full">
-            <select
-                className="w-fit p-2 border border-gray-300 rounded-md"
-                onChange={(e) => handleTermChange(e.target.value)}
-            >
-                <option value={""}>เลือกปีการศึกษาที่ต้องการดู</option>
-                {
-                    filterTerm.map((term) => (
-                        <option key={term.termId} value={term.termId}>
-                            ปีการศึกษา {term.academicYear + 543} เทอม {term.semester}
-                        </option>
-                    ))
-                }
-            </select>
+            <div>
+                <h3 className="block text-base font-medium text-text-color-alt mb-2">เลือกปีการศึกษา</h3>
+                <select
+                    className="w-fit p-2 border border-gray-300 rounded-md"
+                    onChange={(e) => handleTermChange(e.target.value)}
+                >
+                    <option value={""}>เลือกปีการศึกษาที่ต้องการดู</option>
+                    {
+                        filterTerm.map((term) => (
+                            <option key={term.termId} value={term.termId}>
+                                ปีการศึกษา {term.academicYear + 543} เทอม {term.semester}
+                            </option>
+                        ))
+                    }
+                </select>
+            </div>
+            
             {timetable && (
                 <div className="mt-4 overflow-x-auto pb-2">
                     <table>
