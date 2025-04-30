@@ -141,6 +141,8 @@ function TeacherTimetableBySubject({ subject }) {
     useEffect(() => {
         if (term != "") {
             createTimetable(term, subject);
+        }else{
+            setTimetable(null);
         };
     }, [term])
 
