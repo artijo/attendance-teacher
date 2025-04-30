@@ -90,7 +90,7 @@ function Subject() {
                                         </svg>
                                         ตารางสอน
                                     </h2>
-                                    <div className="overflow-x-auto">
+                                    <div>
                                         <TeacherTimetableBySubject subject={subjects}/>
                                     </div>
                                 </div>
