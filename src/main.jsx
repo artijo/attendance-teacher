@@ -34,6 +34,7 @@ const PaticepateByDay = lazy(() => import('./components/classroom/attendance/Pat
 // Activity Page
 const Activities = lazy(() => import('./pages/activities/Activities.jsx'));
 const ActivityDetail = lazy(() => import('./pages/activities/ActivityDetail.jsx'));
+const ActivityQRpaticipate = lazy(() => import('./pages/activities/ActivityQRpaticipate.jsx'));
 const CheckIn = lazy(() => import('./pages/activities/CheckIn.jsx'));
 const EditCheckIn = lazy(() => import('./pages/activities/ActivityEditCheckinByDate.jsx'));
 const ExcelByFilterRoom = lazy(() => import('./pages/activities/excelmanagedownload/ExcelByRoomJoin.jsx'));
@@ -89,6 +90,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='activities/:id' element={<ActivityDetail/>}/>
           <Route path='activities/:id/check-in' element={<CheckIn/>}/>
           <Route path='activities/:id/check-in/edit' element={<EditCheckIn/>}/>
+          <Route path='activities/:id/qr-code' element={<ActivityQRpaticipate/>}/>
            {/* By Ohm Section */}
           <Route path="activity/participate/filterbyclassroom/excel" element={<ExcelByFilterRoom/>} />
           <Route path="activity/participate/filterbyclassroom" element={<FilterClassroomPage />} />

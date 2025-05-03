@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { HOSTNAME, TIME_ZONE } from "../../config";
 import { formatDate } from "../../helper";
@@ -252,7 +252,7 @@ function ActivityDetail() {
                 </div>
                 
                 {!isActivityEnded(activity) && !isActivityNotStarted(activity) && (
-                    <div className="mt-4 flex justify-end">
+                    <div className="mt-4 flex justify-end gap-4">
                         <button
                             onClick={handleCheckIn}
                             className="py-2.5 px-4 text-sm font-medium text-white bg-primary hover:bg-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-300 flex items-center"
@@ -262,6 +262,15 @@ function ActivityDetail() {
                             </svg>
                             เช็คชื่อนักเรียน
                         </button>
+                        <Link
+                            to={`/activities/${id}/qr-code`}
+                            className="py-2.5 px-4 text-sm font-medium text-white bg-primary hover:bg-accent rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-300 flex items-center"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                            QR Code กิจกรรม
+                        </Link>
                     </div>
                 )}
             </div>
