@@ -549,8 +549,8 @@ function ActivityDetail() {
                         <div className="overflow-x-auto pb-2 hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
                             <div className="flex gap-2 px-1">
                                 {activity && getDatesBetween(activity.actDate, activity.actDateEnd).map((date) => {
-                                    const dateTime = DateTime.fromISO(date).setZone('Asia/Bangkok');
-                                    const isToday = DateTime.now().setZone('Asia/Bangkok').hasSame(dateTime, 'day');
+                                    const dateTime = DateTime.fromISO(date).setZone(TIME_ZONE);
+                                    const isToday = DateTime.now().setZone(TIME_ZONE).hasSame(dateTime, 'day');
                                     const thaiMonth = convertNumberToThaiMonth(dateTime.month);
                                     
                                     return (

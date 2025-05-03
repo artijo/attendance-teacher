@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { HOSTNAME } from "../../config";
+import { HOSTNAME, TIME_ZONE } from "../../config";
 import { formatDate } from "../../helper";
 import { DateTime } from "luxon";
 
@@ -22,18 +22,18 @@ function CheckIn() {
     const [searchQuery, setSearchQuery] = useState(''); // Add search query state
 
     const checkValidDate = (activity) => {
-        const now = DateTime.now().setZone('Asia/Bangkok');
-        const startDate = DateTime.fromISO(activity.actDate).setZone('Asia/Bangkok');
-        const endDate = DateTime.fromISO(activity.actDateEnd).setZone('Asia/Bangkok');
+        const now = DateTime.now().setZone(TIME_ZONE);
+        const startDate = DateTime.fromISO(activity.actDate).setZone(TIME_ZONE);
+        const endDate = DateTime.fromISO(activity.actDateEnd).setZone(TIME_ZONE);
         
         return now >= startDate.startOf('day') && now <= endDate.endOf('day');
     };
 
     const getTodayParticipation = (participations) => {
-        const today = DateTime.now().setZone('Asia/Bangkok').startOf('day');
+        const today = DateTime.now().setZone(TIME_ZONE).startOf('day');
         return participations.filter(p => {
             const participationDate = DateTime.fromISO(p.joinTimestamp)
-                .setZone('Asia/Bangkok')
+                .setZone(TIME_ZONE)
                 .startOf('day');
             return participationDate.equals(today);
         });
@@ -346,10 +346,10 @@ function CheckIn() {
                                     {filteredStudents.map((student) => {
                                         const todayParticipation = activity.actParticipate.find(p => {
                                             const participationDate = DateTime.fromISO(p.joinTimestamp)
-                                                .setZone('Asia/Bangkok')
+                                                .setZone(TIME_ZONE)
                                                 .startOf('day');
                                             const today = DateTime.now()
-                                                .setZone('Asia/Bangkok')
+                                                .setZone(TIME_ZONE)
                                                 .startOf('day');
                                             return p.stdId === student.stdId && 
                                                   participationDate.equals(today);

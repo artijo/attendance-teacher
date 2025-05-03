@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { HOSTNAME } from "../../config";
+import { HOSTNAME, TIME_ZONE } from "../../config";
 import { formatDate } from "../../helper";
 import { DateTime } from "luxon";
 
@@ -31,9 +31,9 @@ function EditCheckIn() {
     const checkValidDate = (activity) => {
         if (!activity || !targetDate) return false;
         
-        const startDate = DateTime.fromISO(activity.actDate).setZone('Asia/Bangkok');
-        const endDate = DateTime.fromISO(activity.actDateEnd).setZone('Asia/Bangkok');
-        const checkDate = DateTime.fromISO(targetDate).setZone('Asia/Bangkok');
+        const startDate = DateTime.fromISO(activity.actDate).setZone(TIME_ZONE);
+        const endDate = DateTime.fromISO(activity.actDateEnd).setZone(TIME_ZONE);
+        const checkDate = DateTime.fromISO(targetDate).setZone(TIME_ZONE);
         
         return checkDate >= startDate.startOf('day') && checkDate <= endDate.endOf('day');
     };
@@ -41,10 +41,10 @@ function EditCheckIn() {
     const getDateParticipation = (participations) => {
         if (!targetDate) return [];
         
-        const checkDate = DateTime.fromISO(targetDate).setZone('Asia/Bangkok').startOf('day');
+        const checkDate = DateTime.fromISO(targetDate).setZone(TIME_ZONE).startOf('day');
         return participations.filter(p => {
             const participationDate = DateTime.fromISO(p.joinTimestamp)
-                .setZone('Asia/Bangkok')
+                .setZone(TIME_ZONE)
                 .startOf('day');
             return participationDate.equals(checkDate);
         });
@@ -55,7 +55,7 @@ function EditCheckIn() {
             setTargetDate(date);
         } else {
             // If no date parameter provided, use today's date
-            setTargetDate(DateTime.now().setZone('Asia/Bangkok').toISODate());
+            setTargetDate(DateTime.now().setZone(TIME_ZONE).toISODate());
         }
     }, [date]);
 
@@ -269,8 +269,8 @@ function EditCheckIn() {
                                         setTargetDate(e.target.value)
                                         setSearchParams({ date: e.target.value });
                                     }}
-                                    min={DateTime.fromISO(activity.actDate).setZone('Asia/Bangkok').toISODate()}
-                                    max={DateTime.fromISO(activity.actDateEnd).setZone('Asia/Bangkok').toISODate()}
+                                    min={DateTime.fromISO(activity.actDate).setZone(TIME_ZONE).toISODate()}
+                                    max={DateTime.fromISO(activity.actDateEnd).setZone(TIME_ZONE).toISODate()}
                                 />
                                 <p className="text-text-color-alt text-xs mt-2">
                                     สามารถเลือกวันที่อยู่ในช่วงวันที่จัดกิจกรรมเท่านั้น
@@ -388,10 +388,10 @@ function EditCheckIn() {
                                     {filteredStudents.map((student) => {
                                         const dateParticipation = activity.actParticipate.find(p => {
                                             const participationDate = DateTime.fromISO(p.joinTimestamp)
-                                                .setZone('Asia/Bangkok')
+                                                .setZone(TIME_ZONE)
                                                 .startOf('day');
                                             const checkDate = DateTime.fromISO(targetDate)
-                                                .setZone('Asia/Bangkok')
+                                                .setZone(TIME_ZONE)
                                                 .startOf('day');
                                             return p.stdId === student.stdId && 
                                                    participationDate.equals(checkDate);
