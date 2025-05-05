@@ -3,9 +3,6 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
-import AttendenceBySubjectPDF from './pages/classroom/attendance/pdfpage/bysubject/AttendenceBySubjectPDF.jsx';
-import AttendanceIsExamPDF from './pages/subject/attendance/pdfpage/IsExam/AttendanceIsExamPDF.jsx';
-import AttendenceBySubjectPDFSubject from './pages/subject/attendance/pdfpage/bysubject/AttendenceBySubjectPDFSubject.jsx';
 
 // Lazy load all page components
 // Auth
@@ -47,6 +44,11 @@ const FilterByRoomJoin = lazy(() => import('./components/activities/exportPDF/Fi
 // Leave Request Page
 const LeaveRequest = lazy(() => import('./pages/leaverequest/LeaveRequest.jsx'));
 const LeaveRequestDetail = lazy(() => import('./pages/leaverequest/LeaveRequestDetail.jsx'));
+
+// PDF pages (now lazy-loaded)
+const AttendenceBySubjectPDF = lazy(() => import('./pages/classroom/attendance/pdfpage/bysubject/AttendenceBySubjectPDF.jsx'))
+const AttendanceIsExamPDF = lazy(() => import('./pages/subject/attendance/pdfpage/IsExam/AttendanceIsExamPDF.jsx'))
+const AttendenceBySubjectPDFSubject = lazy(() => import('./pages/subject/attendance/pdfpage/bysubject/AttendenceBySubjectPDFSubject.jsx'))
 
 // Loading component for Suspense fallback
 const LoadingSpinner = () => (
