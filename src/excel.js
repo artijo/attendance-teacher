@@ -12,7 +12,6 @@ export function Table_to_Excel(table, fileName, sheetTitle){
 }
 
 export function summaryAttendeanceBySubjectFilterByDay(objectJson, month, fileName, classroomInfo, subject){
-    
     try{
         let index = 0;
         const sheetData = [
@@ -23,7 +22,6 @@ export function summaryAttendeanceBySubjectFilterByDay(objectJson, month, fileNa
             [],
             ['เลขที่','รหัสนักเรียน', 'ชื่อ-นามสกุล'],
         ]
-    
     
         //Header 1
         objectJson.data[0].attendance.forEach((attInfo) => {
@@ -42,7 +40,9 @@ export function summaryAttendeanceBySubjectFilterByDay(objectJson, month, fileNa
             ]
             
             object.attendance.forEach((attend, index) => {
-                if(attend.month == month){
+                if(attend.attStatus == null) {
+                    arraySheet.push('-');
+                }else if(attend.month == month && attend.attStatus != null ){
                     let attendStatus = attend.attStatus.toLowerCase();
                     if(attendStatus == "absent"){
                         arraySheet.push("ไม่เข้าเรียน");
@@ -303,12 +303,6 @@ export async function abstactActivityFilterByClassroom(activityId, filterRoom, a
             `${formatTitle(member.title)} ${member.fName} ${member.lName}`,
             member.participateCount
         ]);
-        // const newObject = {
-        //     "รหัสนักเรียน":member.stdId,
-        //     "ชื่อ":`${formatTitle(member.title)} ${member.fName} ${member.lName}`,
-        //     "จำนวนการเข้าร่วม": member.participateCount
-        // }
-        // arrayOfJsonObject.push(newObject);
     });
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
