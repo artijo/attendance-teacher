@@ -1,232 +1,332 @@
 import ExportExcelButton from "../exportExcelButton";
 import { TapAttendenceSummaryOpen } from "../tapAttendenceSummaryOpen";
 import { useEffect, useRef, useState } from "react";
-import { convertNumberToThaiMonth, formatTitle } from "../../helper";
-import { Table_to_Excel } from "../../excel";
+import { convertNumberToThaiMonth, dateTimeFormat, formatTitle } from "../../helper";
+import { summaryAttendeanceBySubjectFilterByDay, Table_to_Excel } from "../../excel";
 import FilterByPeriod from "./exportPDF/FilterByPeriod";
 import { tabletojson } from "tabletojson";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { HOSTNAME } from "../../config";
+import ExportPdfButton from "../exportPdfButton";
 
-export const SubjectCheckAttendenceByPeriodTable = ({studentList, classrooms, subject}) => {
-    // const subject = subject;
-    // const classroom = classrooms;
+export const SubjectCheckAttendenceByPeriodTable = ({ studentList,classrooms,subject }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    // const subject = location.state?.subject;
     const ref = useRef([]);
     // const [classroomInfo, setClassroomInfo] = useState(null);
     const [isTabOpen, setIsTabOpen] = useState([]);
-    let indexReal = 0;
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Function to calculate attendance summary for each period
-    const calculatePeriodSummary = (month) => {
-        // Get all periods for the month
-        const periodAttendances = studentList.data[0].attendance.filter(att => att.month === month);
-        
-        // Initialize summary object for each period
-        const summary = {};
-        
-        periodAttendances.forEach((_, periodIndex) => {
-            summary[periodIndex] = {
-                present: 0,
-                absent: 0,
-                late: 0,
-                activity: 0,
-                leave: 0,
-                total: 0,
-                null: 0
+    // console.log(studentList);
+
+    // console.log(classroomInfo);
+    
+    // Format attendance status to Thai language
+    const formatAttStatus = (status) => {
+        const statusMap = {
+            'present': 'เข้าเรียน',
+            'absent': 'ไม่เข้าเรียน',
+            'late': 'มาสาย',
+            'activity': 'เข้าร่วมกิจกรรม',
+            'leave': 'ลา'
+        };
+        return statusMap[status.toLowerCase()] || status;
+    };
+
+    // Render table header for each month
+    const TableHeader = ({ month }) => {
+        let indexReal = 0;
+        return (
+            <tr className="text-xs text-gray-700 uppercase bg-gray-50">
+                <th className="px-4 py-3">เลขที่</th>
+                <th className="px-4 py-3">รหัสนักเรียน</th>
+                <th className="px-4 py-3">ชื่อ-นามสกุล</th>
+                {studentList.data[0].attendance
+                    .filter((att) => att.month === month)
+                    .map((attendance, index) => (
+                        <th key={index} className="px-4 py-3 text-center whitespace-nowrap">
+                            <div className="font-medium">คาบที่ {++indexReal}</div>
+                            <div className="text-xs mt-1 text-gray-500 font-normal">({dateTimeFormat(attendance.studingTimeDate)})</div>
+                        </th>
+                    ))}
+            </tr>
+        );
+    };
+
+    // Render table body for each month
+    const TableBody = ({ month }) => {
+        const getStatusClass = (status) => {
+            if (!status) return "text-gray-400";
+            
+            const statusClasses = {
+                'present': 'text-green-600 font-medium',
+                'absent': 'text-red-600 font-medium',
+                'late': 'text-orange-500 font-medium',
+                'activity': 'text-blue-600 font-medium',
+                'leave': 'text-purple-600 font-medium'
             };
             
-            // Count each status for this period across all students
-            studentList.data.forEach(student => {
-                const attendance = student.attendance.filter(att => att.month === month)[periodIndex];
-                if (attendance) {
-                    const status = attendance.attStatus?.toLowerCase() || null;
-                    summary[periodIndex][status || 'null'] += 1;
-                    summary[periodIndex].total += 1;
-                }
-            });
-        });
-        
-        return summary;
-    };
-
-    const formatAttStatus = (status) => {
-        switch (status) {
-            case 'present':
-                return 'เข้าเรียน';
-            case 'absent':
-                return 'ไม่เข้าเรียน';
-            case 'late':
-                return 'มาสาย';
-            case 'activity':
-                return 'เข้าเรียนกิจกรรม';
-            case 'leave':
-                return 'ลา';
-            default:
-                return status;
-        }
-    };
-
-    const TableHeader = ({month}) => {
-        return (
-            <tr>
-                <th className="px-6 py-3" >เลขที่</th>
-                <th className="px-6 py-3" >รหัสนักเรียน</th>
-                <th className="px-6 py-3" >ชื่อ-นามสกุล</th>
-                {
-                    studentList.data[0].attendance.map((attendance, index) => (
-                    attendance.month === month && (
-                        <th key={index} className="px-6 py-3">
-                            คาบที่ {++indexReal}
-                        </th>
-                    )
-                    ))
-                }   
-            </tr>
-        )
-    }
-
-    const TableBody = ({month}) => {
-        return (
-            studentList.data.map((student, index) => (
-                <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                    <td className="px-6 py-4">{student.stdNo}</td>
-                    <td className="px-6 py-4">{student.stdId}</td>
-                    <td className="px-6 py-4">{ `${formatTitle(student.title)} ${student.fName} ${student.lName}`}</td>
-                    {
-                        student.attendance.map((attendance, index) => (
-                            attendance.month === month && (
-                            <td key={index} className="px-6 py-4">{attendance.attStatus != null ? formatAttStatus(attendance.attStatus.toLowerCase()) : '-'}</td>
-                            )
-                        ))
-                    }
-                </tr>
-            ))
-        )
-    }
-
-    // New component for summary rows
-    const TableSummary = ({ month }) => {
-        const summary = calculatePeriodSummary(month);
+            return statusClasses[status.toLowerCase()] || "";
+        };
         
         return (
             <>
-                <tr className="bg-gray-100 font-medium text-gray-700 border-t-2 border-gray-300">
-                    <td colSpan={3} className="px-6 py-3 text-right font-bold">สรุปการเข้าเรียน:</td>
-                    {Object.keys(summary).map((periodIndex) => (
-                        <td key={periodIndex} className="px-6 py-3 text-left">
-                            <div className="flex flex-col gap-1">
-                                <span className="text-gray-700">มาเรียน: {summary[periodIndex].present}</span>
-                                <span className="text-gray-700">ขาดเรียน: {summary[periodIndex].absent}</span>
-                                <span className="text-gray-700">มาสาย: {summary[periodIndex].late}</span>
-                                <span className="text-gray-700">กิจกรรม: {summary[periodIndex].activity}</span>
-                                <span className="text-gray-700">ลา: {summary[periodIndex].leave}</span>
-                            </div>
-                        </td>
-                    ))}
-                </tr>
-                <tr className="bg-gray-100 font-medium text-gray-700 border-b border-gray-300">
-                    <td colSpan={3} className="px-6 py-3 text-right">รวมทั้งหมด:</td>
-                    {Object.keys(summary).map((periodIndex) => (
-                        <td key={periodIndex} className="px-6 py-3 text-center font-bold">
-                            {summary[periodIndex].total} คน
-                        </td>
-                    ))}
-                </tr>
+                {studentList.data.map((student, index) => (
+                    <tr key={index} className="bg-white border-b hover:bg-gray-50 transition-colors duration-150">
+                        <td className="px-4 py-3 text-center font-medium">{student.stdNo}</td>
+                        <td className="px-4 py-3">{student.stdId}</td>
+                        <td className="px-4 py-3 font-medium">{`${student.fName} ${student.lName}`}</td>
+                        {student.attendance
+                            .filter((att) => att.month === month)
+                            .map((attendance, attIndex) => (
+                                <td key={attIndex} className={`px-4 py-3 text-center ${getStatusClass(attendance.attStatus?.toLowerCase())}`}>
+                                    {attendance.attStatus != null ? formatAttStatus(attendance.attStatus.toLowerCase()) : '-'}
+                                </td>
+                            ))}
+                    </tr>
+                ))}
             </>
         );
     };
 
-    const Table = ({month,exportPdf, exportExcel,index}) => {
-        return(
-            <>
-                <ul className="flex ml-auto w-fit">
-                    <li>
-                        {exportPdf}
-                    </li>
-                    <li>
-                        {exportExcel}
-                    </li>
-                </ul>
-                <div ref={(element) => (ref.current[index] = element)}>
-                    {/* <span>{month}</span> */}
-                    <div>
-                        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                    <TableHeader month={month}/>
-                                </thead>
-                                <tbody>
-                                    <TableBody month={month}/>
-                                    <TableSummary month={month} />
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+    // Render table footer with status summary
+    const TableFooter = ({ month }) => {
+        // Get all attendance records for this month
+        const monthAttendance = studentList.data.flatMap(student => 
+            student.attendance.filter(att => att.month === month)
+        );
+        
+        // Group attendance records by period (using their index)
+        const periodStatusCounts = {};
+        
+        monthAttendance.forEach((attendance, index) => {
+            // Get period index (e.g., 1st period, 2nd period)
+            const periodIndex = index % (monthAttendance.length / studentList.data.length);
+            
+            if (!periodStatusCounts[periodIndex]) {
+                periodStatusCounts[periodIndex] = {
+                    present: 0,
+                    absent: 0,
+                    late: 0,
+                    activity: 0,
+                    leave: 0,
+                    null: 0
+                };
+            }
+            
+            const status = attendance.attStatus?.toLowerCase() || 'null';
+            periodStatusCounts[periodIndex][status]++;
+        });
+        
+        const getStatusSummaryStyle = (status) => {
+            const statusStyles = {
+                present: 'bg-green-50 text-green-700',
+                absent: 'bg-red-50 text-red-700',
+                late: 'bg-orange-50 text-orange-700',
+                activity: 'bg-blue-50 text-blue-700',
+                leave: 'bg-purple-50 text-purple-700',
+                null: 'bg-gray-50 text-gray-500'
+            };
+            
+            return statusStyles[status] || 'bg-gray-50 text-gray-500';
+        };
+        
+        const renderStatusSummary = (counts) => {
+            const totalStudents = studentList.data.length;
+            
+            return (
+                <div className="flex flex-col space-y-1 min-w-[100px]">
+                    {Object.entries(counts).map(([status, count]) => {
+                        if (count === 0 || status === 'null') return null;
+                        
+                        const statusLabel = {
+                            present: 'เข้าเรียน',
+                            absent: 'ไม่เข้าเรียน',
+                            late: 'มาสาย',
+                            activity: 'เข้าร่วมกิจกรรม',
+                            leave: 'ลา'
+                        }[status];
+                        
+                        const percentage = Math.round((count / totalStudents) * 100);
+                        
+                        return (
+                            <div 
+                                key={status} 
+                                className={`text-xs px-2 py-1 rounded-md flex justify-between items-center ${getStatusSummaryStyle(status)}`}
+                            >
+                                <span>{statusLabel}</span>
+                                <span className="font-medium">{count} ({percentage}%)</span>
+                            </div>
+                        );
+                    })}
                 </div>
-            </>
-        )
+            );
+        };
         
-    }
+        return (
+            <tr className="bg-gray-50 border-t-2 border-gray-200">
+                <td colSpan={3} className="px-4 py-3 font-medium text-gray-700">
+                    สรุปจำนวนแต่ละสถานะ
+                </td>
+                {Object.entries(periodStatusCounts).map(([periodIndex, counts]) => (
+                    <td key={periodIndex} className="px-3 py-3">
+                        {renderStatusSummary(counts)}
+                    </td>
+                ))}
+            </tr>
+        );
+    };
 
+    // Main table component
+    const Table = ({ month, exportPdf, exportExcel, index }) => {
+        return (
+            <div className="space-y-4">
+                <div className="flex justify-end items-center gap-3">
+                    {exportPdf}
+                    {exportExcel}
+                </div>
+                
+                <div ref={(element) => (ref.current[index] = element)} className="overflow-x-auto">
+                    <table className="w-full text-sm text-left border border-line rounded-lg overflow-hidden">
+                        <thead>
+                            <TableHeader month={month} />
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                            <TableBody month={month} />
+                        </tbody>
+                        <tfoot>
+                            <TableFooter month={month} />
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        );
+    };
+
+    // Fetch classroom info
+    const fetchClassroomInfo = async () => {
+        try {
+            setIsLoading(true);
+            const response = await axios.get(`${HOSTNAME}/a/classroom/${location.state?.classroomId}`);
+            if (response.status === 200) {
+                // setClassroomInfo(response.data);
+                setError(null);
+            }
+        } catch (error) {
+            console.error(error);
+            setError("ไม่สามารถโหลดข้อมูลห้องเรียนได้");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Handle tab open/close
     const handleIsTabOpen = (index) => {
-        let newIsTabOpen = isTabOpen.slice();
+        let newIsTabOpen = [...isTabOpen];
         newIsTabOpen[index] = !newIsTabOpen[index];
-        setIsTabOpen(newIsTabOpen)
-        
-    }
+        setIsTabOpen(newIsTabOpen);
+    };
 
+    // Initialize tab states
     const makeValueIsOpen = () => {
-        const arrayState = new Array(1).fill(false);
+        // Start with all tabs closed
+        const arrayState = new Array(studentList?.month?.length || 0).fill(false);
+        // If only one month, open it by default
+        if (arrayState.length === 1) arrayState[0] = true;
         setIsTabOpen(arrayState);
+    };
+
+    // Handle Excel export
+    const handleExportExcel = (objectlist ,month) => {
+        const fileName = `สรุปการเข้าเรียนวิชา${subject.subNameThai}_ม.${classrooms.classLevel}/${classrooms.classRoom}_เดือน${convertNumberToThaiMonth(month)}`;
+        try{
+            summaryAttendeanceBySubjectFilterByDay(objectlist, month, fileName, classrooms, subject);
+        }catch(error){
+            console.log(error);
+        }
+    };
+
+    const navigateToPDF = (subject, month) => {
+        navigate('/subjects/attendances/abstract/subject', {state: { subject, classroomInfo: classrooms, month, studentList}});
     }
 
     useEffect(() => {
-        if(studentList != null){
+        if (location.state?.classroomId) {
+            fetchClassroomInfo();
+        }
+        
+        if (studentList) {
             makeValueIsOpen();
         }
-    },[studentList])
+    }, [studentList, location.state]);
 
-    const handelExportExcel = (index,classroominfo, month , subject) => {
-        if(ref.current[index]){
-            Table_to_Excel(ref.current[index],`สรุปการเข้าเรียนตามคาบวิชา ${subject.subNameThai} เดือน ${convertNumberToThaiMonth(month)} ห้องม.${classroominfo.classLevel}/${classroominfo.classRoom} `);
-        }
-    }
-
-    const ButtonExportPDF = ({index,classroomInfo,month,subject}) => {
-        const tableElement = ref.current[index];
-        if(tableElement != null){
-            const tableJson = tabletojson.convert(tableElement.outerHTML);
-            return <FilterByPeriod tableJson={tableJson[0]} classroomInfo={classroomInfo} month={month} subject={subject}/>
-        }
-        return null;
+    if (!studentList || !studentList.data) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
     }
 
     return (
-        <>
-            <div className="mx-auto container flex flex-col gap-2">
-                {
-                    studentList != null && (
-                        studentList.month.map((month, index) => (
-                            <div key={index}>
-                                {/* {console.log(month)} */}
-                                <TapAttendenceSummaryOpen
-                                    title={convertNumberToThaiMonth(month)} 
-                                    index={index} 
-                                    isTabOpen={isTabOpen} 
-                                    handleIsTabOpen={handleIsTabOpen}
-                                >
-                                    <Table 
-                                        month={month} 
-                                        index={index} 
-                                        exportPdf={<ButtonExportPDF index={index} classroomInfo={classrooms} month={month} subject={subject}/>}//<ExportPdfButtonKK index={index} month={month}/>}
-                                        exportExcel={ <ExportExcelButton handelOnClickFunction={() => handelExportExcel(index, classrooms, month, subject)}/>}
-                                    />
-                                </TapAttendenceSummaryOpen>
-                            </div>
-                            
-                        ))
-                    )
-                }
+        <div className="space-y-6 px-6 py-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="bg-white rounded-lg px-4 py-3 border border-line shadow-sm">
+                    <div className="text-text-color-alt font-body text-sm">จำนวนเดือนที่มีข้อมูล:</div>
+                    <div className="font-medium text-primary text-lg font-heading">{studentList.month.length} เดือน</div>
+                </div>
             </div>
-        </>
-        
-    )
+            
+            <div className="space-y-4">
+                {classrooms != null && studentList.month.map((month, index) => (
+                    <div key={index}>
+                        <TapAttendenceSummaryOpen 
+                            title={`เดือน${convertNumberToThaiMonth(month)}`} 
+                            index={index} 
+                            isTabOpen={isTabOpen} 
+                            handleIsTabOpen={handleIsTabOpen}
+                            icon={
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            }
+                        >
+                            <Table 
+                                month={month} 
+                                index={index} 
+                                exportPdf={<ExportPdfButton onClikFunction={() => navigateToPDF(subject,month, index)}/>}
+                                exportExcel={<ExportExcelButton handelOnClickFunction={() => handleExportExcel(studentList, month)} />}
+                            />
+                        </TapAttendenceSummaryOpen>
+                    </div>
+                ))}
+                
+                {studentList.month.length === 0 && (
+                    <div className="bg-white rounded-xl shadow-md p-6 text-center border border-line">
+                        <div className="flex justify-center mb-4 text-text-color-alt">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-lg font-medium text-text-color mb-1">ไม่พบข้อมูลรายเดือน</h3>
+                        <p className="text-text-color-alt">ยังไม่มีข้อมูลการเข้าเรียนในรายวิชานี้</p>
+                    </div>
+                )}
+            </div>
+            
+            <div className="flex justify-center mt-6">
+                <Link
+                    to="/attendances" 
+                    className="inline-flex justify-center items-center px-4 py-2.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-text-color bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-300"
+                >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    กลับไปหน้าการเข้าเรียน
+                </Link>
+            </div>
+        </div>
+    );
 };

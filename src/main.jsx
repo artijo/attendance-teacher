@@ -19,6 +19,7 @@ const Attendance = lazy(() => import('./pages/subject/attendance/Attendance.jsx'
 const SubjectCheckAttendence = lazy(() => import('./pages/subject/SubjectCheckAttendence.jsx'));
 const SubjectCheckAttendenceDetail = lazy(() => import('./pages/subject/SubjectCheckAttendenceDetail.jsx'));
 const SubjectCheckAttendenceByPeriod = lazy(() => import('./pages/subject/SubjectCheckAttendenceByPeriod.jsx'));
+const AttendanceWithQR = lazy(() => import('./pages/subject/AttendanceQRCode.jsx'))
 
 // Classroom Page
 const Classroom = lazy(() => import('./pages/classroom/Classroom.jsx'));
@@ -30,6 +31,7 @@ const PaticepateByDay = lazy(() => import('./components/classroom/attendance/Pat
 // Activity Page
 const Activities = lazy(() => import('./pages/activities/Activities.jsx'));
 const ActivityDetail = lazy(() => import('./pages/activities/ActivityDetail.jsx'));
+const ActivityQRpaticipate = lazy(() => import('./pages/activities/ActivityQRpaticipate.jsx'));
 const CheckIn = lazy(() => import('./pages/activities/CheckIn.jsx'));
 const EditCheckIn = lazy(() => import('./pages/activities/ActivityEditCheckinByDate.jsx'));
 const ExcelByFilterRoom = lazy(() => import('./pages/activities/excelmanagedownload/ExcelByRoomJoin.jsx'));
@@ -38,6 +40,15 @@ const FilterByClassroom = lazy(() => import('./components/activities/exportPDF/F
 const FilterExcelPage = lazy(() => import('./pages/activities/excelmanagedownload/ExcelByClassroomPage.jsx'));
 const FilterByClassroomJoinPage = lazy(() => import('./pages/activities/pdfmanagedownload/FilterByClassroomJoinPage.jsx'));
 const FilterByRoomJoin = lazy(() => import('./components/activities/exportPDF/FilterByRoomJoin.jsx'));
+
+// Leave Request Page
+const LeaveRequest = lazy(() => import('./pages/leaverequest/LeaveRequest.jsx'));
+const LeaveRequestDetail = lazy(() => import('./pages/leaverequest/LeaveRequestDetail.jsx'));
+
+// PDF pages (now lazy-loaded)
+const AttendenceBySubjectPDF = lazy(() => import('./pages/classroom/attendance/pdfpage/bysubject/AttendenceBySubjectPDF.jsx'))
+const AttendanceIsExamPDF = lazy(() => import('./pages/subject/attendance/pdfpage/IsExam/AttendanceIsExamPDF.jsx'))
+const AttendenceBySubjectPDFSubject = lazy(() => import('./pages/subject/attendance/pdfpage/bysubject/AttendenceBySubjectPDFSubject.jsx'))
 
 // Loading component for Suspense fallback
 const LoadingSpinner = () => (
@@ -62,20 +73,26 @@ createRoot(document.getElementById('root')).render(
           <Route path='subjects/:id' element={<SubjectDetail />} />
           <Route path='subjects/:id/attendance' element={<SubjectAttendance />} />
           <Route path='subjects/:id/attendance/:studingid' element={<Attendance />} />
+          <Route path='subjects/:subjectId/qrcode/:studyTimeId' element={<AttendanceWithQR />} />
           <Route path='subjects/:id/attendance/check' element={<SubjectCheckAttendence />} />
           <Route path='subjects/attendance/checkdetail' element={<SubjectCheckAttendenceDetail />} />
+          <Route path='subjects/attendance/checkdetail/pdfpage' element={<AttendanceIsExamPDF />} />
+          <Route path='subjects/attendances/abstract/subject' element={<AttendenceBySubjectPDFSubject />} />
           <Route path='subjects/attendance/byperiod' element={<SubjectCheckAttendenceByPeriod />} />
           {/* Classroom */}
           <Route path='classroom' element={<Classroom/>}/>
           <Route path='classroom/attendance/student' element={<StudentAttendance/>}/>
-          <Route path='classroom/attendance/byday/student'  element={<StudentAttendanceFilterByDay/>}/>
-          <Route path='classroom/attendance/byday/student/infomation'  element={<PaticepateByDay/>}/>
+          <Route path='classroom/attendence/student/pdf' element={<AttendenceBySubjectPDF/>}/>
+          {/* <Route path='classroom/attendance/byday/student'  element={<StudentAttendanceFilterByDay/>}/>
+          <Route path='classroom/attendance/byday/student/infomation'  element={<PaticepateByDay/>}/> */}
           <Route path='classroom/detail' element={<ClassroomDetail/>}/>
+          
           {/* Activities */}
           <Route path='activities' element={<Activities/>}/>
           <Route path='activities/:id' element={<ActivityDetail/>}/>
           <Route path='activities/:id/check-in' element={<CheckIn/>}/>
           <Route path='activities/:id/check-in/edit' element={<EditCheckIn/>}/>
+          <Route path='activities/:id/qr-code' element={<ActivityQRpaticipate/>}/>
            {/* By Ohm Section */}
           <Route path="activity/participate/filterbyclassroom/excel" element={<ExcelByFilterRoom/>} />
           <Route path="activity/participate/filterbyclassroom" element={<FilterClassroomPage />} />
@@ -83,6 +100,10 @@ createRoot(document.getElementById('root')).render(
           <Route path="activity/participate/filterbyclassroomjoin/excel" element={<FilterExcelPage/>} />
           <Route path="activity/participate/filterbyclassroomjoin" element={<FilterByClassroomJoinPage />} />
           <Route path="activity/participate/filterbyclassroomjoin/pdfpage" element={<FilterByRoomJoin />} />
+          {/* Leave Request */}
+          <Route path='leavereq' element={<LeaveRequest />} />
+          <Route path='leavereq/:id' element={<LeaveRequestDetail />} />
+          {/* Redirect to dashboard if no match */}
         </Route>
       </Routes>
     </Suspense>

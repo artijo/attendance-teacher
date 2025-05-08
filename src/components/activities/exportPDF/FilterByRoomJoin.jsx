@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { styles } from "./style.js";
-import { Page, Text, Document, Image, PDFViewer } from "@react-pdf/renderer";
+import { Page, Text, Document, Image, PDFViewer, View } from "@react-pdf/renderer";
 import { Table, TR, TH, TD } from "@ag-media/react-pdf-table";
 import axios from "axios";
 import { HOSTNAME } from "../../../config.js";
@@ -12,14 +12,17 @@ function FilterByRoomJoin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const location = useLocation();
-  const { activityId, className, filterRoom, activity } = location.state;
-
+  console.log(location.state);
+  const { activityId, className, activity } = location.state;
+  // {state:{classrooms: classrooms, activityId: activityId, activity: activity}}
+  // console.log(filterRoom);
   const getParticipateList = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${HOSTNAME}/a/activity/abstact/${activityId}`);
+      const response = await axios.get(`${HOSTNAME}/t/activity/abstact/${activityId}`);
       if (response.status === 200) {
-        setParticipate(response.data[filterRoom]);
+        setParticipate(response.data[className]);
+        // console.log(response.data);
       } else {
         throw new Error(response.data.message);
       }
@@ -134,20 +137,18 @@ function FilterByRoomJoin() {
                     <Text style={styles.textParagraph}>
                       สถานที่: {activity.actLocation} เวลา: {activity.actStartTime} - {activity.actEndTime} น.
                     </Text>
-                    <Table style={styles.table}>
-                      <TH style={styles.tableHeader}>
-                        <TD style={[styles.td, { flex: 1 }]}>รหัสนักเรียน</TD>
-                        <TD style={[styles.td, { flex: 1 }]}>ชื่อ-นามสกุล</TD>
-                        <TD style={[styles.td, { flex: 1 }]}>จำนวนการเข้าร่วม</TD>
-                      </TH>
-                      {participate.map((pati, patiIndex) => (
-                        <TR key={patiIndex}>
-                          <TD style={[styles.td, { flex: 1 }]}>{pati.stdId}</TD>
-                          <TD style={[styles.td, { flex: 1 }]}>{formatTitle(pati.title)} {pati.fName} {pati.lName}</TD>
-                          <TD style={[styles.td, { flex: 1 }]}>{pati.participateCount}</TD>
-                        </TR>
-                      ))}
-                    </Table>
+                    <View style={styles.tableHeader}>
+                      <Text style={styles.tableColumn1}>รหัสนักเรียน</Text>
+                      <Text style={styles.tableColumn2}>ชื่อ-นามสกุล</Text>
+                      <Text style={styles.tableColumn2}>จำนวนการเข้าร่วม</Text>
+                    </View>
+                    {participate.map((pati, patiIndex) => (
+                      <View key={patiIndex} style={styles.tableRow}>
+                        <Text style={styles.tableColumn1}>{pati.stdId}</Text>
+                        <Text style={styles.tableColumn2}>{formatTitle(pati.title)} {pati.fName} {pati.lName}</Text>
+                        <Text style={styles.tableColumn2}>{pati.participateCount}</Text>
+                      </View>
+                    ))}
                   </Page>
                 </Document>
               </PDFViewer>

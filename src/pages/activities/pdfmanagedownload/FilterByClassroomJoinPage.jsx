@@ -77,7 +77,7 @@ function FilterByClassroomJoinPage() {
                                                         activityId: activityId,
                                                         className: classroom.className,
                                                         activity: activity,
-                                                        filterRoom: classroom.className.split('ม.')[1]
+                                                        // filterRoom: classroom.className.split('ม.')[1]
                                                     }}
                                                 >
                                                     <button 

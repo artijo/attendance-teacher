@@ -1,21 +1,24 @@
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { HOSTNAME } from "../../../config";
 import { useEffect, useRef, useState } from "react";
 import PaticepateBySubject from "../../../components/classroom/attendance/PaticepateBySubject";
 import { formatTitle } from "../../../helper";
 import ExportExcelButton from "../../../components/exportExcelButton";
-import { Table_to_Excel } from "../../../excel.js"
+import { summaryJoinSubjectPeriod, Table_to_Excel } from "../../../excel.js"
+import ExportPdfButton from "../../../components/exportPdfButton.jsx";
 
 function StudentAttendance(){
     const location = useLocation();
     const classroomId = location.state.classroomsId;
     const className = location.state.className;
+    const classroom = location.state.classroom;
     const stdId = location.state.stdId;
     const [studentInfo, setStudentInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const studentInfoMation = studentInfo != null && studentInfo.studentInfo.student;
     const tableRef = useRef(null);
+    const navigate = useNavigate();
 
     async function getSubjectName(subId) {
         try{
@@ -59,8 +62,9 @@ function StudentAttendance(){
         }
     }
 
-    const handleDownloandExcel = (table,studentInfo) => {
-        Table_to_Excel(table, `สรุปการเข้าเรียนตามวิชาของ ${formatTitle(studentInfo.title)} ${studentInfo.fName} ${studentInfo.lName}`, "สรุปการเข้าเรียนตามวิชา");
+    const handleDownloandExcel = () => {
+        summaryJoinSubjectPeriod(studentInfo, classroom);
+        // Table_to_Excel(table, `สรุปการเข้าเรียนตามวิชาของ ${formatTitle(studentInfo.title)} ${studentInfo.fName} ${studentInfo.lName}`, "สรุปการเข้าเรียนตามวิชา");
     };
 
     useEffect(() => {
@@ -79,6 +83,10 @@ function StudentAttendance(){
         return "bg-red-100 text-red-800";
     }
     
+    const navigateToPDFpage = () => {
+        navigate('/classroom/attendence/student/pdf', {state: {studentInfo: studentInfoMation,dataInfo: studentInfo, className: className, stdId:stdId, classroom: classroom}})
+    }
+
     return(
         <div>
             {loading ? (
@@ -115,7 +123,7 @@ function StudentAttendance(){
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-text-color-alt">เบอร์โทรศัพท์</p>
-                                        <p className="font-medium text-text-color">{studentInfoMation.phone || "-"}</p>
+                                        <p className="font-medium text-text-color">{studentInfoMation.tel || "-"}</p>
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-text-color-alt">อีเมล</p>
@@ -130,10 +138,9 @@ function StudentAttendance(){
                         <div className="p-4 flex flex-col md:flex-row gap-4 justify-between items-center border-b border-line">
                             <h2 className="text-xl font-medium text-primary font-heading">สรุปการเข้าเรียน</h2>
                             
-                            {tableRef.current != null && (
-                                <div className="flex gap-2">
+                            <div className="flex gap-2">
                                     <ExportExcelButton
-                                        handelOnClickFunction={() => handleDownloandExcel(tableRef.current, studentInfoMation)}
+                                        handelOnClickFunction={() => handleDownloandExcel()}
                                         className="text-sm bg-primary hover:bg-accent text-white font-medium py-2.5 px-4 rounded-lg inline-flex items-center transition-colors"
                                     >
                                         <svg className="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -141,14 +148,10 @@ function StudentAttendance(){
                                         </svg>
                                         ส่งออกรายงาน Excel
                                     </ExportExcelButton>
-                                    
-                                    <PaticepateBySubject
-                                        personInfo={studentInfoMation}
-                                        studentInfo={studentInfo}
-                                        className={className}
+                                    <ExportPdfButton
+                                        onClikFunction={navigateToPDFpage}
                                     />
-                                </div>
-                            )}
+                            </div>
                         </div>
                         
                         <div className="overflow-x-auto">

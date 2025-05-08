@@ -3,12 +3,12 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { formatDateToThai } from "../../../helper";
 import { abstactActivity } from "../../../excel";
-import ErrorAlertActivity from "../../../components/alert/activity/activity/error";
+import { TIME_ZONE } from "../../../config";
 
 function ExcelByFilterRoom() {
     const location = useLocation();
     const { classrooms, activityId, activity } = location.state;
-    const firstDate = DateTime.fromISO(activity.actDate).setZone('Asia/Bangkok').startOf('day').toISODate();
+    const firstDate = DateTime.fromISO(activity.actDate).setZone(TIME_ZONE).startOf('day').toISODate();
     
     const [alert, setAlert] = useState(false);
     const [startDate, setStartDate] = useState(`${firstDate}`);
@@ -24,8 +24,8 @@ function ExcelByFilterRoom() {
     };
 
     const checkDate = (startDate, endDate) => {
-        const startDateTime = DateTime.fromISO(startDate).setZone('Asia/Bangkok').startOf('day');
-        const endDateTime = DateTime.fromISO(endDate).setZone('Asia/Bangkok').startOf('day');
+        const startDateTime = DateTime.fromISO(startDate).setZone(TIME_ZONE).startOf('day');
+        const endDateTime = DateTime.fromISO(endDate).setZone(TIME_ZONE).startOf('day');
         if(startDateTime > endDateTime) {
             setAlert(true);
         }else{
@@ -35,8 +35,8 @@ function ExcelByFilterRoom() {
 
     const getDatesBetween = (startDate, endDate) => {
         const dates = [];
-        let current = DateTime.fromISO(startDate).setZone('Asia/Bangkok').startOf('day');
-        const end = DateTime.fromISO(endDate).setZone('Asia/Bangkok').startOf('day');
+        let current = DateTime.fromISO(startDate).setZone(TIME_ZONE).startOf('day');
+        const end = DateTime.fromISO(endDate).setZone(TIME_ZONE).startOf('day');
         
         while (current <= end) {
             dates.push(current.toISODate());
@@ -48,7 +48,7 @@ function ExcelByFilterRoom() {
     const handelExportExcel = async (activityId, classId, startDate, endDate, className, activityName) => {
         setLoading({...loading, [classId]: true});
         try {
-            await abstactActivity(activityId, classId, startDate, endDate, className, activityName);
+            await abstactActivity(activityId, classId, startDate, endDate, className, activityName, activity);
         } finally {
             setLoading({...loading, [classId]: false});
         }

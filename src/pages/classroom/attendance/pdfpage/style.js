@@ -1,6 +1,7 @@
 import { Font, StyleSheet, } from '@react-pdf/renderer';
-import bold from '../../../assets/fonts/TH-Sarabun-New/THSarabunNew Bold.ttf'
-import normal from '../../../assets/fonts/TH-Sarabun-New/THSarabunNew.ttf'
+// import bold from '../../../../assets'
+import bold from '../../../../assets/fonts/TH-Sarabun-New/THSarabunNew Bold.ttf'
+import normal from '../../../../assets/fonts/TH-Sarabun-New/THSarabunNew.ttf'
 Font.register({
     family: 'TH Sarabun New',
     fonts:[

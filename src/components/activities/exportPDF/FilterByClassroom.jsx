@@ -1,26 +1,26 @@
 import { useEffect, useState } from "react";
-import { Page, Text, Document, Image , PDFViewer } from "@react-pdf/renderer";
-import { Table, TR, TH, TD } from "@ag-media/react-pdf-table";
+import { Page, Text, Document, Image, PDFViewer, View } from "@react-pdf/renderer";
+// import { Table, TR, TH, TD } from "@ag-media/react-pdf-table";
 import axios from "axios";
-import { HOSTNAME } from "../../../config.js";
+import { HOSTNAME, TIME_ZONE } from "../../../config.js";
 import { convertNumberToThaiMonth, formatTitle } from "../../../helper.js";
 import { DateTime } from "luxon";
-import {styles} from "./style.js";
+import { styles } from "./style.js";
 import { useLocation } from "react-router-dom";
 
 function FilterByClassroom() {
   const location = useLocation();
-  const { activityId, classId, className, startDate, endDate , activity } = location.state;
+  const { activityId, classId, className, startDate, endDate, activity } = location.state;
   const [keyFilter, setKeyFilter] = useState([]);
   const [participate, setParticipate] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  // console.log(participate);
   const getDatesBetween = (startDate, endDate) => {
     const dates = [];
-    let current = DateTime.fromISO(startDate).setZone('Asia/Bangkok').startOf('day');
-    const end = DateTime.fromISO(endDate).setZone('Asia/Bangkok').startOf('day');
-    
+    let current = DateTime.fromISO(startDate).setZone(TIME_ZONE).startOf('day');
+    const end = DateTime.fromISO(endDate).setZone(TIME_ZONE).startOf('day');
+
     while (current <= end) {
       dates.push(current.toISODate());
       current = current.plus({ days: 1 });
@@ -38,7 +38,7 @@ function FilterByClassroom() {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${HOSTNAME}/a/activity/abstact/byclassroom/${activityId}/${classId}`
+        `${HOSTNAME}/t/activity/abstact/byclassroom/${activityId}/${classId}`
       );
       if (response.status === 200) {
         setParticipate(response.data);
@@ -82,7 +82,7 @@ function FilterByClassroom() {
             </h1>
             <div className="mt-2 h-1 w-16 bg-secondary rounded-full"></div>
           </div>
-          
+
           <div className="flex items-center gap-2 font-body">
             <div className="bg-primary/10 px-3 py-1.5 rounded-lg">
               <span className="font-medium text-primary">กิจกรรม:</span> {activity.actName}
@@ -92,7 +92,7 @@ function FilterByClassroom() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg p-4 mt-6 shadow-sm border border-line">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-body">
             <div className="space-y-1">
@@ -126,7 +126,7 @@ function FilterByClassroom() {
           </div>
         </div>
       </div>
-      
+
       <div className="bg-white rounded-xl shadow-md border border-line overflow-hidden">
         <div className="border-b border-line p-6">
           <h2 className="text-xl font-bold text-primary font-heading mb-2 flex items-center">
@@ -139,7 +139,7 @@ function FilterByClassroom() {
             แสดงตัวอย่างรายงานการเข้าร่วมกิจกรรมสำหรับพิมพ์หรือบันทึก
           </p>
         </div>
-        
+
         <div className="p-6">
           {loading ? (
             <div className="flex items-center justify-center h-[560px] bg-gray-50 rounded-lg border border-line">
@@ -155,7 +155,7 @@ function FilterByClassroom() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <h3 className="text-lg font-medium mb-1 text-text-color">{error}</h3>
-                <button 
+                <button
                   className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-accent transition-colors"
                   onClick={getParticipateList}
                 >
@@ -170,17 +170,40 @@ function FilterByClassroom() {
                 height="100%"
                 style={{ borderRadius: "0.5rem" }}
               >
-                <Document 
+                <Document
                   pageMode="fullScreen"
                   title={`เอกสารการเข้าร่วมกิจกรรม ${activity.actName} ห้อง ${className}`}
                 >
                   <Page size="A4" style={styles.page} orientation="portrait">
-                    <Image src={`/Logo_NPS.png`} style={styles.logoSize}/>
+                    <Image src={`/Logo_NPS.png`} style={styles.logoSize} />
                     <Text style={styles.textHeader}>การเข้าร่วมกิจกรรม {activity.actName} ระหว่างวันที่ {dateFormatToThai(startDate)} ถึง {dateFormatToThai(endDate)} ห้อง {className}</Text>
                     <Text style={styles.textParagraph}>
                       สถานที่ {activity.actLocation} เริ่ม {activity.actStartTime} น. สิ้นสุด {activity.actEndTime} น.
                     </Text>
                     {keyFilter.map((key) => (
+                      <View key={key} style={{ marginBottom: 10 }}>
+                        <Text style={styles.textSpan}>{dateFormatToThai(key)}</Text>
+                        <View style={styles.tableHeader}>
+                          <Text style={[styles.tableColumn1, { fontWeight: "bold" }]}>รหัสนักเรียน</Text>
+                          <Text style={[styles.tableColumn2, { fontWeight: "bold" }]}>ชื่อ-นามสกุล</Text>
+                          <Text style={[styles.tableColumn2, { fontWeight: "bold" }]}>เวลาที่ลงชื่อ</Text>
+                          <Text style={[styles.tableColumn2, { fontWeight: "bold" }]}>สถานะการเข้าร่วม</Text>
+                        </View>
+                        {participate[key].map((pati, patiIndex) => (
+                          <View key={patiIndex} style={styles.tableRow}>
+                            <Text style={styles.tableColumn1}>{pati.stdId}</Text>
+                            <Text style={styles.tableColumn2}>{formatTitle(pati.student.title)} {pati.student.fName} {pati.student.lName}</Text>
+                            <Text style={styles.tableColumn2}>{pati.isJoin ? timeStampConvert(pati.joinTimestamp) : "-"}</Text>
+                            <Text style={styles.tableColumn2}>{pati.isJoin ? "เข้าร่วม" : "ไม่เข้าร่วม"}</Text>
+                          </View>
+
+                        ))}
+                        {/* <View style={styles.tableRow}>
+
+                        </View> */}
+                      </View>
+                    ))}
+                    {/* {keyFilter.map((key) => (
                       <Table style={styles.table} key={key}>
                         <Text style={styles.textSpan}>{dateFormatToThai(key)}</Text>
                         <TH style={styles.tableHeader}>
@@ -198,7 +221,7 @@ function FilterByClassroom() {
                           </TR>
                         ))}
                       </Table>
-                    ))}
+                    ))} */}
                   </Page>
                 </Document>
               </PDFViewer>
@@ -215,7 +238,7 @@ function FilterByClassroom() {
             </div>
           )}
         </div>
-        
+
         <div className="p-4 border-t border-line bg-gray-50">
           <div className="flex justify-end">
             <button

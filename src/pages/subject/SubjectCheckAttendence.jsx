@@ -143,7 +143,7 @@ function SubjectCheckAttendence() {
                                     <div className="mb-3">
                                         <p className="text-text-color-alt text-sm font-body">ครูที่ปรึกษา</p>
                                         <div className="flex flex-wrap gap-1 mt-1">
-                                            {item.teacher.length > 0 ? (
+                                            {item.classTeacher.length > 0 ? (
                                                 item.teacher.map((teacher, idx) => (
                                                     <span 
                                                         key={`${teacher.fName}-${idx}`}

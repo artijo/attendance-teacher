@@ -181,18 +181,14 @@ function SubjectAttendance() {
                                                         คาบเรียนทั้งหมด
                                                     </h3>
 
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
                                                         {time.studyTime.length > 0 ? (
                                                             time.studyTime.sort((a, b) => new Date(a.studingTimeDate) - new Date(b.studingTimeDate)).map((study) => (
-                                                                <Link
-                                                                    key={study.studyTimeId}
-                                                                    to={`/subjects/${id}/attendance/${study.studyTimeId}`}
-                                                                    className={`block rounded-lg border transition-all duration-200 hover:-translate-y-1 ${
-                                                                        hasAttendance(study) 
-                                                                        ? 'bg-green-50 border-green-200 hover:shadow-md hover:border-green-300' 
-                                                                        : 'bg-white border-line hover:bg-blue-50 hover:shadow-md hover:border-blue-200'
-                                                                    }`}
-                                                                >
+                                                                <div key={study.studyTimeId} className={`rounded-lg border ${
+                                                                    hasAttendance(study) 
+                                                                    ? 'bg-green-50 border-green-200' 
+                                                                    : 'bg-white border-line'
+                                                                }`}>
                                                                     <div className="p-4">
                                                                         <div className="flex justify-between items-center mb-3">
                                                                             <div className="font-medium text-text-color">
@@ -225,17 +221,29 @@ function SubjectAttendance() {
                                                                             {time.timeStart.substring(0, 5)} - {time.timeEnd.substring(0, 5)} น.
                                                                         </div>
 
-                                                                        <div className="flex justify-end">
-                                                                            <span className="text-sm px-3 py-1 rounded-lg bg-primary text-white inline-flex items-center">
+                                                                        <div className="flex justify-end gap-2">
+                                                                            <Link 
+                                                                                to={`/subjects/${id}/qrcode/${study.studyTimeId}`}
+                                                                                className="text-sm px-3 py-1 rounded-lg bg-secondary text-white inline-flex items-center hover:bg-secondary/90 transition-all duration-200"
+                                                                            >
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2m0 0H8m4 1v3m-4-3H4m8-3V8m4 4h4m-4-8l-2 2m-4 0L4 8m4-2v4"/>
+                                                                                </svg>
+                                                                                QR Code เช็คชื่อ
+                                                                            </Link>
+                                                                            <Link 
+                                                                                to={`/subjects/${id}/attendance/${study.studyTimeId}`}
+                                                                                className="text-sm px-3 py-1 rounded-lg bg-primary text-white inline-flex items-center hover:bg-primary/90 transition-all duration-200"
+                                                                            >
                                                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                                                 </svg>
                                                                                 {hasAttendance(study) ? 'ดูบันทึก' : 'บันทึกการเข้าเรียน'}
-                                                                            </span>
+                                                                            </Link>
                                                                         </div>
                                                                     </div>
-                                                                </Link>
+                                                                </div>
                                                             ))
                                                         ) : (
                                                             <div className="col-span-full text-center py-6 text-text-color-alt bg-gray-50 rounded-lg">
