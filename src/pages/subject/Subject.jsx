@@ -140,7 +140,7 @@ function Subject() {
                                                 </button>
                                             </Link>
                                             
-                                            <Link to={`/subjects/${subject.subId}/attendance/check`} state={{subject: subject}} className="w-full">
+                                            <Link to={`/subjects/attendance/check`} state={{subject: subject}} className="w-full">
                                                 <button className="w-full py-2 px-4 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors duration-200 flex items-center justify-center text-sm font-medium">
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
