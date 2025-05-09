@@ -25,9 +25,19 @@ function Dashboard() {
           const subjectCount = response.data.subject?.length || 0;
           const activityCount = response.data.activity?.length || 0;
           
-          // Calculate unique classrooms from subjects
+          // Calculate unique classrooms from subjects and classTeacher
           const classroomSet = new Set();
           
+          // Add classrooms from classTeacher (homeroom classes)
+          if (response.data.classTeacher && response.data.classTeacher.length > 0) {
+            response.data.classTeacher.forEach(entry => {
+              if (entry.classroom) {
+                classroomSet.add(`${entry.classroom.classLevel}/${entry.classroom.classRoom}`);
+              }
+            });
+          }
+          
+          // Add classrooms from timetable if available
           if (response.data.subject) {
             response.data.subject.forEach(subject => {
               if (subject.timetable) {
@@ -40,14 +50,9 @@ function Dashboard() {
             });
           }
           
-          // If no timetable data, add the teacher's assigned classroom
-          if (response.data.classroom) {
-            classroomSet.add(`${response.data.classroom.classLevel}/${response.data.classroom.classRoom}`);
-          }
-          
           setStats({
             subjects: subjectCount,
-            classrooms: classroomSet.size || (response.data.classroom ? 1 : 0),
+            classrooms: classroomSet.size || 0,
             activities: activityCount
           });
         }
@@ -59,6 +64,24 @@ function Dashboard() {
         setLoading(false);
       });
   }, []);
+
+  // Helper function to get the teacher's homeroom class
+  const getHomeRoomClass = () => {
+    if (!teacher || !teacher.classTeacher || teacher.classTeacher.length === 0) {
+      return null;
+    }
+    
+    // Return the first classroom entry (assuming the primary homeroom)
+    const primaryClassTeacher = teacher.classTeacher[0];
+    if (primaryClassTeacher && primaryClassTeacher.classroom) {
+      return primaryClassTeacher.classroom;
+    }
+    
+    return null;
+  };
+
+  // Get teacher's homeroom class
+  const homeroomClass = getHomeRoomClass();
 
   return (
     <div>
@@ -112,8 +135,8 @@ function Dashboard() {
             <div>
               <h3 className="text-sm text-text-color-alt font-medium">ห้องเรียน</h3>
               <p className="text-2xl font-bold text-secondary">{loading ? '-' : stats.classrooms}</p>
-              {!loading && teacher?.classroom && (
-                <p className="text-xs text-text-color-alt mt-1">ประจำชั้น {teacher.classroom.classLevel}/{teacher.classroom.classRoom}</p>
+              {!loading && homeroomClass && (
+                <p className="text-xs text-text-color-alt mt-1">ประจำชั้น {homeroomClass.classLevel}/{homeroomClass.classRoom}</p>
               )}
             </div>
           </div>
