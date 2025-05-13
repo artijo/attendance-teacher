@@ -10,12 +10,43 @@ function SubjectDetail() {
     const [subject, setSubject] = useState(null);
     const [selectedTimetable, setSelectedTimetable] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [timetablesByTerm, setTimetablesByTerm] = useState({});
+    const [selectedTerm, setSelectedTerm] = useState(null);
 
     useEffect(() => {
         setLoading(true);
         axios.get(`${HOSTNAME}/t/subject/${id}`)
             .then((response) => {
                 setSubject(response.data);
+                
+                // Group timetables by term
+                const groupedTimetables = {};
+                if (response.data && response.data.timetable) {
+                    response.data.timetable.forEach(timetable => {
+                        if (timetable.classroom && timetable.classroom.term) {
+                            const termId = timetable.classroom.term.termId;
+                            const termInfo = timetable.classroom.term;
+                            
+                            if (!groupedTimetables[termId]) {
+                                groupedTimetables[termId] = {
+                                    termInfo,
+                                    timetables: []
+                                };
+                            }
+                            
+                            groupedTimetables[termId].timetables.push(timetable);
+                        }
+                    });
+                }
+                
+                setTimetablesByTerm(groupedTimetables);
+                
+                // Select the first term as default if available
+                const termIds = Object.keys(groupedTimetables);
+                if (termIds.length > 0) {
+                    setSelectedTerm(termIds[0]);
+                }
+                
                 setLoading(false);
             })
             .catch((error) => {
@@ -23,6 +54,18 @@ function SubjectDetail() {
                 setLoading(false);
             });
     }, [id]);
+
+    // Format term name for display
+    const formatTermName = (term) => {
+        if (!term) return '';
+        return `ปีการศึกษา ${term.academicYear} เทอม ${term.semester}`;
+    };
+
+    // Count total study periods across all timetables
+    const getTotalStudyPeriods = () => {
+        if (!subject || !subject.timetable) return 0;
+        return subject.timetable.reduce((total, time) => total + (time.studyTime?.length || 0), 0);
+    };
 
     return (
         <>
@@ -127,7 +170,7 @@ function SubjectDetail() {
                                     </div>
                                     <div className="bg-secondary/5 p-4 rounded-lg text-center">
                                         <p className="text-4xl font-bold text-secondary">
-                                            {subject.timetable.reduce((total, time) => total + (time.studyTime?.length || 0), 0)}
+                                            {getTotalStudyPeriods()}
                                         </p>
                                         <p className="text-text-color-alt font-body text-sm mt-1">
                                             คาบเรียนทั้งหมด
@@ -149,100 +192,147 @@ function SubjectDetail() {
                             <p className="text-text-color-alt font-body">รายละเอียดตารางสอนของรายวิชานี้ทั้งหมด</p>
                         </div>
                         
-                        <div className="p-6">
-                            {subject.timetable.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {subject.timetable.map((time) => (
-                                        <div key={time.timetableId} className="border border-line rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
-                                            <div className={`h-1 ${time.dayOfWeek % 2 === 0 ? 'bg-primary' : 'bg-secondary'}`}></div>
-                                            <div 
-                                                className={`p-5 cursor-pointer transition-all duration-200 ${
-                                                    selectedTimetable === time.timetableId 
-                                                        ? 'bg-gray-50' 
-                                                        : 'bg-white hover:bg-gray-50'
-                                                }`}
-                                                onClick={() => setSelectedTimetable(selectedTimetable === time.timetableId ? null : time.timetableId)}
-                                            >
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <span className="inline-block bg-primary/10 text-primary px-2 py-1 text-xs font-medium rounded-md">
-                                                        ห้อง {time.classroom.classLevel}/{time.classroom.classRoom}
-                                                    </span>
-                                                    <div className="flex items-center text-text-color-alt text-xs">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V4z" clipRule="evenodd" />
-                                                        </svg>
-                                                        {time.timeStart.substring(0, 5)} - {time.timeEnd.substring(0, 5)} น.
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="flex items-center mb-1 text-text-color font-medium">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-secondary" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                                                    </svg>
-                                                    วัน{getDayName(time.dayOfWeek)}
-                                                </div>
-                                                
-                                                <div className="text-text-color-alt text-sm mt-4">
-                                                    {time.studyTime && time.studyTime.length > 0 ? (
-                                                        <div className="flex items-center">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                                            </svg>
-                                                            มีทั้งหมด {time.studyTime.length} คาบเรียน
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex items-center">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                                            </svg>
-                                                            ยังไม่มีคาบเรียนบันทึกไว้
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                
-                                                <div className="flex justify-end mt-4">
-                                                    <button 
-                                                        className="flex items-center text-sm text-primary hover:text-accent transition-colors"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSelectedTimetable(selectedTimetable === time.timetableId ? null : time.timetableId);
-                                                        }}
-                                                    >
-                                                        {selectedTimetable === time.timetableId ? 'ซ่อนรายละเอียด' : 'ดูรายละเอียด'}
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ml-1 transition-transform duration-300 ${selectedTimetable === time.timetableId ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 011.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 010-1.414z" clipRule="evenodd" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                                
-                                                {selectedTimetable === time.timetableId && time.studyTime && time.studyTime.length > 0 && (
-                                                    <div className="mt-4 pt-4 border-t border-line">
-                                                        <h4 className="font-medium mb-3 text-sm text-text-color">คาบเรียนทั้งหมด:</h4>
-                                                        <div className="bg-gray-50 rounded-lg p-2 max-h-64 overflow-y-auto" 
-                                                            onClick={(e) => e.stopPropagation()}>
-                                                            {time.studyTime
-                                                                .sort((a, b) => new Date(a.studingTimeDate) - new Date(b.studingTimeDate))
-                                                                .map((study) => (
-                                                                <div 
-                                                                    key={study.studyTimeId}
-                                                                    className="py-2 px-3 rounded bg-white hover:bg-gray-100 mb-1 transition-colors"
-                                                                >
-                                                                    <div className="flex justify-between items-center">
-                                                                        <span className="font-medium text-text-color">{formatDate(study.studingTimeDate)}</span>
-                                                                        <span className="text-xs text-text-color-alt">สัปดาห์ที่ {Math.ceil(
-                                                                            (new Date(study.studingTimeDate) - new Date(time.studyTime[0].studingTimeDate)) / 
-                                                                            (7 * 24 * 60 * 60 * 1000) + 1
-                                                                        )}</span>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
+                        {/* Term Selector */}
+                        {Object.keys(timetablesByTerm).length > 0 && (
+                            <div className="px-6 pt-4">
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {Object.entries(timetablesByTerm).map(([termId, { termInfo }]) => (
+                                        <button
+                                            key={termId}
+                                            onClick={() => setSelectedTerm(termId)}
+                                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                                selectedTerm === termId
+                                                    ? 'bg-primary text-white'
+                                                    : 'bg-gray-100 text-text-color hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {formatTermName(termInfo)}
+                                        </button>
                                     ))}
                                 </div>
+                            </div>
+                        )}
+                        
+                        <div className="p-6 pt-2">
+                            {Object.keys(timetablesByTerm).length > 0 ? (
+                                <>
+                                    {selectedTerm && (
+                                        <div>
+                                            <div className="mb-4">
+                                                <p className="text-text-color-alt text-sm">
+                                                    ระยะเวลาเปิดเทอม: {formatDate(timetablesByTerm[selectedTerm].termInfo.termStart)} - {formatDate(timetablesByTerm[selectedTerm].termInfo.termEnd)}
+                                                </p>
+                                            </div>
+                                            
+                                            {timetablesByTerm[selectedTerm].timetables.length > 0 ? (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                    {timetablesByTerm[selectedTerm].timetables.map((time) => (
+                                                        <div key={time.timetableId} className="border border-line rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+                                                            <div className={`h-1 ${time.dayOfWeek % 2 === 0 ? 'bg-primary' : 'bg-secondary'}`}></div>
+                                                            <div 
+                                                                className={`p-5 cursor-pointer transition-all duration-200 ${
+                                                                    selectedTimetable === time.timetableId 
+                                                                        ? 'bg-gray-50' 
+                                                                        : 'bg-white hover:bg-gray-50'
+                                                                }`}
+                                                                onClick={() => setSelectedTimetable(selectedTimetable === time.timetableId ? null : time.timetableId)}
+                                                            >
+                                                                <div className="flex justify-between items-start mb-4">
+                                                                    <span className="inline-block bg-primary/10 text-primary px-2 py-1 text-xs font-medium rounded-md">
+                                                                        ห้อง {time.classroom.classLevel}/{time.classroom.classRoom}
+                                                                    </span>
+                                                                    <div className="flex items-center text-text-color-alt text-xs">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V4z" clipRule="evenodd" />
+                                                                        </svg>
+                                                                        {time.timeStart.substring(0, 5)} - {time.timeEnd.substring(0, 5)} น.
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div className="flex items-center mb-1 text-text-color font-medium">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-secondary" viewBox="0 0 20 20" fill="currentColor">
+                                                                        <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 10-2 0v1H7V3a1 1 00-1-1zm0 5a1 1 00 0 2h8a1 1 100-2H6z" clipRule="evenodd" />
+                                                                    </svg>
+                                                                    วัน{getDayName(time.dayOfWeek)}
+                                                                </div>
+                                                                
+                                                                <div className="text-text-color-alt text-sm mt-4">
+                                                                    {time.studyTime && time.studyTime.length > 0 ? (
+                                                                        <div className="flex items-center">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 00-1.414-1.414L9 10.586 7.707 9.293a1 1 00-1.414 1.414l2 2a1 1 00 1.414 0l4-4z" clipRule="evenodd" />
+                                                                            </svg>
+                                                                            มีทั้งหมด {time.studyTime.length} คาบเรียน
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="flex items-center">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 101.414 1.414L10 11.414l1.293 1.293a1 1 00 1.414-1.414L11.414 10l1.293-1.293a1 1 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                                                            </svg>
+                                                                            ยังไม่มีคาบเรียนบันทึกไว้
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                
+                                                                <div className="flex justify-end mt-4">
+                                                                    <button 
+                                                                        className="flex items-center text-sm text-primary hover:text-accent transition-colors"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setSelectedTimetable(selectedTimetable === time.timetableId ? null : time.timetableId);
+                                                                        }}
+                                                                    >
+                                                                        {selectedTimetable === time.timetableId ? 'ซ่อนรายละเอียด' : 'ดูรายละเอียด'}
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ml-1 transition-transform duration-300 ${selectedTimetable === time.timetableId ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+                                                                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 011.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 010-1.414z" clipRule="evenodd" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </div>
+                                                                
+                                                                {selectedTimetable === time.timetableId && time.studyTime && time.studyTime.length > 0 && (
+                                                                    <div className="mt-4 pt-4 border-t border-line">
+                                                                        <h4 className="font-medium mb-3 text-sm text-text-color">คาบเรียนทั้งหมด:</h4>
+                                                                        <div className="bg-gray-50 rounded-lg p-2 max-h-64 overflow-y-auto" 
+                                                                            onClick={(e) => e.stopPropagation()}>
+                                                                            {time.studyTime
+                                                                                .sort((a, b) => new Date(a.studingTimeDate) - new Date(b.studingTimeDate))
+                                                                                .map((study) => (
+                                                                                <div 
+                                                                                    key={study.studyTimeId}
+                                                                                    className="py-2 px-3 rounded bg-white hover:bg-gray-100 mb-1 transition-colors"
+                                                                                >
+                                                                                    <div className="flex justify-between items-center">
+                                                                                        <span className="font-medium text-text-color">{formatDate(study.studingTimeDate)}</span>
+                                                                                        <span className="text-xs text-text-color-alt">สัปดาห์ที่ {Math.ceil(
+                                                                                            (new Date(study.studingTimeDate) - new Date(time.studyTime[0].studingTimeDate)) / 
+                                                                                            (7 * 24 * 60 * 60 * 1000) + 1
+                                                                                        )}</span>
+                                                                                    </div>
+                                                                                    {study.attendance && study.attendance.length > 0 && (
+                                                                                        <div className="mt-1 flex items-center text-xs text-green-600">
+                                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 00-1.414-1.414L9 10.586 7.707 9.293a1 1 00-1.414 1.414l2 2a1 1 00 1.414 0l4-4z" clipRule="evenodd" />
+                                                                                            </svg>
+                                                                                            บันทึกรายชื่อแล้ว {study.attendance.length} คน
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-8 text-text-color-alt">
+                                                    ไม่พบข้อมูลตารางสอนสำหรับภาคเรียนนี้
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </>
                             ) : (
                                 <div className="text-center py-8 text-text-color-alt">
                                     ไม่พบข้อมูลตารางสอนสำหรับวิชานี้
