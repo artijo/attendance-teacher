@@ -7,7 +7,7 @@ function SubjectCheckAttendence() {
     const params = useParams();
     const location = useLocation();
     const subjectInfo = location.state.subject;
-    const subjectid = params.id === undefined || params.id === null || params.id === "" ? "no id" : params.id
+    // const subjectid = params.id === undefined || params.id === null || params.id === "" ? "no id" : params.id
     const [termList, setTermList] = useState([]);
     const [selectValue, setSelectValue] = useState("");
     const [classrooms, setClassrooms] = useState([]);
@@ -35,9 +35,10 @@ function SubjectCheckAttendence() {
     const fetchClassroomByTerm = async (termId) => {
         setLoading(true);
         try{
-            const response = await axios.get(`${HOSTNAME}/t/classrooms/check/${termId}/${subjectid}`);
+            const response = await axios.get(`${HOSTNAME}/t/classrooms/check/${termId}/${subjectInfo.subId}`);
             if(response.status === 200) {
                 setClassrooms(response.data);
+                // console.log(response.data);
             }else{
                 throw new Error(response.data.message);
             }
@@ -144,15 +145,15 @@ function SubjectCheckAttendence() {
                                         <p className="text-text-color-alt text-sm font-body">ครูที่ปรึกษา</p>
                                         <div className="flex flex-wrap gap-1 mt-1">
                                             {item.classTeacher.length > 0 ? (
-                                                item.teacher.map((teacher, idx) => (
+                                                item.classTeacher.map((teacher, idx) => (
                                                     <span 
-                                                        key={`${teacher.fName}-${idx}`}
+                                                        key={`${teacher.teacher.fName}-${idx}`}
                                                         className="inline-flex items-center bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded-md"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                                                         </svg>
-                                                        {teacher.fName} {teacher.lName}
+                                                        {teacher.teacher.fName} {teacher.teacher.lName}
                                                     </span>
                                                 ))
                                             ) : (

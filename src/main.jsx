@@ -74,7 +74,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='subjects/:id/attendance' element={<SubjectAttendance />} />
           <Route path='subjects/:id/attendance/:studingid' element={<Attendance />} />
           <Route path='subjects/:subjectId/qrcode/:studyTimeId' element={<AttendanceWithQR />} />
-          <Route path='subjects/:id/attendance/check' element={<SubjectCheckAttendence />} />
+          <Route path='subjects/attendance/check' element={<SubjectCheckAttendence />} />
           <Route path='subjects/attendance/checkdetail' element={<SubjectCheckAttendenceDetail />} />
           <Route path='subjects/attendance/checkdetail/pdfpage' element={<AttendanceIsExamPDF />} />
           <Route path='subjects/attendances/abstract/subject' element={<AttendenceBySubjectPDFSubject />} />
