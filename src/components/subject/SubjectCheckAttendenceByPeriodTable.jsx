@@ -188,7 +188,7 @@ export const SubjectCheckAttendenceByPeriodTable = ({ studentList,classrooms,sub
                     {exportExcel}
                 </div>
                 
-                <div ref={(element) => (ref.current[index] = element)} className="overflow-y-auto max-h-[500px]">
+                <div ref={(element) => (ref.current[index] = element)} className="overflow-auto max-h-[500px]">
                     <table className="w-full text-sm text-left border border-line rounded-lg">
                         <thead className="bg-gray-50 sticky top-0 z-10">
                             <TableHeader month={month} />

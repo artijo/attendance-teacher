@@ -16,14 +16,19 @@ function SubjectCheckAttendenceDetail() {
     const [abStact, setAbStact] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    console.log(classroom);
+    // console.log(classroom);
 
     const fetchDataAbstact = async (subjectId, classroomId) => {
         setLoading(true);
         try{
             const response = await axios.get(`${HOSTNAME}/t/classrooms/classrooms/checkdetail/${subjectId}/${classroomId}`);
             if(response.status === 200) {
-                setAbStact(response.data);
+                const studentDataSorted = response.data.sort((a, b) => {
+                    return parseInt(a.stdNo) - parseInt(b.stdNo);
+                });
+                // console.log(studentDataSorted);
+                setAbStact(studentDataSorted);
+                // console.log(response.data);
             }else{
                 throw new Error(response.data.message);
             }
