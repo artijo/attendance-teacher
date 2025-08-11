@@ -1,7 +1,7 @@
 import ExportExcelButton from "../exportExcelButton";
 import { TapAttendenceSummaryOpen } from "../tapAttendenceSummaryOpen";
 import { useEffect, useRef, useState } from "react";
-import { convertNumberToThaiMonth, dateTimeFormat, formatTitle } from "../../helper";
+import { convertNumberToThaiMonth, dateTimeFormat, formatDateToThaiStyle, formatTitle } from "../../helper";
 import { summaryAttendeanceBySubjectFilterByDay, Table_to_Excel } from "../../excel";
 import FilterByPeriod from "./exportPDF/FilterByPeriod";
 import { tabletojson } from "tabletojson";
@@ -10,6 +10,7 @@ import { HOSTNAME } from "../../config";
 import ExportPdfButton from "../exportPdfButton";
 
 export const SubjectCheckAttendenceByPeriodTable = ({ studentList,classrooms,subject }) => {
+    // console.log(studentList);
     const navigate = useNavigate();
     const location = useLocation();
     // const subject = location.state?.subject;
@@ -39,16 +40,34 @@ export const SubjectCheckAttendenceByPeriodTable = ({ studentList,classrooms,sub
     const TableHeader = ({ month }) => {
         let indexReal = 0;
         return (
-            <tr className="text-xs text-gray-700 uppercase bg-gray-50">
-                <th className="px-4 py-3">เลขที่</th>
-                <th className="px-4 py-3">รหัสนักเรียน</th>
-                <th className="px-4 py-3">ชื่อ-นามสกุล</th>
-                {studentList.data[0].attendance
+            <tr>
+                <th
+                    className="px-6 py-3.5 text-left text-xs font-medium text-text-color-alt tracking-wider sticky left-0 outline-1 outline-gray-200 bg-white"
+                    style={{ minWidth: '80px' }}
+                >
+                    เลขที่
+                </th>
+                <th
+                    className="px-6 py-3.5 text-left text-xs font-medium text-text-color-alt tracking-wider sticky left-[80px] outline-1 outline-gray-200 bg-white"
+                    style={{ minWidth: '128px' }}
+                >
+                    รหัสนักเรียน
+                </th>
+                <th
+                    className="px-6 py-3.5 text-left text-xs font-medium text-text-color-alt tracking-wider sticky left-[208px] outline-1 outline-gray-200 bg-white"
+                    style={{ minWidth: '200px' }}
+                >
+                    ชื่อ-นามสกุล
+                </th>
+                 {studentList.data[0].attendance
                     .filter((att) => att.month === month)
                     .map((attendance, index) => (
-                        <th key={index} className="px-4 py-3 text-center whitespace-nowrap">
-                            <div className="font-medium">คาบที่ {++indexReal}</div>
-                            <div className="text-xs mt-1 text-gray-500 font-normal">({dateTimeFormat(attendance.studingTimeDate)})</div>
+                        <th
+                            className="px-6 py-3.5 text-left text-xs font-medium text-text-color-alt tracking-wider outline-1 outline-gray-200"
+                            key={index}
+                            style={{ minWidth: '240px' }}
+                        >
+                            คาบที่ {++indexReal} วันที่ {formatDateToThaiStyle(attendance.studingTimeDate)}
                         </th>
                     ))}
             </tr>
@@ -74,17 +93,36 @@ export const SubjectCheckAttendenceByPeriodTable = ({ studentList,classrooms,sub
         return (
             <>
                 {studentList.data.map((student, index) => (
-                    <tr key={index} className="bg-white border-b hover:bg-gray-50 transition-colors duration-150">
-                        <td className="px-4 py-3 text-center font-medium">{student.stdNo}</td>
-                        <td className="px-4 py-3">{student.stdId}</td>
-                        <td className="px-4 py-3 font-medium">{`${student.fName} ${student.lName}`}</td>
+                    <tr key={index} className="hover:bg-gray-50 transition-colors duration-150">
+                        <td 
+                            className="px-4 py-3 font-medium text-text-color sticky left-0 bg-white outline-1 outline-gray-200"
+                            style={{ minWidth: '80px' }}
+                        >
+                            {student.stdNo}
+                        </td>
+                        <td 
+                            className="px-4 py-3 font-medium text-text-color sticky left-[80px] bg-white outline-1 outline-gray-200"
+                            style={{ minWidth: '128px' }}
+                        >
+                            {student.stdId}
+                        </td>
+                        <td 
+                            className="px-4 py-3 font-medium text-text-color sticky left-[208px] bg-white outline-1 outline-gray-200"
+                            style={{ minWidth: '200px' }}
+                        >
+                            {`${student.fName} ${student.lName}`}
+                        </td>
                         {student.attendance
                             .filter((att) => att.month === month)
                             .map((attendance, attIndex) => (
-                                <td key={attIndex} className={`px-4 py-3 text-center ${getStatusClass(attendance.attStatus?.toLowerCase())}`}>
+                                <td 
+                                    key={attIndex} 
+                                    className={`px-6 py-4  outline-1 outline-gray-200 ${getStatusClass(attendance.attStatus?.toLowerCase())}`}
+                                    style={{ minWidth: '200px' }}
+                                >
                                     {attendance.attStatus != null ? formatAttStatus(attendance.attStatus.toLowerCase()) : '-'}
                                 </td>
-                            ))}
+                        ))}
                     </tr>
                 ))}
             </>
@@ -167,7 +205,11 @@ export const SubjectCheckAttendenceByPeriodTable = ({ studentList,classrooms,sub
         
         return (
             <tr className="bg-gray-50 border-t-2 border-gray-200">
-                <td colSpan={3} className="px-4 py-3 font-medium text-gray-700">
+                 <td 
+                    colSpan={3} 
+                    className="sticky left-0 bg-gray-50 z-20 px-6 py-3 font-medium text-text-color outline-1 outline-gray-200"
+                    style={{ minWidth: '280px' }}
+                >
                     สรุปจำนวนแต่ละสถานะ
                 </td>
                 {Object.entries(periodStatusCounts).map(([periodIndex, counts]) => (
@@ -187,13 +229,12 @@ export const SubjectCheckAttendenceByPeriodTable = ({ studentList,classrooms,sub
                     {exportPdf}
                     {exportExcel}
                 </div>
-                
-                <div ref={(element) => (ref.current[index] = element)} className="overflow-auto max-h-[500px]">
-                    <table className="w-full text-sm text-left border border-line rounded-lg">
-                        <thead className="bg-gray-50 sticky top-0 z-10">
+                <div ref={(element) => (ref.current[index] = element)} className="overflow-auto h-[500px] border border-gray-200 rounded-lg">
+                    <table className="w-full border-gray-200 border-collapse text-sm bg-white rounded-lg ">
+                        <thead className="bg-white sticky top-0 z-20">
                             <TableHeader month={month} />
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
+                        <tbody>
                             <TableBody month={month} />
                         </tbody>
                         <tfoot>
