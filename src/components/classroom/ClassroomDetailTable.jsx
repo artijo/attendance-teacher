@@ -48,9 +48,9 @@ function ClassroomDetailTable({classrooms}) {
                 </ExportExcelButton> */}
             </div>
             
-            <div className="overflow-x-auto">   
+            <div className="overflow-y-auto max-h-[500px]">   
                 <table className="w-full text-sm text-left">
-                    <thead className="text-sm text-white uppercase bg-primary">
+                    <thead className="text-sm text-white uppercase bg-primary sticky top-0 z-10">
                         <tr>
                             <th className="px-6 py-3">เลขที่</th>
                             <th className="px-6 py-3">รหัสนักเรียน</th>

@@ -16,14 +16,19 @@ function SubjectCheckAttendenceDetail() {
     const [abStact, setAbStact] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    console.log(classroom);
+    // console.log(classroom);
 
     const fetchDataAbstact = async (subjectId, classroomId) => {
         setLoading(true);
         try{
             const response = await axios.get(`${HOSTNAME}/t/classrooms/classrooms/checkdetail/${subjectId}/${classroomId}`);
             if(response.status === 200) {
-                setAbStact(response.data);
+                const studentDataSorted = response.data.sort((a, b) => {
+                    return parseInt(a.stdNo) - parseInt(b.stdNo);
+                });
+                // console.log(studentDataSorted);
+                setAbStact(studentDataSorted);
+                // console.log(response.data);
             }else{
                 throw new Error(response.data.message);
             }
@@ -122,13 +127,13 @@ function SubjectCheckAttendenceDetail() {
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                     </div>
                 ) : abStact.length > 0 ? (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-auto h-[500px]">
                         <table ref={ref} className="w-full text-sm text-left">
-                            <thead className="text-xs text-white uppercase bg-primary">
+                            <thead className="sticky top-0 z-20 text-xs text-white uppercase bg-primary">
                                 <tr>
-                                    <th className="px-6 py-3">เลขที่</th>
-                                    <th className="px-6 py-3">รหัสนักเรียน</th>
-                                    <th className="px-6 py-3">ชื่อ-นามสกุล</th>
+                                    <th className="px-6 py-3 sticky left-0 bg-primary z-20" style={{minWidth: '80px'}}>เลขที่</th>
+                                    <th className="px-6 py-3 sticky left-[80px] bg-primary z-20" style={{minWidth: '128px'}}>รหัสนักเรียน</th>
+                                    <th className="px-6 py-3 sticky left-[208px] bg-primary z-20" style={{minWidth: '200px'}}>ชื่อ-นามสกุล</th>
                                     <th className="px-6 py-3 text-center">ขาดเรียน</th>
                                     <th className="px-6 py-3 text-center">เข้าสาย</th>
                                     <th className="px-6 py-3 text-center">ลา</th>
@@ -144,9 +149,9 @@ function SubjectCheckAttendenceDetail() {
                                         key={`${item.stdNo}-${index}`} 
                                         className="bg-white border-b hover:bg-gray-50 transition-colors"
                                     >
-                                        <td className="px-6 py-4 font-medium text-text-color">{parseInt(item.stdNo)}</td>
-                                        <td className="px-6 py-4 font-medium text-text-color">{item.stdId}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-6 py-4 font-medium text-text-color sticky left-0 bg-white" style={{minWidth: '80px'}}>{parseInt(item.stdNo)}</td>
+                                        <td className="px-6 py-4 font-medium text-text-color sticky left-[80px] bg-white" style={{minWidth: '128px'}}>{item.stdId}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap sticky left-[208px] bg-white" style={{minWidth: '200px'}}>
                                             {formatTitle(item.title)} {item.fName} {item.lName}
                                         </td>
                                         <td className="px-6 py-4 text-center">

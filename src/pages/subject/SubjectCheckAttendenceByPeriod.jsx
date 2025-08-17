@@ -16,7 +16,12 @@ function SubjectCheckAttendenceByPeriod(){
         try{
             const response = await axios.get(`${HOSTNAME}/t/attendence/${subject.subId}/${classrooms.classId}`);
             if(response.status === 200){
-                setStudentList(response.data);
+                // console.log(response.data);
+                const studentDataSorted = response.data.data.sort((a, b) => {
+                   return parseInt(a.stdNo) - parseInt(b.stdNo); 
+                });
+                // console.log(studentDataSorted);
+                setStudentList({...response.data, data: studentDataSorted});
             }else{
                 throw new Error(response.data.message);
             }

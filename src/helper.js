@@ -143,5 +143,10 @@ export function daybetween(start, end) {
   return dates;
 }
 
+export const formatDateToThaiStyle = (date) => {
+  const dateformat = DateTime.fromISO(date).setZone("Asia/Bangkok");
+  return `${dateformat.day} ${convertNumberToThaiMonth(dateformat.month)} ${dateformat.year + 543}`;
+};
+
 
   
