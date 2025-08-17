@@ -19,15 +19,15 @@ function Dashboard() {
     axios.get(`${HOSTNAME}/t/teacher-info`)
       .then(response => {
         setTeacher(response.data);
-        
+
         // Set basic stats if available
         if (response.data) {
           const subjectCount = response.data.subject?.length || 0;
           const activityCount = response.data.activity?.length || 0;
-          
+
           // Calculate unique classrooms from subjects and classTeacher
           const classroomSet = new Set();
-          
+
           // Add classrooms from classTeacher (homeroom classes)
           if (response.data.classTeacher && response.data.classTeacher.length > 0) {
             response.data.classTeacher.forEach(entry => {
@@ -36,7 +36,7 @@ function Dashboard() {
               }
             });
           }
-          
+
           // Add classrooms from timetable if available
           if (response.data.subject) {
             response.data.subject.forEach(subject => {
@@ -49,7 +49,7 @@ function Dashboard() {
               }
             });
           }
-          
+
           setStats({
             subjects: subjectCount,
             classrooms: classroomSet.size || 0,
@@ -70,13 +70,13 @@ function Dashboard() {
     if (!teacher || !teacher.classTeacher || teacher.classTeacher.length === 0) {
       return null;
     }
-    
+
     // Return the first classroom entry (assuming the primary homeroom)
     const primaryClassTeacher = teacher.classTeacher[0];
     if (primaryClassTeacher && primaryClassTeacher.classroom) {
       return primaryClassTeacher.classroom;
     }
-    
+
     return null;
   };
 
@@ -91,7 +91,7 @@ function Dashboard() {
             <h1 className="text-2xl md:text-3xl font-bold text-primary font-heading">แดชบอร์ด</h1>
             <div className="mt-2 h-1 w-16 bg-secondary rounded-full"></div>
           </div>
-          
+
           {!loading && teacher && (
             <div className="bg-white shadow-sm border border-line rounded-lg px-4 py-3 flex items-center">
               <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary mr-3">
@@ -108,7 +108,72 @@ function Dashboard() {
           )}
         </div>
       </div>
-      
+
+      {/* Satisfaction Survey Section */}
+      <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 md:p-6 shadow-sm">
+        <div className="flex items-start space-x-4">
+          <div className="flex-shrink-0 pt-1">
+            <div className="bg-blue-100 rounded-full p-2">
+              <svg
+                className="w-6 h-6 text-blue-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-blue-800 mb-2">
+              แบบประเมินความพึงพอใจ
+            </h3>
+            <p className="text-blue-700 text-sm mb-4">
+              ขอความอนุเคราะห์ในการประเมินความพึงพอใจต่อการใช้งานระบบ
+              เพื่อนำมาพัฒนาและปรับปรุงระบบให้ดียิ่งขึ้น
+            </p>
+            <a
+              href="https://forms.gle/h1djPQjY2Lh7Y7ZU8"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+            >
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              ทำแบบประเมิน
+              <svg
+                className="w-4 h-4 ml-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="bg-white rounded-xl shadow-sm p-5 border border-line">
@@ -124,7 +189,7 @@ function Dashboard() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl shadow-sm p-5 border border-line">
           <div className="flex items-center">
             <div className="h-12 w-12 rounded-full bg-secondary/20 flex items-center justify-center text-secondary mr-4">
@@ -141,7 +206,7 @@ function Dashboard() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl shadow-sm p-5 border border-line">
           <div className="flex items-center">
             <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center text-green-500 mr-4">
@@ -156,12 +221,12 @@ function Dashboard() {
           </div>
         </div>
       </div>
-      
+
       {/* Attendance Chart */}
       <div className="mb-8">
         <AttendanceChart />
       </div>
-      
+
       {/* Quick Actions */}
       <div className="mb-6">
         <h2 className="text-xl font-bold text-primary font-heading mb-4 flex items-center">
@@ -170,7 +235,7 @@ function Dashboard() {
           </svg>
           การดำเนินการด่วน
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link to="/subjects" className="bg-white rounded-xl shadow-sm border border-line p-5 hover:shadow-md transition-all duration-200">
             <div className="flex items-center">
@@ -185,7 +250,7 @@ function Dashboard() {
               </div>
             </div>
           </Link>
-          
+
           <Link to="/classroom" className="bg-white rounded-xl shadow-sm border border-line p-5 hover:shadow-md transition-all duration-200">
             <div className="flex items-center">
               <div className="h-12 w-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mr-4">
@@ -199,7 +264,7 @@ function Dashboard() {
               </div>
             </div>
           </Link>
-          
+
           <Link to="/activities" className="bg-white rounded-xl shadow-sm border border-line p-5 hover:shadow-md transition-all duration-200">
             <div className="flex items-center">
               <div className="h-12 w-12 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-500 mr-4">
