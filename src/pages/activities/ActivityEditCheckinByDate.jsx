@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import axios from "axios";
 import { HOSTNAME, TIME_ZONE } from "../../config";
-import { formatDate } from "../../helper";
+import { formatDate, formatTitle } from "../../helper";
 import { DateTime } from "luxon";
 
 function EditCheckIn() {
@@ -87,13 +87,13 @@ function EditCheckIn() {
 
         if (!isDateValid) {
           setError(
-            "ไม่สามารถบันทึกการเข้าร่วมได้ เนื่องจากไม่อยู่ในช่วงวันที่จัดกิจกรรม"
+            "ไม่สามารถบันทึกการเข้าร่วมได้ เนื่องจากไม่อยู่ในช่วงวันที่จัดกิจกรรม",
           );
         }
 
         // Filter participations by the selected date
         const dateParticipations = getDateParticipation(
-          activity.actParticipate
+          activity.actParticipate,
         );
 
         // Initialize notes from date's participation data
@@ -114,15 +114,15 @@ function EditCheckIn() {
           if (activityResponse.data.joinLimitNumber) {
             setAvailableClassrooms(classroomsResponse.data);
             const allStudents = classroomsResponse.data.flatMap(
-              (c) => c.classroomMembers
+              (c) => c.classroomMembers,
             );
             setStudents(allStudents);
           } else if (activityResponse.data.classroom) {
             const allowedClassIds = activityResponse.data.classroom.map(
-              (c) => c.classId
+              (c) => c.classId,
             );
             const filteredClassrooms = classroomsResponse.data.filter((c) =>
-              allowedClassIds.includes(c.classId)
+              allowedClassIds.includes(c.classId),
             );
             setAvailableClassrooms(filteredClassrooms);
             const filteredStudents = classroomsResponse.data
@@ -133,13 +133,13 @@ function EditCheckIn() {
         } else {
           setAvailableClassrooms(classroomsResponse.data);
           const allStudents = classroomsResponse.data.flatMap(
-            (c) => c.classroomMembers
+            (c) => c.classroomMembers,
           );
           setStudents(allStudents);
         }
       } catch (err) {
         setError(
-          err.response?.data?.message || "เกิดข้อผิดพลาดในการโหลดข้อมูล"
+          err.response?.data?.message || "เกิดข้อผิดพลาดในการโหลดข้อมูล",
         );
       } finally {
         setLoading(false);
@@ -154,7 +154,7 @@ function EditCheckIn() {
 
     if (selectedClassroomId !== "all") {
       result = result.filter(
-        (student) => student.classId === selectedClassroomId
+        (student) => student.classId === selectedClassroomId,
       );
     }
 
@@ -162,9 +162,9 @@ function EditCheckIn() {
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
       result = result.filter((student) => {
-        const studentName = `${
-          student.student.title === "BOY" ? "เด็กชาย" : "เด็กหญิง"
-        } ${student.student.fName} ${student.student.lName}`.toLowerCase();
+        const studentName = `${formatTitle(
+          student.student.title,
+        )} ${student.student.fName} ${student.student.lName}`.toLowerCase();
         const studentId = student.stdId.toLowerCase();
         const studentNo = student.stdNo.toString();
 
@@ -184,11 +184,11 @@ function EditCheckIn() {
   const handleAttendanceChange = async (
     studentId,
     status,
-    note = notes[studentId] || ""
+    note = notes[studentId] || "",
   ) => {
     if (!isValidDate) {
       setError(
-        "ไม่สามารถบันทึกการเข้าร่วมได้ เนื่องจากไม่อยู่ในช่วงวันที่จัดกิจกรรม"
+        "ไม่สามารถบันทึกการเข้าร่วมได้ เนื่องจากไม่อยู่ในช่วงวันที่จัดกิจกรรม",
       );
       return;
     }
@@ -214,7 +214,7 @@ function EditCheckIn() {
       setActivity(response.data);
     } catch (err) {
       setError(
-        err.response?.data?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล"
+        err.response?.data?.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
       );
     }
   };
@@ -567,7 +567,7 @@ function EditCheckIn() {
                     const dateParticipation = activity.actParticipate.find(
                       (p) => {
                         const participationDate = DateTime.fromISO(
-                          p.joinTimestamp
+                          p.joinTimestamp,
                         )
                           .setZone(TIME_ZONE)
                           .startOf("day");
@@ -578,7 +578,7 @@ function EditCheckIn() {
                           p.stdId === student.stdId &&
                           participationDate.equals(checkDate)
                         );
-                      }
+                      },
                     );
 
                     const isAbsent =
@@ -599,9 +599,7 @@ function EditCheckIn() {
                           {student.stdId}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-body text-text-color">
-                          {student.student.title === "BOY"
-                            ? "เด็กชาย"
-                            : "เด็กหญิง"}{" "}
+                          {formatTitle(student.student.title)}{" "}
                           {student.student.fName} {student.student.lName}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -621,7 +619,7 @@ function EditCheckIn() {
                                 onChange={(e) =>
                                   handleAttendanceChange(
                                     student.stdId,
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 className="sr-only peer"
@@ -666,7 +664,7 @@ function EditCheckIn() {
                                 onChange={(e) =>
                                   handleAttendanceChange(
                                     student.stdId,
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 className="sr-only peer"
@@ -716,7 +714,7 @@ function EditCheckIn() {
                                 handleAttendanceChange(
                                   student.stdId,
                                   "PRESENT",
-                                  e.target.value
+                                  e.target.value,
                                 );
                               }
                             }}
