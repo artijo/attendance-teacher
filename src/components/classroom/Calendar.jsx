@@ -145,7 +145,7 @@ function Calendar({
                                     className="flex justify-center items-center w-6.5 h-6.5 bg-red-300 text-white font-bold rounded-full"
 
                                 >
-                                    {parseInt(value.split('-')[2])}
+                                    {value.split('-')[2]}
                                 </div>
                             )
                         }
@@ -162,7 +162,7 @@ function Calendar({
                                                 : undefined
                                         }
                                     >
-                                        {parseInt(value.split('-')[2])}
+                                        {(value.split('-')[2])}
                                     </div>
                                 )
                             } else {
@@ -176,15 +176,15 @@ function Calendar({
                                                 : undefined
                                         }
                                     >
-                                        {parseInt(value.split('-')[2])}
+                                        {value.split('-')[2]}
                                     </div>
                                 )
                             }
 
                         } else {
                             return (
-                                <div key={index} className=" flex justify-center items-center w-6.5 h-6.5 text-gray-200">
-                                    {parseInt(value.split('-')[2])}
+                                <div key={index} className="flex justify-center items-center w-6.5 h-6.5 text-gray-200">
+                                    {value.split('-')[2]}
                                 </div>
                             )
                         }
