@@ -9,6 +9,8 @@ function AttendenceByDayPDF() {
     const { studentList, periodStatus, date, classroomInfo } = location.state;
     const [newStudentList, setNewStudentList] = useState([]);
    
+    // console.log(classroomInfo.classRoom);
+
     useEffect(() => {
         let listPerPage = 25;
         let totalPage = Math.ceil(studentList.length / listPerPage); // ปัดเศษขึ้น 
@@ -75,7 +77,7 @@ function AttendenceByDayPDF() {
                                         <Page size={"A4"} style={styles.page} key={`Page ${pageIndex + 1}`}>
                                             <Image src={`/Logo_NPS.png`} style={styles.logoSize} />
                                             <Text style={styles.textHeader}>
-                                                รายละเอียดการเข้าเรียนประจำวันที่ {formatDateToThai(date)} | ห้องม.{classroomInfo.classLevel}/{classroomInfo.classLevel}
+                                                รายละเอียดการเข้าเรียนประจำวันที่ {formatDateToThai(date)} | ห้องม.{classroomInfo.classLevel}/{classroomInfo.classRoom}
                                             </Text>
                                             <View
                                                 style={{
