@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { HOSTNAME } from "../../../config";
 import axios from "axios";
-import { formatDateToThai, formatTitle } from "../../../helper";
+import { formatDateToThai, formatDayOfWeeks, formatTitle } from "../../../helper";
 import StudentAttendenceDayDetailList from "../../../components/classroom/attendance/StudentAttendenceDayDetailList";
+import { DateTime } from "luxon";
 function StudentAttendanceDayDetail() {
     const location = useLocation();
     const { classrooms, date } = location.state;
@@ -71,7 +72,7 @@ function StudentAttendanceDayDetail() {
                         <button
                             className={`px-4 py-3 font-medium font-body border-b-2 border-primary text-primary `}
                         >
-                            การเข้าเรียนตามวันที่ {formatDateToThai(date)}
+                            การเข้าเรียนตามวัน{formatDayOfWeeks(DateTime.fromISO(date).weekday)} ที่ {formatDateToThai(date)}
                         </button>
                     </nav>
                 </div>
