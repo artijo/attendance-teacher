@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { HOSTNAME } from "../../../config";
 import axios from "axios";
-import { formatDateToThai, formatDayOfWeeks, formatTitle } from "../../../helper";
+import { formatDateToThai, formatTitle } from "../../../helper";
 import StudentAttendenceDayDetailList from "../../../components/classroom/attendance/StudentAttendenceDayDetailList";
-import {DateTime} from 'luxon'
 function StudentAttendanceDayDetail() {
     const location = useLocation();
     const { classrooms, date } = location.state;
@@ -13,7 +12,7 @@ function StudentAttendanceDayDetail() {
         try {
             const response = await axios.get(`${HOSTNAME}/t/attendence/byDate/${date}/${classroomId}`);
             setStudentList(response.data);
-            console.log(response.data);
+            // console.log(response.data);
         } catch (error) {
             console.error(error);
         }

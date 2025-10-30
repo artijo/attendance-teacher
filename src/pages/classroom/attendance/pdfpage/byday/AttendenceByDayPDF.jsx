@@ -1,9 +1,8 @@
-import { Link, useLocation } from "react-router-dom";
-import { formatAttStatus, formatDateToThai, formatDayOfWeeks, formatTitle } from "../../../../../helper.js";
+import { useLocation } from "react-router-dom";
+import { formatAttStatus, formatDateToThai, formatTitle } from "../../../../../helper.js";
 import { styles } from "../style.js";
 import { Page, Text, View, Document, PDFViewer, Image } from "@react-pdf/renderer";
 import { useEffect, useState } from "react";
-import { DateTime } from "luxon";
 
 function AttendenceByDayPDF() {
     const location = useLocation();

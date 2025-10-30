@@ -6,7 +6,6 @@ function StudentAttendanceCalendar() {
     const navigate = useNavigate();
     const location = useLocation();
     const { classrooms } = location.state;
-    // console.log(classrooms);
     const navigateDetailPage = (date) => {
         // navigate to detail page
         navigate('/classroom/attendance/byday/detail', {state: {classrooms, date}});

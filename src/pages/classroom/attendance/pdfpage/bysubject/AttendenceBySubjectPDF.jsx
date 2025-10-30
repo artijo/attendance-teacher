@@ -5,9 +5,8 @@ import { styles } from "../style.js";
 function AttendenceBySubjectPDF() {
     const location = useLocation();
     const { studentInfo, dataInfo, className, stdId, classroom } = location.state;
-    // console.log(dataInfo);
     // {studentInfo: studentInfoMation,dataInfo: studentInfo, className: className, stdId:stdId, classroom: classroom}}
-    console.log(classroom);
+    // console.log(classroom);
     return (
         <div className="min-h-screen">
             <div className="mb-6">

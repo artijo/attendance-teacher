@@ -3,7 +3,7 @@ import ExportPdfButton from "../../exportPdfButton";
 import ExportExcelButton from "../../exportExcelButton";
 import { formatAttStatus, formatDateToThai, formatDayOfWeeks } from "../../../helper";
 import { useNavigate } from "react-router-dom";
-import { HOSTNAME, TIME_ZONE } from "../../../config.js";
+import { TIME_ZONE } from "../../../config.js";
 import { DateTime } from "luxon";
 import { summaryAttendeanceByDay } from "../../../excel.js";
 
