@@ -1,15 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
-import { formatAttStatus, formatDateToThai, formatTitle } from "../../../../../helper.js";
+import { formatAttStatus, formatDateToThai, formatDayOfWeeks, formatTitle } from "../../../../../helper.js";
 import { styles } from "../style.js";
 import { Page, Text, View, Document, PDFViewer, Image } from "@react-pdf/renderer";
 import { useEffect, useState } from "react";
+import { DateTime } from "luxon";
 
 function AttendenceByDayPDF() {
     const location = useLocation();
     const { studentList, periodStatus, date, classroomInfo } = location.state;
     const [newStudentList, setNewStudentList] = useState([]);
-
-    
+   
     useEffect(() => {
         let listPerPage = 25;
         let totalPage = Math.ceil(studentList.length / listPerPage); // ปัดเศษขึ้น 

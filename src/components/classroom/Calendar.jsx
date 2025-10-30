@@ -26,11 +26,11 @@ function Calendar({
     let starDateMonth = DateTime.fromObject({
         month: selectMonthAndYear.month,
         year: selectMonthAndYear.year
-    }).startOf('month');
+    }).setZone(TIME_ZONE).startOf('month');
     let endDateMonth = DateTime.fromObject({
         month: selectMonthAndYear.month,
         year: selectMonthAndYear.year
-    }).endOf('month');
+    }).setZone(TIME_ZONE).endOf('month');
 
     const handleSelectDate = (date) => {
         if (date === selectDate) {
@@ -64,6 +64,13 @@ function Calendar({
         });
     };
 
+    const covertNumberToStringOneLetter = (stringText) => {
+        /*
+            Example if input 01 this fuction gonna change to 1.
+        */
+        return String(parseInt(stringText))
+    }
+
     const createDate = () => {
         let dayArr = [];
         let startWeekDay = starDateMonth.weekday; //If weekday is 'wednesday' mean 3
@@ -92,6 +99,7 @@ function Calendar({
         dayArr = [...frontEmpty.reverse(), ...dayArr, ...backEmpty];
         // console.log(dayArr);
         setDayList(dayArr);
+        // console.log(dayArr);
         return;
     }
 
@@ -129,7 +137,7 @@ function Calendar({
             </div>
             <div className="grid grid-cols-1 gap-2 mt-2">
                 <div className="grid grid-cols-7 gap-2 text-sm font-medium text-center">
-                    {["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."].map((value, index) => (
+                    {["จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส.", "อา"].map((value, index) => (
                         <div key={index}>
                             {value}
                         </div>
@@ -145,7 +153,7 @@ function Calendar({
                                     className="flex justify-center items-center w-6.5 h-6.5 bg-red-300 text-white font-bold rounded-full"
 
                                 >
-                                    {value.split('-')[2]}
+                                    {covertNumberToStringOneLetter(value.split('-')[2])}
                                 </div>
                             )
                         }
@@ -155,36 +163,36 @@ function Calendar({
                                 return (
                                     <div
                                         key={index}
-                                        className={`cursor-pointer flex justify-center items-center w-6.5 h-6.5 text-gray-950 font-medium ${selectDate === value && 'rounded-full bg-primary text-white font-medium'} `}
+                                        className={`cursor-pointer flex justify-center items-center w-6.5 h-6.5 text-gray-950 font-bold ${selectDate === value && 'rounded-full bg-primary text-white font-medium'} `}
                                         onClick={
-                                            !(valueDate.weekday == 1 || valueDate.weekday == 7)
+                                            !(valueDate.weekday == 6 || valueDate.weekday == 7)
                                                 ? () => handleSelectDate(value)
                                                 : undefined
                                         }
                                     >
-                                        {(value.split('-')[2])}
+                                        {covertNumberToStringOneLetter(value.split('-')[2])}
                                     </div>
                                 )
                             } else {
                                 return (
                                     <div
                                         key={index}
-                                        className={`cursor-pointer flex justify-center items-center w-6.5 h-6.5 text-gray-500  font-medium ${selectDate === value && 'rounded-full bg-primary text-white font-medium'}`}
+                                        className={`cursor-pointer flex justify-center items-center w-6.5 h-6.5 text-gray-500  font-bold ${selectDate === value && 'rounded-full bg-primary text-white font-medium'}`}
                                         onClick={
-                                            !(valueDate.weekday == 1 || valueDate.weekday == 7)
+                                            !(valueDate.weekday == 6 || valueDate.weekday == 7)
                                                 ? () => handleSelectDate(value)
                                                 : undefined
                                         }
                                     >
-                                        {value.split('-')[2]}
+                                        {covertNumberToStringOneLetter(value.split('-')[2])}
                                     </div>
                                 )
                             }
 
                         } else {
                             return (
-                                <div key={index} className="flex justify-center items-center w-6.5 h-6.5 text-gray-200">
-                                    {value.split('-')[2]}
+                                <div key={index} className="flex justify-center items-center w-6.5 h-6.5 text-gray-200 font-bold">
+                                    {covertNumberToStringOneLetter(value.split('-')[2])}
                                 </div>
                             )
                         }
