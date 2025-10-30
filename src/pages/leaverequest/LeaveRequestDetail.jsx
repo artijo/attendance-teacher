@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { userStore } from "../../store";
-import { formatTitle } from "../../helper";
+import { formatTitle, formatThaiDateTime } from "../../helper";
 
 function LeaveRequestDetail() {
   const { id } = useParams();
@@ -640,7 +640,13 @@ function LeaveRequestDetail() {
                                 //     </svg>
                                 //     อนุมัติแล้ว
                                 // </div>
-                                <span> - </span>
+                                <span className="text-xs text-gray-500 text-wrap">
+                                  {" "}
+                                  ดำเนินการเมื่อ{" "}
+                                  {formatThaiDateTime(
+                                    timeEntry.approverTimestamp,
+                                  )}{" "}
+                                </span>
                               ) : (
                                 // <div className="text-red-600 flex items-center">
                                 //     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -648,7 +654,13 @@ function LeaveRequestDetail() {
                                 //     </svg>
                                 //     ไม่อนุมัติ
                                 // </div>
-                                <span> - </span>
+                                <span className="text-xs text-gray-500 text-wrap">
+                                  {" "}
+                                  ดำเนินการเมื่อ{" "}
+                                  {formatThaiDateTime(
+                                    timeEntry.approverTimestamp,
+                                  )}{" "}
+                                </span>
                               )}
                             </td>
                           </tr>
