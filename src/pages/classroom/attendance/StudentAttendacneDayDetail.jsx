@@ -1,13 +1,33 @@
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import ClassroomDetailTable from "../../components/classroom/ClassroomDetailTable";
-import { useState } from "react";
-import { formatTitle } from "../../helper";
+import { HOSTNAME } from "../../../config";
+import axios from "axios";
+import { formatDateToThai, formatTitle } from "../../../helper";
+import StudentAttendenceDayDetailList from "../../../components/classroom/attendance/StudentAttendenceDayDetailList";
 
-function ClassroomDetail() {
+function StudentAttendanceDayDetail() {
     const location = useLocation();
-    const classrooms = location.state.classroooms;
-    const [activeTab, setActiveTab] = useState("students");
-    
+    const { classrooms, date } = location.state;
+    const [studentList, setStudentList] = useState([]);
+    // console.log(classrooms);
+    // console.log(date);
+
+    const getStudentData = async (classroomId, date) => {
+        try {
+            const response = await axios.get(`${HOSTNAME}/t/attendence/byDate/${date}/${classroomId}`);
+            setStudentList(response.data);
+            console.log(response.data);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    useEffect(() => {
+        if (classrooms && date) {
+            getStudentData(classrooms.classId, date);
+        };
+    }, []);
+
     return (
         <div>
             <div className="mb-6">
@@ -18,7 +38,7 @@ function ClassroomDetail() {
                         </h1>
                         <div className="w-16 h-1 mt-2 rounded-full bg-secondary"></div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2 font-body text-text-color-alt">
                         <div className="bg-primary/5 px-3 py-1.5 rounded-lg">
                             <span className="font-medium text-primary">ปีการศึกษา:</span> {classrooms.term.academicYear + 543}
@@ -28,7 +48,7 @@ function ClassroomDetail() {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="flex flex-wrap justify-between gap-4 p-4 mt-6 bg-white border rounded-lg shadow-sm border-line">
                     <div className="space-y-1 font-body">
                         <p className="text-text-color-alt">หลักสูตร</p>
@@ -53,24 +73,21 @@ function ClassroomDetail() {
                 <div className="border-b border-line">
                     <nav className="flex">
                         <button
-                            className={`px-4 py-3 font-medium font-body border-b-2 ${
-                                activeTab === "students" 
-                                ? "border-primary text-primary" 
-                                : "border-transparent text-text-color-alt hover:text-text-color"
-                            }`}
-                            onClick={() => setActiveTab("students")}
+                            className={`px-4 py-3 font-medium font-body border-b-2 border-primary text-primary `}
                         >
-                            รายชื่อนักเรียน
+                            การเข้าเรียนตามวันที่ {formatDateToThai(date)}
                         </button>
                     </nav>
                 </div>
-                
-                <div className="p-1">
-                    {classrooms != null && <ClassroomDetailTable classrooms={classrooms}/>}
+
+                <div className="p-5">
+                    <StudentAttendenceDayDetailList classroomInfo={classrooms} studentList={studentList} date={date}/>
                 </div>
             </div>
+
+
         </div>
     );
 };
 
-export default ClassroomDetail;
+export default StudentAttendanceDayDetail;

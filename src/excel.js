@@ -78,6 +78,112 @@ export function summaryAttendeanceBySubjectFilterByDay(objectJson, month, fileNa
 
 }
 
+export function summaryAttendeanceByDay(objectJson, fileName, classroomInfo, dateformat) {
+    try {
+        const sheetData = [
+            ['สรุปรายละเอียดการเข้าเรียนตามวัน'],
+            [`ประจำวันที: ${dateformat.day}/${dateformat.month}/${dateformat.year + 543}`],
+            [`ห้อง: ${classroomInfo.classLevel}/${classroomInfo.classRoom}`],
+            [],
+            ['คาบที่', '', ''],
+            ['รหัสวิชา', '', ''],
+            ['เลขที่', 'รหัสนักเรียน', 'ชื่อ-นามสกุล'],
+        ]
+        //summary 
+        const summaryData = [
+            ['มาเรียน', '', ''],
+            ['มาสาย', '', ''],
+            ['ขาดเรียน', '', ''],
+            ['ลา', '', ''],
+            ['กิจกรรม', '', '']
+        ];
+
+        // console.log(objectJson);
+        // tableHeader 1
+        objectJson[0].attendance.forEach((_, index) => {
+            sheetData[4].push(`${index + 1}`);
+            summaryData[0].push(0);
+            summaryData[1].push(0);
+            summaryData[2].push(0);
+            summaryData[3].push(0);
+            summaryData[4].push(0);
+        })
+
+        // console.log(summaryData[0][3]);
+        //tableHeader 2
+        objectJson[0].attendance.forEach((object) => {
+            sheetData[5].push(`${object.subjectCode}`);
+        })
+        //tableHeader 3
+        objectJson[0].attendance.forEach((object) => {
+            sheetData[6].push(`${object.subjectName}`);
+        })
+
+        //Add Data
+        objectJson.forEach((object, objectIndex) => {
+            const studentData = [
+                object.stdNo,
+                object.stdId,
+                `${formatTitle(object.title)} ${object.fName} ${object.lName}`
+            ];
+            // console.log(object.attendance);
+            object.attendance.forEach((attend, index) => {
+                if(attend.attStatus == null) {
+                    studentData.push('-');
+                }else if (attend.attStatus) {
+                    let attendStatus = attend.attStatus.toLowerCase();
+                    if (attendStatus == "absent") {
+                        summaryData[2][index + 3] += 1;
+                        studentData.push("ขาดเรียน");
+                    } else if (attendStatus == "present") {
+                        summaryData[0][index + 3] += 1;
+                        studentData.push("เข้าเรียน");
+                    } else if (attendStatus == "late") {
+                        summaryData[1][index + 3] += 1;
+                        studentData.push("มาสาย");
+                    } else if (attendStatus == "activity") {
+                        summaryData[4][index + 3] += 1;
+                        studentData.push("เข้าเรียนกิจกรรม");
+                    } else if (attendStatus == "leave") {
+                        summaryData[3][index + 3] += 1;
+                        studentData.push("ลา");
+                    } else {
+                        studentData.push("-")
+                    }
+                }
+
+            })
+            sheetData.push(studentData);
+
+        })
+        sheetData.push(...summaryData);
+        const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+        worksheet["!merges"] = [
+            XLSX.utils.decode_range("A5:C5"),
+            XLSX.utils.decode_range("A6:C6"),
+        ]
+        worksheet["!cols"] = [
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 30 },
+            { wch: 25 },
+            { wch: 25 },
+            { wch: 25 },
+            { wch: 25 },
+            { wch: 25 },
+            { wch: 25 },
+            { wch: 25 },
+            { wch: 25 },
+        ]
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "สรุป");
+
+        XLSX.writeFile(workbook, `${fileName}.xlsx`, { compression: true });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 export function summarySubjectIsExam(objectJson, classroom, subject) {
     // console.log(objectJson);
     // console.log(classroom);

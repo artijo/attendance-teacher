@@ -148,5 +148,29 @@ export const formatDateToThaiStyle = (date) => {
   return `${dateformat.day} ${convertNumberToThaiMonth(dateformat.month)} ${dateformat.year + 543}`;
 };
 
+export const formatAttStatus = (status) => {
+  switch (status.toLowerCase()) {
+    case 'present': {
+      return 'เข้าเรียน';
+    }
+    case 'absent': {
+      return 'ไม่เข้าเรียน';
+    }
+    case 'late': {
+      return 'มาสาย';
+    }
+    case 'activity': {
+
+      return 'เข้าเรียนกิจกรรม';
+    }
+    case 'leave': {
+
+      return 'ลา';
+    }
+    default:
+      return status;
+  }
+};
+
 
   
