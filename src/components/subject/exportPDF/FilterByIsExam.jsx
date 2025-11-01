@@ -7,7 +7,7 @@ function FilterByIsExam({
     subjectName,
     className,
 }){
-    console.log(abstact);
+    // console.log(abstact);
     const MyPDFDocument = () => {
         return (
             <Document
@@ -84,14 +84,7 @@ function FilterByIsExam({
                 </PDFDownloadLink>
             )}
         </div>
-        // <div className="w-full h-[500px] border mb-1">
-        //     <PDFViewer
-        //         width={"100%"}
-        //         height={"100%"}
-        //     >
-        //         <MyPDFDocument/>
-        //     </PDFViewer>
-        // </div>
+
     );
 };
 

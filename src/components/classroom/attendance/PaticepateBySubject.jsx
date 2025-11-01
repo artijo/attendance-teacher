@@ -1,9 +1,9 @@
 import { Page, Text, View, Document, PDFViewer, PDFDownloadLink, Image } from "@react-pdf/renderer";
 import { Table, TR, TH, TD } from "@ag-media/react-pdf-table";
 import { styles } from "./style.js";
-import { HOSTNAME } from "../../../config";
-import { tabletojson } from "tabletojson";
-import { useEffect, useMemo, useState } from "react";
+// import { HOSTNAME } from "../../../config";
+// import { tabletojson } from "tabletojson";
+// import { useEffect, useMemo, useState } from "react";
 import { formatTitle } from "../../../helper.js";
 
 

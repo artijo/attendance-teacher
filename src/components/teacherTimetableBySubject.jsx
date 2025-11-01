@@ -66,7 +66,6 @@ const timeStudyList = [
 function TeacherTimetableBySubject({ subject }) {
     const [timetable, setTimetable] = useState(null);
     const [term, setTerm] = useState("");
-
     // console.log(subject);
     const handleTermChange = (value) => {
         setTerm(value);
@@ -134,7 +133,7 @@ function TeacherTimetableBySubject({ subject }) {
         const lightness = 40 + (hash % 10);
 
         return {
-            borderLeft: `4px solid hsl(${hue}, ${saturation + 10}%, ${lightness - 10}%)`
+            borderTop: `4px solid hsl(${hue}, ${saturation + 10}%, ${lightness - 10}%)`
         };
     };
 
@@ -202,10 +201,10 @@ function TeacherTimetableBySubject({ subject }) {
                                                     style={getSubjectCardStyle(timetablethistime.subject)}
                                                     key={index}
                                                 >
-                                                    <div className="w-full">
-                                                        <h5 className="text-sm font-semibold tracking-wide text-gray-700">{timetablethistime.subject.subNameThai}</h5>
-                                                        <p className="font-medium text-gray-500">{timetablethistime.subject.subCode}</p>
-                                                        <p className="text-sm font-semibold tracking-wide text-gray-700">ห้องม.{timetablethistime.classroom.classLevel}/{timetablethistime.classroom.classRoom}</p>
+                                                    <div className="w-full h-full flex flex-col items-start space-y-1">
+                                                        <p className="text-sm font-medium text-gray-500">{timetablethistime.subject.subCode}</p>
+                                                        <h5 className="text-base font-bold text-gray-800">{timetablethistime.subject.subNameThai}</h5>
+                                                        <p className="text-xs font-medium text-gray-500">ห้องม.{timetablethistime.classroom.classLevel}/{timetablethistime.classroom.classRoom}</p>
                                                     </div>
                                                 </td>
                                             )

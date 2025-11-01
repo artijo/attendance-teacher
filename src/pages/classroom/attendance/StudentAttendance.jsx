@@ -2,10 +2,10 @@ import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { HOSTNAME } from "../../../config";
 import { useEffect, useRef, useState } from "react";
-import PaticepateBySubject from "../../../components/classroom/attendance/PaticepateBySubject";
+// import PaticepateBySubject from "../../../components/classroom/attendance/PaticepateBySubject";
 import { formatTitle } from "../../../helper";
 import ExportExcelButton from "../../../components/exportExcelButton";
-import { summaryJoinSubjectPeriod, Table_to_Excel } from "../../../excel.js"
+import { summaryJoinSubjectPeriod } from "../../../excel.js"
 import ExportPdfButton from "../../../components/exportPdfButton.jsx";
 
 function StudentAttendance(){

@@ -18,7 +18,6 @@ function PaticepateByDay() {
             activity: 0,
             leave: 0
         };
-        // console.log(attendanceAbstact);
         attendanceAbstact.attendance.forEach((attendance) => {
             if (attendance.attStatus !== null) {
                 if (attendance.attStatus.toLowerCase() === 'present') {

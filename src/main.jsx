@@ -25,8 +25,9 @@ const AttendanceWithQR = lazy(() => import('./pages/subject/AttendanceQRCode.jsx
 const Classroom = lazy(() => import('./pages/classroom/Classroom.jsx'));
 const ClassroomDetail = lazy(() => import('./pages/classroom/ClassroomDetail.jsx'));
 const StudentAttendance = lazy(() => import('./pages/classroom/attendance/StudentAttendance.jsx'));
-const StudentAttendanceFilterByDay = lazy(() => import('./pages/classroom/attendance/StudentAttendanceFilterByDay.jsx'));
-const PaticepateByDay = lazy(() => import('./components/classroom/attendance/PaticepateByDay.jsx'));
+const StudentAttendanceCalendar = lazy(() => import('./pages/classroom/attendance/StudentAttendanceCalendar.jsx'))
+const StudentAttendanceDayDetail = lazy(() => import('./pages/classroom/attendance/StudentAttendacneDayDetail.jsx'))
+const AttendenceByDayPDF = lazy(() => import('./pages/classroom/attendance/pdfpage/byday/AttendenceByDayPDF.jsx'))
 
 // Activity Page
 const Activities = lazy(() => import('./pages/activities/Activities.jsx'));
@@ -83,8 +84,9 @@ createRoot(document.getElementById('root')).render(
           <Route path='classroom' element={<Classroom/>}/>
           <Route path='classroom/attendance/student' element={<StudentAttendance/>}/>
           <Route path='classroom/attendence/student/pdf' element={<AttendenceBySubjectPDF/>}/>
-          {/* <Route path='classroom/attendance/byday/student'  element={<StudentAttendanceFilterByDay/>}/>
-          <Route path='classroom/attendance/byday/student/infomation'  element={<PaticepateByDay/>}/> */}
+          <Route path='classroom/attendance/byday/calendar' element={<StudentAttendanceCalendar/>}/>
+          <Route path='classroom/attendance/byday/detail' element={<StudentAttendanceDayDetail/>}/>
+           <Route path='classroom/attendance/byday/detail/pdf' element={<AttendenceByDayPDF/>}/>
           <Route path='classroom/detail' element={<ClassroomDetail/>}/>
           
           {/* Activities */}
