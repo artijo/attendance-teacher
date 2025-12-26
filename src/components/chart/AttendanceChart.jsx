@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { HOSTNAME } from '../../config';
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  BarElement, 
-  Title, 
-  Tooltip, 
-  Legend 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 
@@ -31,7 +31,6 @@ function AttendanceChart() {
   const [selectedTimetable, setSelectedTimetable] = useState(null);
   const [attendanceData, setAttendanceData] = useState(null);
   const [loading, setLoading] = useState(true);
-  
   // Fetch subjects taught by the teacher
   useEffect(() => {
     setLoading(true);
@@ -58,12 +57,12 @@ function AttendanceChart() {
         .then((response) => {
           // Group timetables by classroom
           const classroomMap = new Map();
-          
+
           if (response.data && response.data.timetable) {
             response.data.timetable.forEach(time => {
               if (time.classroom) {
                 const classKey = `${time.classroom.classLevel}/${time.classroom.classRoom}`;
-                
+
                 if (!classroomMap.has(classKey)) {
                   classroomMap.set(classKey, {
                     classId: time.classId,
@@ -72,7 +71,7 @@ function AttendanceChart() {
                     timetables: []
                   });
                 }
-                
+
                 // Add this timetable to the classroom's timetables array
                 classroomMap.get(classKey).timetables.push({
                   timetableId: time.timetableId,
@@ -84,20 +83,20 @@ function AttendanceChart() {
               }
             });
           }
-          
+
           const classroomArray = Array.from(classroomMap.values());
           setClassrooms(classroomArray);
-          
+
           // Auto select first classroom if available
           if (classroomArray.length > 0) {
             const firstClassroom = classroomArray[0];
             setSelectedClassroom(`${firstClassroom.classLevel}/${firstClassroom.classRoom}`);
             setTimetables(firstClassroom.timetables);
-            
+
             // Auto select first timetable if available
             if (firstClassroom.timetables.length > 0) {
               setSelectedTimetable(firstClassroom.timetables[0].timetableId);
-              
+
               // Process attendance data for the selected timetable
               processPeriodData(response.data, firstClassroom.timetables[0]);
             }
@@ -119,13 +118,13 @@ function AttendanceChart() {
   // Handle classroom selection change
   useEffect(() => {
     if (selectedClassroom && classrooms.length > 0) {
-      const selectedClassroomObj = classrooms.find(c => 
+      const selectedClassroomObj = classrooms.find(c =>
         `${c.classLevel}/${c.classRoom}` === selectedClassroom
       );
-      
+
       if (selectedClassroomObj) {
         setTimetables(selectedClassroomObj.timetables);
-        
+
         // Auto select first timetable when changing classroom
         if (selectedClassroomObj.timetables.length > 0) {
           setSelectedTimetable(selectedClassroomObj.timetables[0].timetableId);
@@ -147,7 +146,7 @@ function AttendanceChart() {
           const selectedTimetableObj = response.data.timetable.find(
             time => time.timetableId === selectedTimetable
           );
-          
+
           if (selectedTimetableObj) {
             processPeriodData(response.data, selectedTimetableObj);
           } else {
@@ -167,7 +166,7 @@ function AttendanceChart() {
   const handleClassroomChange = (e) => {
     setSelectedClassroom(e.target.value);
   };
-  
+
   // Handle timetable selection change
   const handleTimetableChange = (e) => {
     setSelectedTimetable(e.target.value);
@@ -185,29 +184,29 @@ function AttendanceChart() {
       setAttendanceData(null);
       return;
     }
-    
+
     const timeStartString = timetableObj.timeStart.substring(0, 5);
     const timeEndString = timetableObj.timeEnd.substring(0, 5);
     const dayName = getDayName(timetableObj.dayOfWeek);
-    
+
     // Sort study times by date
-    const sortedStudyTimes = [...timetableObj.studyTime].sort((a, b) => 
+    const sortedStudyTimes = [...timetableObj.studyTime].sort((a, b) =>
       new Date(a.studingTimeDate) - new Date(b.studingTimeDate)
     );
-    
+
     // Create labels with dates
     const labels = sortedStudyTimes.map(study => {
       const date = new Date(study.studingTimeDate);
       return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     });
-    
+
     // Count attendance for each study date
     const presentData = [];
     const absentData = [];
     const lateData = [];
     const leaveData = [];
     const activityData = [];
-    
+
     sortedStudyTimes.forEach(study => {
       // Initialize counters for this date
       let present = 0;
@@ -215,7 +214,7 @@ function AttendanceChart() {
       let late = 0;
       let leave = 0;
       let activity = 0;
-      
+
       // Count attendance for this date
       if (study.attendance && study.attendance.length > 0) {
         study.attendance.forEach(att => {
@@ -240,7 +239,7 @@ function AttendanceChart() {
           }
         });
       }
-      
+
       // Add to datasets
       presentData.push(present);
       absentData.push(absent);
@@ -248,7 +247,7 @@ function AttendanceChart() {
       leaveData.push(leave);
       activityData.push(activity);
     });
-    
+
     // Prepare chart data
     const chartData = {
       labels: labels,
@@ -290,7 +289,7 @@ function AttendanceChart() {
         }
       ]
     };
-    
+
     // Find the currently selected classroom name
     let selectedClassroomDisplay = selectedClassroom;
     if (classrooms.length > 0) {
@@ -299,7 +298,7 @@ function AttendanceChart() {
         selectedClassroomDisplay = `ม.${classroomObj.classLevel}/${classroomObj.classRoom}`;
       }
     }
-    
+
     // Custom options for date-based view
     const chartOptions = {
       responsive: true,
@@ -307,7 +306,7 @@ function AttendanceChart() {
       plugins: {
         legend: {
           position: 'top',
-          font : {
+          font: {
             family: 'lineseed'
           }
         },
@@ -321,19 +320,19 @@ function AttendanceChart() {
         },
         tooltip: {
           callbacks: {
-            title: function(tooltipItems) {
+            title: function (tooltipItems) {
               return `วันที่: ${tooltipItems[0].label}`;
             },
-            label: function(context) {
+            label: function (context) {
               const label = context.dataset.label || '';
               const value = context.parsed.y || 0;
               return `${label}: ${value} คน`;
             },
-            afterLabel: function(context) {
+            afterLabel: function (context) {
               const dateIndex = context.dataIndex;
-              const total = presentData[dateIndex] + absentData[dateIndex] + 
-                           lateData[dateIndex] + leaveData[dateIndex] + 
-                           activityData[dateIndex];
+              const total = presentData[dateIndex] + absentData[dateIndex] +
+                lateData[dateIndex] + leaveData[dateIndex] +
+                activityData[dateIndex];
               if (total > 0) {
                 const value = context.parsed.y || 0;
                 const percentage = Math.round((value / total) * 100);
@@ -363,7 +362,7 @@ function AttendanceChart() {
         }
       }
     };
-    
+
     setAttendanceData({ data: chartData, options: chartOptions });
   };
 
@@ -375,7 +374,7 @@ function AttendanceChart() {
         </svg>
         สถิติการเข้าเรียน
       </h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Subject Selection */}
         <div>
@@ -398,7 +397,7 @@ function AttendanceChart() {
             )}
           </select>
         </div>
-        
+
         {/* Classroom Selection */}
         <div>
           <label htmlFor="classroom-select" className="block text-sm font-medium text-text-color-alt mb-2">เลือกห้องเรียน</label>
@@ -446,7 +445,7 @@ function AttendanceChart() {
           </select>
         </div>
       </div>
-      
+
       <div className="h-80">
         {loading ? (
           <div className="flex justify-center items-center h-full">
@@ -464,7 +463,7 @@ function AttendanceChart() {
           </div>
         )}
       </div>
-      
+
       {/* Display info text about the chart */}
       {attendanceData && (
         <div className="mt-4 text-sm text-text-color-alt px-4 py-3 bg-gray-50 rounded-lg border border-gray-100">

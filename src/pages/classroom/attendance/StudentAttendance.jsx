@@ -52,6 +52,7 @@ function StudentAttendance(){
             const response = await axios.get(`${HOSTNAME}/t/classrooms/${classroomId}/${stdId}`);
             if(response.status === 200){
                 changeIdToName(response.data);
+                // console.log(response.data);
             }else{
                 throw new Error(response.data.message);
             }
